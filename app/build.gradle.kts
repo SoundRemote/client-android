@@ -4,10 +4,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
-    id("org.jetbrains.kotlin.kapt")
     alias(libs.plugins.room)
     id("kotlin-parcelize")
+    alias(libs.plugins.ksp)
+    id("org.jetbrains.kotlin.kapt")
 }
 
 kotlin {
