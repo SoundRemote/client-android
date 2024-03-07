@@ -5,6 +5,7 @@ import com.fake.soundremote.util.ConnectionStatus
 import com.fake.soundremote.util.KeyCode
 import com.fake.soundremote.util.Mods
 import com.fake.soundremote.util.Net
+import com.fake.soundremote.util.Net.getUInt
 import com.fake.soundremote.util.PacketProtocolType
 import com.fake.soundremote.util.SystemMessage
 import kotlinx.coroutines.CoroutineName
@@ -223,6 +224,7 @@ internal class Connection(
 
     private suspend fun processAudioData(buffer: ByteBuffer, compressed: Boolean) {
         if (currentStatus != ConnectionStatus.CONNECTED || !processAudio.get()) return
+        buffer.getUInt()    // sequence number
         val packetData = ByteArray(buffer.remaining())
         buffer.get(packetData)
         if (compressed) {
