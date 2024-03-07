@@ -83,6 +83,10 @@ object Net {
         return short.toUShort()
     }
 
+    fun ByteBuffer.getUInt(): UInt {
+        return int.toUInt()
+    }
+
     fun ByteBuffer.putUByte(value: UByte): ByteBuffer {
         return put(value.toByte())
     }
