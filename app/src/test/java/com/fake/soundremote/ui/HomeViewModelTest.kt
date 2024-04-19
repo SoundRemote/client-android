@@ -1,9 +1,9 @@
 package com.fake.soundremote.ui
 
 import com.fake.soundremote.MainDispatcherExtension
-import com.fake.soundremote.data.TestKeystrokeRepository
+import com.fake.soundremote.data.TestHotkeyRepository
 import com.fake.soundremote.data.preferences.TestPreferencesRepository
-import com.fake.soundremote.getKeystroke
+import com.fake.soundremote.getHotkey
 import com.fake.soundremote.service.ServiceState
 import com.fake.soundremote.service.TestServiceManager
 import com.fake.soundremote.ui.home.HomeViewModel
@@ -28,13 +28,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 @DisplayName("HomeViewModel")
 class HomeViewModelTest {
     private var preferencesRepository = TestPreferencesRepository()
-    private var keystrokeRepository = TestKeystrokeRepository()
+    private var hotkeyRepository = TestHotkeyRepository()
     private var serviceManager = TestServiceManager()
     private lateinit var viewModel: HomeViewModel
 
     @BeforeEach
     fun setup() {
-        viewModel = HomeViewModel(preferencesRepository, keystrokeRepository, serviceManager)
+        viewModel = HomeViewModel(preferencesRepository, hotkeyRepository, serviceManager)
     }
 
     @Nested
@@ -45,7 +45,7 @@ class HomeViewModelTest {
             val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                 viewModel.homeUIState.collect {}
             }
-            keystrokeRepository.setKeystrokes(emptyList())
+            hotkeyRepository.setHotkeys(emptyList())
 
             viewModel.connect("123.45.67.89")
 
@@ -60,7 +60,7 @@ class HomeViewModelTest {
             val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                 viewModel.homeUIState.collect {}
             }
-            keystrokeRepository.setKeystrokes(emptyList())
+            hotkeyRepository.setHotkeys(emptyList())
             assertNull(viewModel.messageState)
 
             viewModel.connect("Invalid address")
@@ -112,7 +112,7 @@ class HomeViewModelTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.homeUIState.collect {}
         }
-        keystrokeRepository.setKeystrokes(emptyList())
+        hotkeyRepository.setHotkeys(emptyList())
 
         viewModel.connect("Invalid address")
         assertNotNull(viewModel.messageState)
@@ -130,7 +130,7 @@ class HomeViewModelTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.homeUIState.collect {}
         }
-        keystrokeRepository.setKeystrokes(emptyList())
+        hotkeyRepository.setHotkeys(emptyList())
 
         serviceManager.setServiceState(ServiceState(ConnectionStatus.CONNECTED))
 
@@ -148,7 +148,7 @@ class HomeViewModelTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.homeUIState.collect {}
         }
-        keystrokeRepository.setKeystrokes(emptyList())
+        hotkeyRepository.setHotkeys(emptyList())
 
         serviceManager.setServiceState(ServiceState(isMuted = false))
 
@@ -161,15 +161,15 @@ class HomeViewModelTest {
     }
 
     @Test
-    @DisplayName("sendKeystroke() calls ServiceManger.sendKeystroke()")
-    fun sendKeystroke_callsService() = runTest {
+    @DisplayName("sendHotkey() calls ServiceManger.sendHotkey()")
+    fun sendHotkey_callsService() = runTest {
         val id = 3
-        val expected = getKeystroke(id = id)
-        keystrokeRepository.setKeystrokes(listOf(expected))
+        val expected = getHotkey(id = id)
+        hotkeyRepository.setHotkeys(listOf(expected))
 
-        viewModel.sendKeystroke(id)
+        viewModel.sendHotkey(id)
 
-        val actual = serviceManager.sentKeystroke
+        val actual = serviceManager.sentHotkey
         assertEquals(expected, actual)
     }
 

@@ -50,14 +50,14 @@ internal class EventsScreenTest {
         composeTestRule.onNodeWithText(eventName).assertIsDisplayed()
     }
 
-    // Keystroke name is displayed
+    // Hotkey name is displayed
     @Test
-    fun keystrokeName_isDisplayed() {
-        val keystrokeName = "Test name"
+    fun hotkeyName_isDisplayed() {
+        val hotkeyName = "Test name"
         composeTestRule.setContent {
             val events = buildList {
                 val action =
-                    ActionUIState(ActionType.KEYSTROKE, 1, TextValue.TextString(keystrokeName))
+                    ActionUIState(ActionType.HOTKEY, 1, TextValue.TextString(hotkeyName))
                 add(
                     EventUIState(
                         1,
@@ -71,7 +71,7 @@ internal class EventsScreenTest {
             CreateEventsScreen(eventsUIState = EventsUIState(events))
         }
 
-        composeTestRule.onNodeWithText(keystrokeName, true).assertIsDisplayed()
+        composeTestRule.onNodeWithText(hotkeyName, true).assertIsDisplayed()
     }
 
     // Event without a permission doesn't show permission info button
@@ -80,7 +80,7 @@ internal class EventsScreenTest {
         composeTestRule.setContent {
             val events = buildList {
                 val action =
-                    ActionUIState(ActionType.KEYSTROKE, 1, TextValue.TextString("Keystroke name"))
+                    ActionUIState(ActionType.HOTKEY, 1, TextValue.TextString("Hotkey name"))
                 add(
                     EventUIState(
                         1,
@@ -103,7 +103,7 @@ internal class EventsScreenTest {
         composeTestRule.setContent {
             val events = buildList {
                 val action =
-                    ActionUIState(ActionType.KEYSTROKE, 1, TextValue.TextString("Keystroke name"))
+                    ActionUIState(ActionType.HOTKEY, 1, TextValue.TextString("Hotkey name"))
                 add(
                     EventUIState(
                         1,

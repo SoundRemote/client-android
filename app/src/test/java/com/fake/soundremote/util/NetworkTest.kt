@@ -3,7 +3,7 @@ package com.fake.soundremote.util
 import com.fake.soundremote.network.ConnectData
 import com.fake.soundremote.network.DisconnectData
 import com.fake.soundremote.network.KeepAliveData
-import com.fake.soundremote.network.KeystrokeData
+import com.fake.soundremote.network.HotkeyData
 import com.fake.soundremote.network.PacketHeader
 import com.fake.soundremote.network.SetFormatData
 import com.fake.soundremote.util.Net.COMPRESSION_256
@@ -13,7 +13,7 @@ import com.fake.soundremote.util.Net.calculateGap
 import com.fake.soundremote.util.Net.getConnectPacket
 import com.fake.soundremote.util.Net.getDisconnectPacket
 import com.fake.soundremote.util.Net.getKeepAlivePacket
-import com.fake.soundremote.util.Net.getKeystrokePacket
+import com.fake.soundremote.util.Net.getHotkeyPacket
 import com.fake.soundremote.util.Net.getSetFormatPacket
 import com.fake.soundremote.util.Net.uByte
 import com.fake.soundremote.util.Net.uInt
@@ -148,17 +148,17 @@ internal class NetworkTest {
     }
 
     @Test
-    @DisplayName("getKeystrokePacket() returns correct packet")
-    fun getKeystrokePacket_returnsCorrectPacket() {
+    @DisplayName("getHotkeyPacket() returns correct packet")
+    fun getHotkeyPacket_returnsCorrectPacket() {
         val keyCode: PacketKeyType = 0xfbu
         val mods: PacketModsType = 0xfau
-        val expectedSize = PacketHeader.SIZE + KeystrokeData.SIZE
+        val expectedSize = PacketHeader.SIZE + HotkeyData.SIZE
 
-        val actual = getKeystrokePacket(keyCode, mods)
+        val actual = getHotkeyPacket(keyCode, mods)
 
         assertEquals(actual.remaining(), expectedSize)
         assertEquals(actual.uShort, Net.PROTOCOL_SIGNATURE)
-        assertEquals(actual.uByte, Net.PacketCategory.KEYSTROKE.value)
+        assertEquals(actual.uByte, Net.PacketCategory.HOTKEY.value)
         assertEquals(actual.uShort, expectedSize.toUShort())
         assertEquals(actual.uByte, keyCode)
         assertEquals(actual.uByte, mods)

@@ -7,8 +7,8 @@ import com.fake.soundremote.data.ActionType
 import com.fake.soundremote.data.Event
 import com.fake.soundremote.data.EventAction
 import com.fake.soundremote.data.TestEventActionRepository
-import com.fake.soundremote.data.TestKeystrokeRepository
-import com.fake.soundremote.getKeystroke
+import com.fake.soundremote.data.TestHotkeyRepository
+import com.fake.soundremote.getHotkey
 import com.fake.soundremote.ui.events.EventsViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -27,18 +27,18 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MainDispatcherExtension::class)
 @DisplayName("EventsViewModel")
 internal class EventsViewModelTest {
-    private var keystrokeRepository = TestKeystrokeRepository()
+    private var hotkeyRepository = TestHotkeyRepository()
     private var eventActionRepository = TestEventActionRepository()
     private lateinit var viewModel: EventsViewModel
 
     @BeforeEach
     fun setup() {
-        viewModel = EventsViewModel(eventActionRepository, keystrokeRepository)
+        viewModel = EventsViewModel(eventActionRepository, hotkeyRepository)
     }
 
-    @DisplayName("setKeystrokeForEvent")
+    @DisplayName("setHotkeyForEvent")
     @Nested
-    inner class SetKeystrokeForEventTests {
+    inner class SetHotkeyForEventTests {
         @Test
         @DisplayName("sets action for an event without action")
         fun eventWithoutAction_existingAction_setsAction() = runTest {
@@ -46,16 +46,16 @@ internal class EventsViewModelTest {
                 viewModel.uiState.collect {}
             }
 
-            val keystrokeId = 10
-            val keystrokes = listOf(getKeystroke(id = keystrokeId))
-            keystrokeRepository.setKeystrokes(keystrokes)
+            val expectedId = 10
+            val hotkeys = listOf(getHotkey(id = expectedId))
+            hotkeyRepository.setHotkeys(hotkeys)
             val eventId = Event.CALL_END.id
             assertNull(viewModel.uiState.value.events.find { it.id == eventId }?.action)
 
-            viewModel.setActionForEvent(eventId, Action(ActionType.KEYSTROKE, keystrokeId))
+            viewModel.setActionForEvent(eventId, Action(ActionType.HOTKEY, expectedId))
 
             val actual = viewModel.uiState.value.events.find { it.id == eventId }?.action?.id
-            assertEquals(keystrokeId, actual)
+            assertEquals(expectedId, actual)
 
             collectJob.cancel()
         }
@@ -67,14 +67,14 @@ internal class EventsViewModelTest {
                 viewModel.uiState.collect {}
             }
 
-            val keystrokeId = 1
-            val keystrokes = listOf(getKeystroke(id = keystrokeId))
-            keystrokeRepository.setKeystrokes(keystrokes)
+            val expectedId = 1
+            val hotkeys = listOf(getHotkey(id = expectedId))
+            hotkeyRepository.setHotkeys(hotkeys)
             val eventId = Event.CALL_BEGIN.id
             val eventActions =
-                listOf(EventAction(eventId, ActionData(ActionType.KEYSTROKE, keystrokeId)))
+                listOf(EventAction(eventId, ActionData(ActionType.HOTKEY, expectedId)))
             eventActionRepository.setEventActions(eventActions)
-            assertTrue(viewModel.uiState.value.events.find { it.id == eventId }?.action?.id == keystrokeId)
+            assertTrue(viewModel.uiState.value.events.find { it.id == eventId }?.action?.id == expectedId)
 
             viewModel.setActionForEvent(eventId, null)
 
@@ -91,26 +91,26 @@ internal class EventsViewModelTest {
                 viewModel.uiState.collect {}
             }
 
-            val oldKeystrokeId = 1
-            val newKeystrokeId = 2
-            val keystrokes = listOf(
-                getKeystroke(id = oldKeystrokeId),
-                getKeystroke(id = newKeystrokeId),
+            val oldHotkeyId = 1
+            val newHotkeyId = 2
+            val hotkeys = listOf(
+                getHotkey(id = oldHotkeyId),
+                getHotkey(id = newHotkeyId),
             )
-            keystrokeRepository.setKeystrokes(keystrokes)
+            hotkeyRepository.setHotkeys(hotkeys)
             val eventId = Event.CALL_BEGIN.id
             val eventActions =
-                listOf(EventAction(eventId, ActionData(ActionType.KEYSTROKE, oldKeystrokeId)))
+                listOf(EventAction(eventId, ActionData(ActionType.HOTKEY, oldHotkeyId)))
             eventActionRepository.setEventActions(eventActions)
             assertEquals(
-                oldKeystrokeId,
+                oldHotkeyId,
                 viewModel.uiState.value.events.find { it.id == eventId }?.action?.id
             )
 
-            viewModel.setActionForEvent(eventId, Action(ActionType.KEYSTROKE, newKeystrokeId))
+            viewModel.setActionForEvent(eventId, Action(ActionType.HOTKEY, newHotkeyId))
 
             val actual = viewModel.uiState.value.events.find { it.id == eventId }?.action?.id
-            assertEquals(newKeystrokeId, actual)
+            assertEquals(newHotkeyId, actual)
 
             collectJob.cancel()
         }

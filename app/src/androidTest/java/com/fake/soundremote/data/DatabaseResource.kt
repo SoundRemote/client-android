@@ -11,7 +11,7 @@ internal class DatabaseResource(private val dispatcher: CoroutineDispatcher) : E
     private lateinit var db: AppDatabase
     lateinit var eventActionRepository: SystemEventActionRepository
         private set
-    lateinit var keystrokeRepository: UserKeystrokeRepository
+    lateinit var hotkeyRepository: UserHotkeyRepository
         private set
 
     override fun before() {
@@ -20,7 +20,7 @@ internal class DatabaseResource(private val dispatcher: CoroutineDispatcher) : E
             .addCallback(AppDatabase.Callback())
             .build()
         eventActionRepository = SystemEventActionRepository(db.eventActionDao(), dispatcher)
-        keystrokeRepository = UserKeystrokeRepository(db.keystrokeDao(), dispatcher)
+        hotkeyRepository = UserHotkeyRepository(db.hotkeyDao(), dispatcher)
     }
 
     override fun after() {

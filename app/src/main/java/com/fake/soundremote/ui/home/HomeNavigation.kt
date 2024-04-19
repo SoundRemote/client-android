@@ -23,11 +23,11 @@ import com.fake.soundremote.R
 const val homeRoute = "home"
 
 fun NavGraphBuilder.homeScreen(
-    onNavigateToKeystrokeList: () -> Unit,
+    onNavigateToHotkeyList: () -> Unit,
     onNavigateToEvents: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAbout: () -> Unit,
-    onNavigateToEditKeystroke: (keystrokeId: Int) -> Unit,
+    onNavigateToEditHotkey: (hotkeyId: Int) -> Unit,
     showSnackbar: (String, SnackbarDuration) -> Unit,
     setFab: ((@Composable () -> Unit)?) -> Unit,
     compactHeight: Boolean,
@@ -39,14 +39,14 @@ fun NavGraphBuilder.homeScreen(
         HomeScreen(
             uiState = homeUIState,
             messageId = viewModel.messageState,
-            onNavigateToEditKeystroke = {
+            onNavigateToEditHotkey = {
                 if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-                    onNavigateToEditKeystroke(it)
+                    onNavigateToEditHotkey(it)
                 }
             },
             onConnect = { viewModel.connect(it) },
             onDisconnect = viewModel::disconnect,
-            onSendKeystroke = { viewModel.sendKeystroke(it) },
+            onSendHotkey = { viewModel.sendHotkey(it) },
             onSendKey = { viewModel.sendKey(it) },
             onSetMuted = { viewModel.setMuted(it) },
             onMessageShown = viewModel::messageShown,
@@ -73,13 +73,13 @@ fun NavGraphBuilder.homeScreen(
                 FloatingActionButton(
                     onClick = {
                         if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-                            onNavigateToKeystrokeList.invoke()
+                            onNavigateToHotkeyList.invoke()
                         }
                     },
                     modifier = Modifier
                         .padding(bottom = 48.dp),
                 ) {
-                    Icon(Icons.Default.Edit, stringResource(R.string.action_edit_keystrokes))
+                    Icon(Icons.Default.Edit, stringResource(R.string.action_edit_hotkeys))
                 }
             }
         }

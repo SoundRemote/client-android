@@ -41,7 +41,7 @@ import com.fake.soundremote.R
 import com.fake.soundremote.data.Action
 import com.fake.soundremote.data.ActionType
 import com.fake.soundremote.data.AppAction
-import com.fake.soundremote.util.KeystrokeDescription
+import com.fake.soundremote.util.HotkeyDescription
 
 @Composable
 internal fun ActionSelectDialog(
@@ -49,14 +49,14 @@ internal fun ActionSelectDialog(
     initialAction: Action? = null,
     onConfirm: (Action?) -> Unit,
     onDismiss: () -> Unit,
-    viewModel: KeystrokeSelectViewModel = hiltViewModel()
+    viewModel: HotkeySelectViewModel = hiltViewModel()
 ) {
-    val keystrokes by viewModel.keystrokesState.collectAsStateWithLifecycle()
+    val hotkeys by viewModel.hotkeysState.collectAsStateWithLifecycle()
 
     ActionSelectDialog(
         availableActionTypes,
         initialAction,
-        keystrokes,
+        hotkeys,
         onConfirm,
         onDismiss,
     )
@@ -65,10 +65,10 @@ internal fun ActionSelectDialog(
 sealed interface ActionUIState {
     val id: Int
 
-    data class WithKeystroke(
+    data class WithHotkey(
         override val id: Int,
         val name: String,
-        val description: KeystrokeDescription,
+        val description: HotkeyDescription,
     ) : ActionUIState
 
     data class WithStringIds(
@@ -91,7 +91,7 @@ val appActions: List<ActionUIState> by lazy {
 internal fun ActionSelectDialog(
     availableActionTypes: Set<ActionType>,
     initialAction: Action?,
-    keystrokes: List<KeystrokeInfoUIState>,
+    hotkeys: List<HotkeyInfoUIState>,
     onConfirm: (Action?) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -124,18 +124,18 @@ internal fun ActionSelectDialog(
             }
         }
     }
-    val keystrokeActions = rememberSaveable(keystrokes) {
-        keystrokes.map { keystroke ->
-            ActionUIState.WithKeystroke(
-                keystroke.id,
-                keystroke.name,
-                keystroke.description,
+    val hotkeyActions = rememberSaveable(hotkeys) {
+        hotkeys.map { hotkey ->
+            ActionUIState.WithHotkey(
+                hotkey.id,
+                hotkey.name,
+                hotkey.description,
             )
         }
     }
     val items = when (actionTypes[selectedActionTypeIndex]) {
         ActionType.APP -> appActions
-        ActionType.KEYSTROKE -> keystrokeActions
+        ActionType.HOTKEY -> hotkeyActions
     }
 
     AlertDialog(
@@ -223,7 +223,7 @@ private fun ActionList(
             key = { it.id }
         ) { action ->
             val (name, description) = when (action) {
-                is ActionUIState.WithKeystroke -> {
+                is ActionUIState.WithHotkey -> {
                     action.name to action.description.asString()
                 }
 

@@ -8,15 +8,15 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-@DisplayName("KeystrokeData")
-internal class KeystrokeDataTest {
+@DisplayName("HotkeyData")
+internal class HotkeyDataTest {
 
     @DisplayName("SIZE has correct value")
     @Test
     fun size_ReturnsCorrectValue() {
         val expected = 2
 
-        val actual = KeystrokeData.SIZE
+        val actual = HotkeyData.SIZE
 
         Assertions.assertEquals(expected, actual)
     }
@@ -26,13 +26,13 @@ internal class KeystrokeDataTest {
     fun write_WritesCorrectly() {
         val key: PacketKeyType = 0xDDu
         val mods: PacketModsType = 0x15u
-        val expected = Net.createPacketBuffer(KeystrokeData.SIZE)
+        val expected = Net.createPacketBuffer(HotkeyData.SIZE)
         expected.putUByte(key)
         expected.putUByte(mods)
         expected.rewind()
 
-        val actual = Net.createPacketBuffer(KeystrokeData.SIZE)
-        KeystrokeData(key, mods).write(actual)
+        val actual = Net.createPacketBuffer(HotkeyData.SIZE)
+        HotkeyData(key, mods).write(actual)
         actual.rewind()
 
         Assertions.assertEquals(expected, actual)

@@ -16,12 +16,12 @@ import com.fake.soundremote.ui.events.eventsScreen
 import com.fake.soundremote.ui.events.navigateToEvents
 import com.fake.soundremote.ui.home.homeRoute
 import com.fake.soundremote.ui.home.homeScreen
-import com.fake.soundremote.ui.keystroke.keystrokeCreateScreen
-import com.fake.soundremote.ui.keystroke.keystrokeEditScreen
-import com.fake.soundremote.ui.keystroke.navigateToKeystrokeCreate
-import com.fake.soundremote.ui.keystroke.navigateToKeystrokeEdit
-import com.fake.soundremote.ui.keystrokelist.keystrokeListScreen
-import com.fake.soundremote.ui.keystrokelist.navigateToKeystrokeList
+import com.fake.soundremote.ui.hotkey.hotkeyCreateScreen
+import com.fake.soundremote.ui.hotkey.hotkeyEditScreen
+import com.fake.soundremote.ui.hotkey.navigateToHotkeyCreate
+import com.fake.soundremote.ui.hotkey.navigateToHotkeyEdit
+import com.fake.soundremote.ui.hotkeylist.hotkeyListScreen
+import com.fake.soundremote.ui.hotkeylist.navigateToHotkeyList
 import com.fake.soundremote.ui.settings.navigateToSettings
 import com.fake.soundremote.ui.settings.settingsScreen
 
@@ -42,32 +42,32 @@ fun AppNavigation(
             .consumeWindowInsets(padding)
     ) {
         homeScreen(
-            onNavigateToKeystrokeList = navController::navigateToKeystrokeList,
+            onNavigateToHotkeyList = navController::navigateToHotkeyList,
             onNavigateToEvents = navController::navigateToEvents,
             onNavigateToSettings = navController::navigateToSettings,
             onNavigateToAbout = navController::navigateToAbout,
-            onNavigateToEditKeystroke = { keystrokeId ->
-                navController.navigateToKeystrokeEdit(keystrokeId)
+            onNavigateToEditHotkey = { hotkeyId ->
+                navController.navigateToHotkeyEdit(hotkeyId)
             },
             showSnackbar = showSnackbar,
             setFab = setFab,
             compactHeight = compactHeight,
         )
-        keystrokeListScreen(
-            onNavigateToKeystrokeCreate = navController::navigateToKeystrokeCreate,
-            onNavigateToKeystrokeEdit = { keystrokeId ->
-                navController.navigateToKeystrokeEdit(keystrokeId)
+        hotkeyListScreen(
+            onNavigateToHotkeyCreate = navController::navigateToHotkeyCreate,
+            onNavigateToHotkeyEdit = { hotkeyId ->
+                navController.navigateToHotkeyEdit(hotkeyId)
             },
             onNavigateUp = navController::navigateUp,
             setFab = setFab,
         )
-        keystrokeCreateScreen(
+        hotkeyCreateScreen(
             onNavigateUp = navController::navigateUp,
             showSnackbar = showSnackbar,
             setFab = setFab,
             compactHeight = compactHeight,
         )
-        keystrokeEditScreen(
+        hotkeyEditScreen(
             onNavigateUp = navController::navigateUp,
             showSnackbar = showSnackbar,
             setFab = setFab,

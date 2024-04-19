@@ -1,7 +1,7 @@
 package com.fake.soundremote.service
 
 import android.content.Context
-import com.fake.soundremote.data.Keystroke
+import com.fake.soundremote.data.Hotkey
 import com.fake.soundremote.util.ConnectionStatus
 import com.fake.soundremote.util.Key
 import com.fake.soundremote.util.SystemMessage
@@ -37,8 +37,8 @@ internal class TestServiceManager : ServiceManager {
         }
     }
 
-    override fun sendKeystroke(keystroke: Keystroke) {
-        sentKeystroke = keystroke
+    override fun sendHotkey(hotkey: Hotkey) {
+        sentHotkey = hotkey
     }
 
     override fun sendKey(key: Key) {
@@ -56,6 +56,6 @@ internal class TestServiceManager : ServiceManager {
         _serviceState.value = state
     }
 
-    var sentKeystroke: Keystroke? = null
+    var sentHotkey: Hotkey? = null
     var sentKey: Key? = null
 }

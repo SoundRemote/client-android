@@ -131,9 +131,9 @@ internal class Connection(
         }
     }
 
-    fun sendKeystroke(keyCode: KeyCode, mods: Mods = Mods()) {
-        val keystrokePacket = Net.getKeystrokePacket(keyCode.value.toUByte(), mods.value.toUByte())
-        scope.launch(CoroutineName("Send Keystroke")) { send(keystrokePacket) }
+    fun sendHotkey(keyCode: KeyCode, mods: Mods = Mods()) {
+        val hotkeyPacket = Net.getHotkeyPacket(keyCode.value.toUByte(), mods.value.toUByte())
+        scope.launch(CoroutineName("Send Hotkey")) { send(hotkeyPacket) }
     }
 
     private suspend fun shutdown() = withContext(scope.coroutineContext) {

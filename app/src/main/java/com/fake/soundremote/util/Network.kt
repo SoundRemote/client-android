@@ -4,7 +4,7 @@ import androidx.annotation.IntDef
 import com.fake.soundremote.network.ConnectData
 import com.fake.soundremote.network.DisconnectData
 import com.fake.soundremote.network.KeepAliveData
-import com.fake.soundremote.network.KeystrokeData
+import com.fake.soundremote.network.HotkeyData
 import com.fake.soundremote.network.PacketData
 import com.fake.soundremote.network.PacketHeader
 import com.fake.soundremote.network.SetFormatData
@@ -38,7 +38,7 @@ object Net {
         CONNECT(0x01u),
         DISCONNECT(0x02u),
         SET_FORMAT(0x03u),
-        KEYSTROKE(0x10u),
+        HOTKEY(0x10u),
         AUDIO_DATA_UNCOMPRESSED(0x20u),
         AUDIO_DATA_OPUS(0x21u),
         CLIENT_KEEP_ALIVE(0x30u),
@@ -131,9 +131,9 @@ object Net {
         return createPacket(PacketCategory.SET_FORMAT, data, SetFormatData.SIZE)
     }
 
-    fun getKeystrokePacket(keyCode: PacketKeyType, mods: PacketModsType): ByteBuffer {
-        val data = KeystrokeData(keyCode, mods)
-        return createPacket(PacketCategory.KEYSTROKE, data, KeystrokeData.SIZE)
+    fun getHotkeyPacket(keyCode: PacketKeyType, mods: PacketModsType): ByteBuffer {
+        val data = HotkeyData(keyCode, mods)
+        return createPacket(PacketCategory.HOTKEY, data, HotkeyData.SIZE)
     }
 
     fun getKeepAlivePacket(): ByteBuffer {

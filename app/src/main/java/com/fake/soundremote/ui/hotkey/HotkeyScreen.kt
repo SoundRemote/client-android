@@ -1,4 +1,4 @@
-package com.fake.soundremote.ui.keystroke
+package com.fake.soundremote.ui.hotkey
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Left
@@ -67,8 +67,8 @@ private val sharedMod = Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun KeystrokeScreen(
-    state: KeystrokeScreenUIState,
+internal fun HotkeyScreen(
+    state: HotkeyScreenUIState,
     onKeyCodeChange: (KeyCode?) -> Unit,
     onWinChange: (Boolean) -> Unit,
     onCtrlChange: (Boolean) -> Unit,
@@ -94,8 +94,8 @@ internal fun KeystrokeScreen(
         TopAppBar(
             title = {
                 val title = when (state.mode) {
-                    KeystrokeScreenMode.CREATE -> stringResource(R.string.keystroke_create_title)
-                    KeystrokeScreenMode.EDIT -> stringResource(R.string.keystroke_edit_title)
+                    HotkeyScreenMode.CREATE -> stringResource(R.string.hotkey_create_title)
+                    HotkeyScreenMode.EDIT -> stringResource(R.string.hotkey_edit_title)
                 }
                 Text(
                     text = title,
@@ -212,7 +212,7 @@ private fun KeySelect(
     val keyOptions = remember { keyOptions() }
     // Remember entered Char so it could be restored when letter/digit tab selected again
     var selectedChar: Char? by rememberSaveable { mutableStateOf(null) }
-    // One time init needed when edit a letter/digit keystroke
+    // One time init needed when edit a letter/digit hotkey
     if (selectedChar == null) {
         keyCode?.toLetterOrDigitChar()?.let { selectedChar = it }
     }
@@ -288,8 +288,8 @@ private fun KeySelect(
                     value = keyEditText,
                     onValueChange = onKeyEditChange,
                     modifier = sharedMod,
-                    label = { Text(stringResource(R.string.keystroke_key_edit_label)) },
-                    supportingText = { Text(stringResource(R.string.keystroke_key_edit_hint)) },
+                    label = { Text(stringResource(R.string.hotkey_key_edit_label)) },
+                    supportingText = { Text(stringResource(R.string.hotkey_key_edit_hint)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
                     singleLine = true,
                 )
@@ -332,7 +332,7 @@ private fun KeySelectCombobox(
                 .fillMaxWidth()
                 .menuAnchor(),
             readOnly = true,
-            label = { Text(stringResource(R.string.keystroke_key_edit_label)) },
+            label = { Text(stringResource(R.string.hotkey_key_edit_label)) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
@@ -403,8 +403,8 @@ private fun NameEdit(
         value = value,
         onValueChange = onChange,
         modifier = modifier.then(sharedMod),
-        label = { Text(stringResource(R.string.keystroke_name_edit_label)) },
-        placeholder = { Text(stringResource(R.string.keystroke_name_edit_placeholder)) },
+        label = { Text(stringResource(R.string.hotkey_name_edit_label)) },
+        placeholder = { Text(stringResource(R.string.hotkey_name_edit_placeholder)) },
         trailingIcon = {
             if (value.isNotEmpty()) {
                 IconButton(onClick = { onChange("") }) {
@@ -437,9 +437,9 @@ private fun ScreenPreview(compactHeight: Boolean) {
     var ctrl by remember { mutableStateOf(false) }
     var shift by remember { mutableStateOf(true) }
     var alt by remember { mutableStateOf(false) }
-    KeystrokeScreen(
-        state = KeystrokeScreenUIState(
-            mode = KeystrokeScreenMode.EDIT,
+    HotkeyScreen(
+        state = HotkeyScreenUIState(
+            mode = HotkeyScreenMode.EDIT,
             name = "Test name",
             win = win,
             ctrl = ctrl,

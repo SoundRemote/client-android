@@ -34,22 +34,22 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fake.soundremote.R
-import com.fake.soundremote.util.KeystrokeDescription
+import com.fake.soundremote.util.HotkeyDescription
 
 @Composable
-internal fun KeystrokeSelectDialog(
+internal fun HotkeySelectDialog(
     title: String,
-    initialKeystrokeId: Int? = null,
+    initialHotkeyId: Int? = null,
     onConfirm: (Int?) -> Unit,
     onDismiss: () -> Unit,
-    viewModel: KeystrokeSelectViewModel = hiltViewModel()
+    viewModel: HotkeySelectViewModel = hiltViewModel()
 ) {
-    val keystrokes by viewModel.keystrokesState.collectAsStateWithLifecycle()
+    val hotkeys by viewModel.hotkeysState.collectAsStateWithLifecycle()
 
-    KeystrokeSelectDialog(
+    HotkeySelectDialog(
         title = title,
-        items = keystrokes,
-        initialKeystrokeId = initialKeystrokeId,
+        items = hotkeys,
+        initialHotkeyId = initialHotkeyId,
         onConfirm = onConfirm,
         onDismiss = onDismiss,
     )
@@ -57,29 +57,29 @@ internal fun KeystrokeSelectDialog(
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 @Composable
-internal fun KeystrokeSelectDialog(
+internal fun HotkeySelectDialog(
     title: String,
-    items: List<KeystrokeInfoUIState>,
-    initialKeystrokeId: Int?,
+    items: List<HotkeyInfoUIState>,
+    initialHotkeyId: Int?,
     onConfirm: (Int?) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selectedKeystrokeId by rememberSaveable { mutableStateOf(initialKeystrokeId) }
+    var selectedHotkeyId by rememberSaveable { mutableStateOf(initialHotkeyId) }
 
     AlertDialog(
         title = {
             Text(text = title)
         },
         text = {
-            KeystrokeList(
+            HotkeyList(
                 items = items,
-                selectedKeystrokeId = selectedKeystrokeId,
-                onSelect = { id -> selectedKeystrokeId = id },
+                selectedHotkeyId = selectedHotkeyId,
+                onSelect = { id -> selectedHotkeyId = id },
             )
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(selectedKeystrokeId) }
+                onClick = { onConfirm(selectedHotkeyId) }
             ) {
                 Text(stringResource(android.R.string.ok))
             }
@@ -97,9 +97,9 @@ internal fun KeystrokeSelectDialog(
 }
 
 @Composable
-private fun KeystrokeList(
-    items: List<KeystrokeInfoUIState>,
-    selectedKeystrokeId: Int?,
+private fun HotkeyList(
+    items: List<HotkeyInfoUIState>,
+    selectedHotkeyId: Int?,
     onSelect: (Int?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -107,10 +107,10 @@ private fun KeystrokeList(
 
     var prescrolled by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(items) {
-        // Scroll to initially selected keystroke only once on dialog open
+        // Scroll to initially selected hotkey only once on dialog open
         if (prescrolled || items.isEmpty()) return@LaunchedEffect
-        // Add 1 to account for the "No keystroke" option
-        val index = items.indexOfFirst { it.id == selectedKeystrokeId } + 1
+        // Add 1 to account for the "No hotkey" option
+        val index = items.indexOfFirst { it.id == selectedHotkeyId } + 1
         lazyListState.scrollToItem(index)
         prescrolled = true
     }
@@ -122,29 +122,29 @@ private fun KeystrokeList(
         state = lazyListState
     ) {
         item(key = null) {
-            KeystrokeItem(
-                name = stringResource(R.string.keystroke_select_none),
+            HotkeyItem(
+                name = stringResource(R.string.hotkey_select_none),
                 description = "",
-                selected = selectedKeystrokeId == null,
+                selected = selectedHotkeyId == null,
                 onClick = { onSelect(null) },
             )
         }
         items(
             items = items,
-            key = { keystroke -> keystroke.id }
-        ) { keystroke ->
-            KeystrokeItem(
-                name = keystroke.name,
-                description = keystroke.description.asString(),
-                selected = keystroke.id == selectedKeystrokeId,
-                onClick = { onSelect(keystroke.id) }
+            key = { hotkey -> hotkey.id }
+        ) { hotkey ->
+            HotkeyItem(
+                name = hotkey.name,
+                description = hotkey.description.asString(),
+                selected = hotkey.id == selectedHotkeyId,
+                onClick = { onSelect(hotkey.id) }
             )
         }
     }
 }
 
 @Composable
-private fun KeystrokeItem(
+private fun HotkeyItem(
     name: String,
     description: String,
     selected: Boolean,
@@ -180,9 +180,9 @@ private fun KeystrokeItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun KeystrokeItemPreview() {
-    KeystrokeItem(
-        name = "Keystroke name",
+private fun HotkeyItemPreview() {
+    HotkeyItem(
+        name = "Hotkey name",
         description = "Description",
         selected = true,
         onClick = {}
@@ -191,9 +191,9 @@ private fun KeystrokeItemPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun KeystrokeItemNoDescriptionPreview() {
-    KeystrokeItem(
-        name = "Keystroke name",
+private fun HotkeyItemNoDescriptionPreview() {
+    HotkeyItem(
+        name = "Hotkey name",
         description = "",
         selected = true,
         onClick = {}
@@ -202,17 +202,17 @@ private fun KeystrokeItemNoDescriptionPreview() {
 
 @Preview(showBackground = true, device = "id:Nexus S")
 @Composable
-private fun KeystrokeDialogPreview() {
-    KeystrokeSelectDialog(
-        title = "Select keystroke",
+private fun HotkeyDialogPreview() {
+    HotkeySelectDialog(
+        title = "Select Hotkey",
         items = List(10) {
-            KeystrokeInfoUIState(
+            HotkeyInfoUIState(
                 it,
-                "Keystroke $it",
-                KeystrokeDescription.WithString("Ctrl + Shift + $it")
+                "Hotkey $it",
+                HotkeyDescription.WithString("Ctrl + Shift + $it")
             )
         },
-        initialKeystrokeId = 9,
+        initialHotkeyId = 9,
         onConfirm = {},
         onDismiss = {},
     )

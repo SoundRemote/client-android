@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.fake.soundremote.data.Keystroke
+import com.fake.soundremote.data.Hotkey
 import com.fake.soundremote.util.ConnectionStatus
 import com.fake.soundremote.util.Key
 import com.fake.soundremote.util.SystemMessage
@@ -67,9 +67,9 @@ internal class MainServiceManager(
         service.get()?.disconnect()
     }
 
-    override fun sendKeystroke(keystroke: Keystroke) {
+    override fun sendHotkey(hotkey: Hotkey) {
         if (!bound) return
-        service.get()?.sendKeystroke(keystroke)
+        service.get()?.sendHotkey(hotkey)
     }
 
     override fun sendKey(key: Key) {

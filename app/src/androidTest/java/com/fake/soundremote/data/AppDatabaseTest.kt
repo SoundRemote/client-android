@@ -32,31 +32,31 @@ internal class AppDatabaseTest {
         val database = DatabaseResource(dispatcher)
 
         @Test
-        fun createKeystroke_setsOrderToDefaultValue() = runTest(dispatcher) {
-            val expected = Keystroke.ORDER_DEFAULT_VALUE
-            val keystrokeId = database.keystrokeRepository.insert(Keystroke(KeyCode(1), "Test"))
+        fun createHotkey_setsOrderToDefaultValue() = runTest(dispatcher) {
+            val expected = Hotkey.ORDER_DEFAULT_VALUE
+            val hotkeyId = database.hotkeyRepository.insert(Hotkey(KeyCode(1), "Test"))
 
-            val actual = database.keystrokeRepository.getById(keystrokeId.toInt())?.order
+            val actual = database.hotkeyRepository.getById(hotkeyId.toInt())?.order
 
             assertThat(
-                "Creating a Keystroke must init the order field with the default value",
+                "Creating a Hotkey must init the order field with the default value",
                 actual, equalTo(expected)
             )
         }
 
         @Test
-        fun deleteEventBoundKeystroke_deletesEventAction() = runTest(dispatcher) {
-            val keystroke = Keystroke(KeyCode(123), "Test")
-            val keystrokeId = database.keystrokeRepository.insert(keystroke).toInt()
+        fun deleteEventBoundHotkey_deletesEventAction() = runTest(dispatcher) {
+            val hotkey = Hotkey(KeyCode(123), "Test")
+            val hotkeyId = database.hotkeyRepository.insert(hotkey).toInt()
             val eventId = Event.CALL_END.id
-            val eventAction = EventAction(eventId, ActionData(ActionType.KEYSTROKE, keystrokeId))
+            val eventAction = EventAction(eventId, ActionData(ActionType.HOTKEY, hotkeyId))
             database.eventActionRepository.insert(eventAction)
 
-            database.keystrokeRepository.deleteById(keystrokeId)
+            database.hotkeyRepository.deleteById(hotkeyId)
 
             val actual: EventAction? = database.eventActionRepository.getById(eventId)
             assertThat(
-                "Deleting Event bound Keystroke must delete the EventAction",
+                "Deleting Event bound Hotkey must delete the EventAction",
                 actual, nullValue()
             )
         }

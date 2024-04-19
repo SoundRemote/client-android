@@ -9,7 +9,7 @@ enum class ActionType(
     val nameStringId: Int,
 ) {
     APP(1, R.string.action_type_app),
-    KEYSTROKE(2, R.string.action_type_keystroke);
+    HOTKEY(2, R.string.action_type_hotkey);
 
     companion object {
         /**

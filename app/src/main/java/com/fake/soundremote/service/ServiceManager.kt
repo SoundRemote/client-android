@@ -1,7 +1,7 @@
 package com.fake.soundremote.service
 
 import android.content.Context
-import com.fake.soundremote.data.Keystroke
+import com.fake.soundremote.data.Hotkey
 import com.fake.soundremote.util.ConnectionStatus
 import com.fake.soundremote.util.Key
 import com.fake.soundremote.util.SystemMessage
@@ -15,7 +15,7 @@ internal interface ServiceManager {
     fun unbind(context: Context)
     fun connect(address: String)
     fun disconnect()
-    fun sendKeystroke(keystroke: Keystroke)
+    fun sendHotkey(hotkey: Hotkey)
     fun sendKey(key: Key)
     fun setMuted(value: Boolean)
 }

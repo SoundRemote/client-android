@@ -65,11 +65,11 @@ import com.fake.soundremote.ui.components.ListItemSupport
 import com.fake.soundremote.ui.theme.SoundRemoteTheme
 import com.fake.soundremote.util.ConnectionStatus
 import com.fake.soundremote.util.Key
-import com.fake.soundremote.util.KeystrokeDescription
+import com.fake.soundremote.util.HotkeyDescription
 import com.fake.soundremote.util.TestTag
 
 private val paddingMod = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)
-private val keystrokeItemModifier = Modifier
+private val hotkeyItemModifier = Modifier
     .fillMaxWidth()
     .height(72.dp)
     .then(paddingMod)
@@ -79,9 +79,9 @@ private val keystrokeItemModifier = Modifier
 internal fun HomeScreen(
     uiState: HomeUIState,
     @StringRes messageId: Int?,
-    onSendKeystroke: (keystrokeId: Int) -> Unit,
+    onSendHotkey: (hotkeyId: Int) -> Unit,
     onSendKey: (Key) -> Unit,
-    onNavigateToEditKeystroke: (keystrokeId: Int) -> Unit,
+    onNavigateToEditHotkey: (hotkeyId: Int) -> Unit,
     onConnect: (address: String) -> Unit,
     onDisconnect: () -> Unit,
     onSetMuted: (muted: Boolean) -> Unit,
@@ -198,12 +198,12 @@ internal fun HomeScreen(
             modifier = Modifier
                 .weight(1f),
         ) {
-            items(items = uiState.keystrokes, key = { it.id }) { keystroke ->
-                KeystrokeItem(
-                    name = keystroke.name,
-                    description = keystroke.description.asString(),
-                    onClick = { onSendKeystroke(keystroke.id) },
-                    onLongClick = { onNavigateToEditKeystroke(keystroke.id) },
+            items(items = uiState.hotkeys, key = { it.id }) { hotkey ->
+                HotkeyItem(
+                    name = hotkey.name,
+                    description = hotkey.description.asString(),
+                    onClick = { onSendHotkey(hotkey.id) },
+                    onLongClick = { onNavigateToEditHotkey(hotkey.id) },
                 )
             }
         }
@@ -394,7 +394,7 @@ private fun ConnectButton(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun KeystrokeItem(
+private fun HotkeyItem(
     name: String,
     description: String,
     onClick: () -> Unit,
@@ -404,7 +404,7 @@ private fun KeystrokeItem(
     Column(
         modifier = modifier
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .then(keystrokeItemModifier),
+            .then(hotkeyItemModifier),
         verticalArrangement = Arrangement.Center,
     ) {
         ListItemHeadline(text = name)
@@ -446,23 +446,23 @@ private fun HomePreview(compactHeight: Boolean) {
         HomeScreen(
             uiState = HomeUIState(
                 serverAddress = "192.168.0.1",
-                keystrokes = listOf(
-                    HomeKeystrokeUIState(
+                hotkeys = listOf(
+                    HomeHotkeyUIState(
                         ++id,
                         "X",
-                        KeystrokeDescription.WithString("X")
+                        HotkeyDescription.WithString("X")
                     ),
-                    HomeKeystrokeUIState(
+                    HomeHotkeyUIState(
                         ++id,
                         "Volume up",
-                        KeystrokeDescription.WithLabelId("Ctrl + Alt + ", R.string.key_delete)
+                        HotkeyDescription.WithLabelId("Ctrl + Alt + ", R.string.key_delete)
                     ),
                 ),
                 connectionStatus = status,
                 isMuted = true,
             ),
             messageId = null,
-            onNavigateToEditKeystroke = {},
+            onNavigateToEditHotkey = {},
             onConnect = { status = ConnectionStatus.CONNECTING },
             onDisconnect = {
                 status = if (status == ConnectionStatus.CONNECTING) {
@@ -472,7 +472,7 @@ private fun HomePreview(compactHeight: Boolean) {
                 }
             },
             onSetMuted = {},
-            onSendKeystroke = {},
+            onSendHotkey = {},
             onSendKey = {},
             onMessageShown = {},
             onNavigateToEvents = {},

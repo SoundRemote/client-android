@@ -1,6 +1,6 @@
 package com.fake.soundremote.util
 
-import com.fake.soundremote.getKeystroke
+import com.fake.soundremote.getHotkey
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -82,29 +82,29 @@ internal class KeysTest {
     @Nested
     inner class GenerateDescriptionTests {
         @ParameterizedTest
-        @DisplayName("produces a description without mod key labels for a keystroke without mods")
+        @DisplayName("produces a description without mod key labels for a hotkey without mods")
         @EnumSource(ModKey::class)
-        fun keystrokeWithoutMods_ContainsNoModLabel(mod: ModKey) {
-            val keystroke = getKeystroke(keyCode = KeyCode('A'.code), mods = Mods())
+        fun hotkeyWithoutMods_ContainsNoModLabel(mod: ModKey) {
+            val hotkey = getHotkey(keyCode = KeyCode('A'.code), mods = Mods())
 
-            val description = generateDescription(keystroke)
+            val description = generateDescription(hotkey)
 
-            assertTrue(description is KeystrokeDescription.WithString)
-            description as KeystrokeDescription.WithString
+            assertTrue(description is HotkeyDescription.WithString)
+            description as HotkeyDescription.WithString
             val actual = description.text.lowercase().contains(mod.label.lowercase())
             assertFalse(actual)
         }
 
         @ParameterizedTest
-        @DisplayName("produces a description with a mod label for a keystroke with mod")
+        @DisplayName("produces a description with a mod label for a hotkey with mod")
         @EnumSource(ModKey::class)
-        fun keystrokeWithOneMod_ContainsCorrectModLabel(mod: ModKey) {
-            val keystroke = getKeystroke(keyCode = KeyCode('A'.code), mods = Mods(mod.bitField))
+        fun hotkeyWithOneMod_ContainsCorrectModLabel(mod: ModKey) {
+            val hotkey = getHotkey(keyCode = KeyCode('A'.code), mods = Mods(mod.bitField))
 
-            val description = generateDescription(keystroke)
+            val description = generateDescription(hotkey)
 
-            assertTrue(description is KeystrokeDescription.WithString)
-            description as KeystrokeDescription.WithString
+            assertTrue(description is HotkeyDescription.WithString)
+            description as HotkeyDescription.WithString
             val actual = description.text.lowercase().contains(mod.label.lowercase())
             assertTrue(actual)
         }
@@ -112,13 +112,13 @@ internal class KeysTest {
         @ParameterizedTest
         @DisplayName("produces a description with the correct label for a letter/number key code")
         @CsvSource("48, 0", "57, 9", "65, A", "90, z")
-        fun keystroke_ContainsCorrectKeyLabel(code: Int, label: String) {
-            val keystroke = getKeystroke(keyCode = KeyCode(code))
+        fun hotkey_ContainsCorrectKeyLabel(code: Int, label: String) {
+            val hotkey = getHotkey(keyCode = KeyCode(code))
 
-            val description = generateDescription(keystroke)
+            val description = generateDescription(hotkey)
 
-            assertTrue(description is KeystrokeDescription.WithString)
-            description as KeystrokeDescription.WithString
+            assertTrue(description is HotkeyDescription.WithString)
+            description as HotkeyDescription.WithString
             val actual = description.text.lowercase().contains(label.lowercase())
             assertTrue(actual)
         }
@@ -126,13 +126,13 @@ internal class KeysTest {
         @ParameterizedTest
         @EnumSource(names = ["TILDE", "F12", "DELETE"])
         @DisplayName("produces a correct String resource description for a non letter/number key code")
-        fun keystroke_ContainsCorrectKeyLabelId(key: Key) {
-            val keystroke = getKeystroke(keyCode = key.keyCode)
+        fun hotkey_ContainsCorrectKeyLabelId(key: Key) {
+            val hotkey = getHotkey(keyCode = key.keyCode)
 
-            val description = generateDescription(keystroke)
+            val description = generateDescription(hotkey)
 
-            assertTrue(description is KeystrokeDescription.WithLabelId)
-            description as KeystrokeDescription.WithLabelId
+            assertTrue(description is HotkeyDescription.WithLabelId)
+            description as HotkeyDescription.WithLabelId
             assertEquals(key.labelId, description.labelId)
         }
     }

@@ -292,7 +292,7 @@ private fun EventsPreview() {
                 nameStringId = event.nameStringId,
                 permission = event.requiredPermission,
                 action = ActionUIState(
-                    ActionType.KEYSTROKE,
+                    ActionType.HOTKEY,
                     42,
                     TextValue.TextString("Ctrl + Shift + ${event.id}")
                 ),

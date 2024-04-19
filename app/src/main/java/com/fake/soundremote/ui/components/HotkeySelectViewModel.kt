@@ -2,8 +2,8 @@ package com.fake.soundremote.ui.components
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fake.soundremote.data.KeystrokeRepository
-import com.fake.soundremote.util.KeystrokeDescription
+import com.fake.soundremote.data.HotkeyRepository
+import com.fake.soundremote.util.HotkeyDescription
 import com.fake.soundremote.util.generateDescription
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -11,23 +11,23 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-data class KeystrokeInfoUIState(
+data class HotkeyInfoUIState(
     val id: Int,
     val name: String,
-    val description: KeystrokeDescription,
+    val description: HotkeyDescription,
 )
 
 @HiltViewModel
-class KeystrokeSelectViewModel @Inject constructor(
-    keystrokeRepository: KeystrokeRepository,
+class HotkeySelectViewModel @Inject constructor(
+    hotkeyRepository: HotkeyRepository,
 ) : ViewModel() {
-    val keystrokesState = keystrokeRepository.getAllInfoOrdered()
-        .map { keystrokes ->
-            keystrokes.map { keystroke ->
-                KeystrokeInfoUIState(
-                    keystroke.id,
-                    keystroke.name,
-                    description = generateDescription(keystroke),
+    val hotkeysState = hotkeyRepository.getAllInfoOrdered()
+        .map { hotkeys ->
+            hotkeys.map { hotkey ->
+                HotkeyInfoUIState(
+                    hotkey.id,
+                    hotkey.name,
+                    description = generateDescription(hotkey),
                 )
             }
         }.stateIn(

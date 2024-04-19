@@ -1,10 +1,10 @@
 package com.fake.soundremote.ui
 
 import com.fake.soundremote.MainDispatcherExtension
-import com.fake.soundremote.data.Keystroke
-import com.fake.soundremote.data.TestKeystrokeRepository
-import com.fake.soundremote.getKeystroke
-import com.fake.soundremote.ui.keystrokelist.KeystrokeListViewModel
+import com.fake.soundremote.data.Hotkey
+import com.fake.soundremote.data.TestHotkeyRepository
+import com.fake.soundremote.getHotkey
+import com.fake.soundremote.ui.hotkeylist.HotkeyListViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -23,34 +23,34 @@ import java.util.stream.Stream
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @ExtendWith(MainDispatcherExtension::class)
-@DisplayName("KeystrokeListViewModel")
-class KeystrokeListViewModelTest {
-    private var keystrokeRepository = TestKeystrokeRepository()
+@DisplayName("HotkeyListViewModel")
+class HotkeyListViewModelTest {
+    private var hotkeyRepository = TestHotkeyRepository()
 
-    private lateinit var viewModel: KeystrokeListViewModel
+    private lateinit var viewModel: HotkeyListViewModel
 
     @BeforeEach
     fun setup() {
-        viewModel = KeystrokeListViewModel(keystrokeRepository)
+        viewModel = HotkeyListViewModel(hotkeyRepository)
     }
 
     @Test
-    @DisplayName("deleteKeystroke() deletes")
-    fun deleteKeystroke_deletes() = runTest {
+    @DisplayName("deleteHotkey() deletes")
+    fun deleteHotkey_deletes() = runTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.keystrokeListState.collect {}
+            viewModel.hotkeyListState.collect {}
         }
 
         val id = 10
-        val keystrokes = listOf(
-            getKeystroke(id = id),
-            getKeystroke(id = id + 1),
+        val hotkeys = listOf(
+            getHotkey(id = id),
+            getHotkey(id = id + 1),
         )
-        keystrokeRepository.setKeystrokes(keystrokes)
+        hotkeyRepository.setHotkeys(hotkeys)
 
-        viewModel.deleteKeystroke(id)
+        viewModel.deleteHotkey(id)
 
-        val actual = viewModel.keystrokeListState.value.keystrokes.find { it.id == id }
+        val actual = viewModel.hotkeyListState.value.hotkeys.find { it.id == id }
         assertNull(actual)
 
         collectJob.cancel()
@@ -60,39 +60,39 @@ class KeystrokeListViewModelTest {
     @DisplayName("changeFavoured() changes favoured status")
     fun changeFavoured_changes() = runTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.keystrokeListState.collect {}
+            viewModel.hotkeyListState.collect {}
         }
 
         val id = 10
-        val keystrokes = listOf(getKeystroke(id = id, favoured = true))
-        keystrokeRepository.setKeystrokes(keystrokes)
+        val hotkeys = listOf(getHotkey(id = id, favoured = true))
+        hotkeyRepository.setHotkeys(hotkeys)
 
         viewModel.changeFavoured(id, false)
 
-        val actual = viewModel.keystrokeListState.value.keystrokes.find { it.id == id }!!.favoured
+        val actual = viewModel.hotkeyListState.value.hotkeys.find { it.id == id }!!.favoured
         assertFalse(actual)
 
         collectJob.cancel()
     }
 
     @ParameterizedTest(name = "from {1} to {2} results in {3}")
-    @MethodSource("com.fake.soundremote.ui.KeystrokeListViewModelTest#moveKeystrokeProvider")
-    @DisplayName("moveKeystroke() moves correctly")
-    fun moveKeystroke_movesCorrectly(
-        keystrokes: List<Keystroke>,
+    @MethodSource("com.fake.soundremote.ui.HotkeyListViewModelTest#moveHotkeyProvider")
+    @DisplayName("moveHotkey() moves correctly")
+    fun moveHotkey_movesCorrectly(
+        hotkeys: List<Hotkey>,
         from: Int,
         to: Int,
         expected: List<Int>
     ) = runTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.keystrokeListState.collect {}
+            viewModel.hotkeyListState.collect {}
         }
 
-        keystrokeRepository.setKeystrokes(keystrokes)
+        hotkeyRepository.setHotkeys(hotkeys)
 
-        viewModel.moveKeystroke(from, to)
+        viewModel.moveHotkey(from, to)
 
-        val actual = viewModel.keystrokeListState.value.keystrokes.map { it.id }
+        val actual = viewModel.hotkeyListState.value.hotkeys.map { it.id }
         assertIterableEquals(expected, actual)
 
         collectJob.cancel()
@@ -100,24 +100,24 @@ class KeystrokeListViewModelTest {
 
     companion object {
         /**
-         * List`<Keystroke>`, from: Int, to: Int, expectedOrderedIds: List`<Int>`
+         * List<[Hotkey]>, from: Int, to: Int, expectedOrderedIds: List`<Int>`
          */
         @JvmStatic
-        fun moveKeystrokeProvider(): Stream<Arguments> = Stream.of(
+        fun moveHotkeyProvider(): Stream<Arguments> = Stream.of(
             Arguments.arguments(
-                generateZeroOrderKeystrokes(10),
+                generateZeroOrderHotkeys(10),
                 3,
                 8,
                 listOf(1, 2, 3, 5, 6, 7, 8, 9, 4, 10),
             ),
             Arguments.arguments(
-                generateZeroOrderKeystrokes(10),
+                generateZeroOrderHotkeys(10),
                 9,
                 0,
                 listOf(10, 1, 2, 3, 4, 5, 6, 7, 8, 9)
             ),
             Arguments.arguments(
-                generateZeroOrderKeystrokes(8),
+                generateZeroOrderHotkeys(8),
                 5,
                 5,
                 listOf(1, 2, 3, 4, 5, 6, 7, 8)
@@ -125,12 +125,12 @@ class KeystrokeListViewModelTest {
         )
 
         /**
-         * Generates keystrokes with order value of 0
+         * Generates hotkeys with order value of 0
          */
-        private fun generateZeroOrderKeystrokes(n: Int): List<Keystroke> = buildList {
+        private fun generateZeroOrderHotkeys(n: Int): List<Hotkey> = buildList {
             repeat(n) {
                 val id = it + 1
-                add(getKeystroke(id = id, order = 0))
+                add(getHotkey(id = id, order = 0))
             }
         }
     }

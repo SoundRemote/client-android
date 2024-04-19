@@ -35,7 +35,7 @@
     <string name="navigation_menu" tools:override="true">Меню навигации</string>
     <string name="action_settings">Настройки</string>
     <string name="action_about">О приложении</string>
-    <string name="action_edit_keystrokes">Редактировать сочетания клавиш</string>
+    <string name="action_edit_hotkeys">Редактировать сочетания клавиш</string>
     <string name="action_events">События</string>
     <string name="action_recent_servers">Показать последние серверы</string>
     <string name="recent_servers_title">Последние серверы</string>
@@ -44,22 +44,22 @@
     <!--Notification-->
     <string name="notification_title_template">Открыть %1$s</string>
     <!--Hotkeys-->
-    <string name="keystroke_list_title">Сочетания клавиш</string>
-    <string name="keystroke_delete_confirmation">Удалить сочетание клавиш: %1s?</string>
-    <string name="action_keystroke_create">Создать</string>
+    <string name="hotkey_list_title">Сочетания клавиш</string>
+    <string name="hotkey_delete_confirmation">Удалить сочетание клавиш: %1s?</string>
+    <string name="action_hotkey_create">Создать</string>
     <string name="drag_handle_description">Ручка перетаскивания</string>
-    <string name="keystroke_actions_menu_description">Меню действий</string>
+    <string name="hotkey_actions_menu_description">Меню действий</string>
     <!--Hotkey edit-->
-    <string name="keystroke_create_title">Создать сочетание клавиш</string>
-    <string name="keystroke_edit_title">Редактировать сочетание клавиш</string>
+    <string name="hotkey_create_title">Создать сочетание клавиш</string>
+    <string name="hotkey_edit_title">Редактировать сочетание клавиш</string>
     <string name="error_invalid_key">Введите латинскую букву или цифру</string>
-    <string name="keystroke_name_edit_label">Название</string>
-    <string name="keystroke_name_edit_placeholder">Оставьте пустым для автозаполнения</string>
-    <string name="keystroke_key_edit_label">Клавиша(обязательно)</string>
-    <string name="keystroke_key_edit_hint">a–z или 0–9</string>
+    <string name="hotkey_name_edit_label">Название</string>
+    <string name="hotkey_name_edit_placeholder">Оставьте пустым для автозаполнения</string>
+    <string name="hotkey_key_edit_label">Клавиша(обязательно)</string>
+    <string name="hotkey_key_edit_hint">a–z или 0–9</string>
     <!--Hotkey select-->
-    <string name="keystroke_select_title">Выберите сочетание клавиш</string>
-    <string name="keystroke_select_none">Без горячей клавиши</string>
+    <string name="hotkey_select_title">Выберите сочетание клавиш</string>
+    <string name="hotkey_select_none">Без горячей клавиши</string>
     <!--Action select-->
     <string name="action_select_title">Выберите действие</string>
     <!--Events-->
@@ -89,7 +89,7 @@
     <!--Action types-->
     <string name="action_none">Без действия</string>
     <string name="action_type_app">Приложение</string>
-    <string name="action_type_keystroke">Сочетание клавиш</string>
+    <string name="action_type_hotkey">Сочетание клавиш</string>
     <!--App actions-->
     <string name="app_action_mute">Отключить звук</string>
     <string name="app_action_unmute">Включить звук</string>

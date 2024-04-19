@@ -40,8 +40,8 @@ import com.fake.soundremote.data.ActionType
 import com.fake.soundremote.data.AppAction
 import com.fake.soundremote.data.Event
 import com.fake.soundremote.data.EventActionRepository
-import com.fake.soundremote.data.Keystroke
-import com.fake.soundremote.data.KeystrokeRepository
+import com.fake.soundremote.data.Hotkey
+import com.fake.soundremote.data.HotkeyRepository
 import com.fake.soundremote.data.preferences.PreferencesRepository
 import com.fake.soundremote.network.Connection
 import com.fake.soundremote.util.ACTION_CLOSE
@@ -78,7 +78,7 @@ internal class MainService : MediaBrowserServiceCompat() {
     lateinit var eventActionRepository: EventActionRepository
 
     @Inject
-    lateinit var keystrokeRepository: KeystrokeRepository
+    lateinit var hotkeyRepository: HotkeyRepository
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val binder = LocalBinder()
@@ -273,17 +273,17 @@ internal class MainService : MediaBrowserServiceCompat() {
         }
     }
 
-    fun sendKeystroke(keystroke: Keystroke) {
-        connection.sendKeystroke(keystroke.keyCode, keystroke.mods)
+    fun sendHotkey(hotkey: Hotkey) {
+        connection.sendHotkey(hotkey.keyCode, hotkey.mods)
     }
 
     fun sendKey(key: Key) {
-        connection.sendKeystroke(key.keyCode)
+        connection.sendHotkey(key.keyCode)
     }
 
-    private suspend fun sendKeystroke(keystrokeId: Int) {
-        keystrokeRepository.getById(keystrokeId)?.let {
-            sendKeystroke(it)
+    private suspend fun sendHotkey(hotkeyId: Int) {
+        hotkeyRepository.getById(hotkeyId)?.let {
+            sendHotkey(it)
         }
     }
 
@@ -466,7 +466,7 @@ internal class MainService : MediaBrowserServiceCompat() {
     }
 
     private fun sendKey(key: KeyCode) {
-        connection.sendKeystroke(key)
+        connection.sendHotkey(key)
     }
 
     private fun createNotification(sessionToken: MediaSessionCompat.Token): Notification {
@@ -637,8 +637,8 @@ internal class MainService : MediaBrowserServiceCompat() {
                 }
             }
 
-            ActionType.KEYSTROKE.id -> {
-                sendKeystroke(action.actionId)
+            ActionType.HOTKEY.id -> {
+                sendHotkey(action.actionId)
             }
         }
     }

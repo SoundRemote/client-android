@@ -20,7 +20,7 @@ import com.fake.soundremote.stringResource
 import com.fake.soundremote.ui.theme.SoundRemoteTheme
 import com.fake.soundremote.util.ConnectionStatus
 import com.fake.soundremote.util.Key
-import com.fake.soundremote.util.KeystrokeDescription
+import com.fake.soundremote.util.HotkeyDescription
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -157,7 +157,7 @@ internal class HomeScreenTest {
         composeTestRule.onNodeWithContentDescription(connect).assertDoesNotExist()
     }
 
-    // Click on connect button connects
+    // Click on the connect button connects
     @Test
     fun connectButton_click_connects() {
         val expected = "123.45.67.89"
@@ -175,7 +175,7 @@ internal class HomeScreenTest {
         assertEquals(expected, actual)
     }
 
-    // Click on disconnect button disconnects
+    // Click on the disconnect button disconnects
     @Test
     fun disconnectButton_click_disconnects() {
         var actualPerformed = false
@@ -191,44 +191,44 @@ internal class HomeScreenTest {
         assertTrue(actualPerformed)
     }
 
-    // Click on keystroke calls onSendKeystroke
+    // Click on a hotkey calls onSendHotkey
     @Test
-    fun keystroke_click_sendsKeystroke() {
+    fun hotkey_click_sendsHotkey() {
         val expectedId = 12
-        val keystrokeName = "Key Title"
-        val keystrokeDescription = KeystrokeDescription.WithString("Key Description")
-        val keystroke = HomeKeystrokeUIState(expectedId, keystrokeName, keystrokeDescription)
-        var sentKeystrokeId = -1
+        val name = "Key Title"
+        val description = HotkeyDescription.WithString("Key Description")
+        val hotkey = HomeHotkeyUIState(expectedId, name, description)
+        var actualId = -1
         composeTestRule.setContent {
             val uiState = HomeUIState(
-                keystrokes = listOf(keystroke),
+                hotkeys = listOf(hotkey),
             )
-            CreateHomeScreen(uiState = uiState, onSendKeystroke = { sentKeystrokeId = it })
+            CreateHomeScreen(uiState = uiState, onSendHotkey = { actualId = it })
         }
 
-        composeTestRule.onNodeWithText(keystrokeName).performClick()
+        composeTestRule.onNodeWithText(name).performClick()
 
-        assertEquals(expectedId, sentKeystrokeId)
+        assertEquals(expectedId, actualId)
     }
 
-    // Long click on keystroke calls onEditKeystroke
+    // Long click on a hotkey calls onEditHotkey
     @Test
-    fun keystroke_longClick_editsKeystroke() {
+    fun hotkey_longClick_editsHotkey() {
         val expectedId = 12
-        val keystrokeName = "Key Title"
-        val keystrokeDescription = KeystrokeDescription.WithString("Key Description")
-        val keystroke = HomeKeystrokeUIState(expectedId, keystrokeName, keystrokeDescription)
-        var editKeystrokeId = -1
+        val name = "Key Title"
+        val description = HotkeyDescription.WithString("Key Description")
+        val hotkey = HomeHotkeyUIState(expectedId, name, description)
+        var actualId = -1
         composeTestRule.setContent {
             val uiState = HomeUIState(
-                keystrokes = listOf(keystroke),
+                hotkeys = listOf(hotkey),
             )
-            CreateHomeScreen(uiState = uiState, onEditKeystroke = { editKeystrokeId = it })
+            CreateHomeScreen(uiState = uiState, onEditHotkey = { actualId = it })
         }
 
-        composeTestRule.onNodeWithText(keystrokeName).performTouchInput { longClick() }
+        composeTestRule.onNodeWithText(name).performTouchInput { longClick() }
 
-        assertEquals(expectedId, editKeystrokeId)
+        assertEquals(expectedId, actualId)
     }
 
     // Click on recent servers button shows recent servers dialog
@@ -275,9 +275,9 @@ internal class HomeScreenTest {
         modifier: Modifier = Modifier,
         uiState: HomeUIState = HomeUIState(),
         @StringRes messageId: Int? = null,
-        onSendKeystroke: (Int) -> Unit = {},
+        onSendHotkey: (Int) -> Unit = {},
         onSendKey: (Key) -> Unit = {},
-        onEditKeystroke: (Int) -> Unit = {},
+        onEditHotkey: (Int) -> Unit = {},
         onConnect: (String) -> Unit = {},
         onDisconnect: () -> Unit = {},
         onSetMuted: (Boolean) -> Unit = {},
@@ -291,9 +291,9 @@ internal class HomeScreenTest {
             HomeScreen(
                 uiState = uiState,
                 messageId = messageId,
-                onSendKeystroke = onSendKeystroke,
+                onSendHotkey = onSendHotkey,
                 onSendKey = onSendKey,
-                onNavigateToEditKeystroke = onEditKeystroke,
+                onNavigateToEditHotkey = onEditHotkey,
                 onConnect = onConnect,
                 onDisconnect = onDisconnect,
                 onSetMuted = onSetMuted,

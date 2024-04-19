@@ -1,4 +1,4 @@
-package com.fake.soundremote.ui.keystrokelist
+package com.fake.soundremote.ui.hotkeylist
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.gestures.Orientation
@@ -57,10 +57,10 @@ import java.io.Serializable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun KeystrokeListScreen(
-    state: KeystrokeListUIState,
-    onNavigateToKeystrokeCreate: () -> Unit,
-    onNavigateToKeystrokeEdit: (keystrokeId: Int) -> Unit,
+internal fun HotkeyListScreen(
+    state: HotkeyListUIState,
+    onNavigateToHotkeyCreate: () -> Unit,
+    onNavigateToHotkeyEdit: (hotkeyId: Int) -> Unit,
     onDelete: (id: Int) -> Unit,
     onChangeFavoured: (id: Int, favoured: Boolean) -> Unit,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
@@ -69,20 +69,20 @@ internal fun KeystrokeListScreen(
 ) {
     Column(modifier = modifier) {
         TopAppBar(
-            title = { Text(stringResource(R.string.keystroke_list_title)) },
+            title = { Text(stringResource(R.string.hotkey_list_title)) },
             navigationIcon = { NavigateUpButton(onNavigateUp) },
             actions = {
                 IconButton(
-                    onClick = onNavigateToKeystrokeCreate
+                    onClick = onNavigateToHotkeyCreate
                 ) {
-                    Icon(Icons.Default.Add, stringResource(R.string.action_keystroke_create))
+                    Icon(Icons.Default.Add, stringResource(R.string.action_hotkey_create))
                 }
             }
         )
-        KeystrokeList(
-            keystrokes = state.keystrokes,
+        HotkeyList(
+            hotkeys = state.hotkeys,
             onChangeFavoured = { id, fav -> onChangeFavoured(id, fav) },
-            onEdit = onNavigateToKeystrokeEdit,
+            onEdit = onNavigateToHotkeyEdit,
             onMove = { from, to -> onMove(from, to) },
             onDelete = { onDelete(it) },
         )
@@ -93,8 +93,8 @@ private data class VisibleItemInfo(var index: Int, var offset: Int)
 private data class DeleteInfo(val id: Int, val name: String) : Serializable
 
 @Composable
-private fun KeystrokeList(
-    keystrokes: List<KeystrokeUIState>,
+private fun HotkeyList(
+    hotkeys: List<HotkeyUIState>,
     onChangeFavoured: (Int, Boolean) -> Unit,
     onEdit: (Int) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
@@ -112,12 +112,12 @@ private fun KeystrokeList(
     var firstVisibleItem: VisibleItemInfo? by remember { mutableStateOf(null) }
     val listDragState =
         rememberListDragState(
-            key = keystrokes,
+            key = hotkeys,
             onMove = onMove,
             listState = listState,
             onFirstItemChange = { firstVisibleItem = it },
         )
-    LaunchedEffect(keystrokes) {
+    LaunchedEffect(hotkeys) {
         firstVisibleItem?.let {
             listState.scrollToItem(it.index, it.offset)
             firstVisibleItem = null
@@ -129,16 +129,16 @@ private fun KeystrokeList(
         state = listState,
     ) {
         itemsIndexed(
-            items = keystrokes,
-            key = { _, keystroke -> keystroke.id },
-        ) { index, keystrokeState ->
-            KeystrokeItem(
-                name = keystrokeState.name,
-                description = keystrokeState.description.asString(),
-                favoured = keystrokeState.favoured,
-                onChangeFavoured = { onChangeFavoured(keystrokeState.id, it) },
-                onEdit = { onEdit(keystrokeState.id) },
-                onDelete = { toDelete = DeleteInfo(keystrokeState.id, keystrokeState.name) },
+            items = hotkeys,
+            key = { _, hotkey -> hotkey.id },
+        ) { index, hotkeyState ->
+            HotkeyItem(
+                name = hotkeyState.name,
+                description = hotkeyState.description.asString(),
+                favoured = hotkeyState.favoured,
+                onChangeFavoured = { onChangeFavoured(hotkeyState.id, it) },
+                onEdit = { onEdit(hotkeyState.id) },
+                onDelete = { toDelete = DeleteInfo(hotkeyState.id, hotkeyState.name) },
                 onDragStart = { listDragState.onDragStart(index) },
                 onDrag = { listDragState.onDrag(it) },
                 onDragStop = { listDragState.onDragStop() },
@@ -170,7 +170,7 @@ private fun KeystrokeList(
                     Text(stringResource(R.string.cancel))
                 }
             },
-            text = { Text(stringResource(R.string.keystroke_delete_confirmation).format(name)) }
+            text = { Text(stringResource(R.string.hotkey_delete_confirmation).format(name)) }
         )
     }
 }
@@ -179,7 +179,7 @@ private enum class DragState { DRAGGED, SHIFTED, DEFAULT }
 private data class DragInfo(val state: DragState = DragState.DEFAULT, val offset: Float = 0f)
 
 @Composable
-private fun KeystrokeItem(
+private fun HotkeyItem(
     name: String,
     description: String,
     favoured: Boolean,
@@ -195,7 +195,7 @@ private fun KeystrokeItem(
 ) {
     val animateOffset by animateFloatAsState(
         if (dragInfo.state == DragState.SHIFTED) dragInfo.offset else 0f,
-        label = "Keystroke item drag"
+        label = "Hotkey item drag"
     )
     val offsetY = when {
         !isDragActive -> 0f
@@ -247,7 +247,7 @@ private fun KeystrokeItem(
                 IconButton(onClick = { showMenu = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.keystroke_actions_menu_description)
+                        contentDescription = stringResource(R.string.hotkey_actions_menu_description)
                     )
                 }
                 DropdownMenu(
@@ -373,7 +373,7 @@ private class ListDragState(
 @Preview(showBackground = true)
 @Composable
 private fun CheckedItemPreview() {
-    KeystrokeItem(
+    HotkeyItem(
         name = "Checked",
         description = "desc",
         favoured = true,
@@ -391,7 +391,7 @@ private fun CheckedItemPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun UncheckedItemPreview() {
-    KeystrokeItem(
+    HotkeyItem(
         name = "Unchecked",
         description = "desc",
         favoured = false,

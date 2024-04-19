@@ -1,6 +1,6 @@
 package com.fake.soundremote.data
 
-import com.fake.soundremote.getKeystroke
+import com.fake.soundremote.getHotkey
 import com.fake.soundremote.util.ModKey
 import com.fake.soundremote.util.Mods
 import com.fake.soundremote.util.isModActive
@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
-@DisplayName("Keystroke")
-internal class KeystrokeTest {
+@DisplayName("Hotkey")
+internal class HotkeyTest {
 
     @DisplayName("Mods")
     @Nested
@@ -21,9 +21,9 @@ internal class KeystrokeTest {
         @ParameterizedTest
         @EnumSource(ModKey::class)
         fun isModActive_NoMods_ReturnsFalse(mod: ModKey) {
-            val keystroke = getKeystroke(mods = Mods())
+            val hotkey = getHotkey(mods = Mods())
 
-            val modActive = keystroke.isModActive(mod)
+            val modActive = hotkey.isModActive(mod)
 
             assertFalse(modActive)
         }
@@ -32,9 +32,9 @@ internal class KeystrokeTest {
         @ParameterizedTest
         @EnumSource(ModKey::class)
         fun isModActive_WithMods_ReturnsTrue(mod: ModKey) {
-            val keystroke = getKeystroke(mods = Mods(mod.bitField))
+            val hotkey = getHotkey(mods = Mods(mod.bitField))
 
-            val modActive = keystroke.isModActive(mod)
+            val modActive = hotkey.isModActive(mod)
 
             assertTrue(modActive)
         }
@@ -43,9 +43,9 @@ internal class KeystrokeTest {
         @Test
         fun modsBitfield_NoMods_ReturnsCorrectValue() {
             val expected = Mods()
-            val keystroke = getKeystroke(mods = Mods())
+            val hotkey = getHotkey(mods = Mods())
 
-            val actual = keystroke.mods
+            val actual = hotkey.mods
 
             assertEquals(expected, actual)
         }
@@ -55,9 +55,9 @@ internal class KeystrokeTest {
         @EnumSource(ModKey::class)
         fun modsBitfield_WithMod_ReturnsCorrectValue(mod: ModKey) {
             val expected = Mods(mod.bitField)
-            val keystroke = getKeystroke(mods = Mods(mod.bitField))
+            val hotkey = getHotkey(mods = Mods(mod.bitField))
 
-            val actual = keystroke.mods
+            val actual = hotkey.mods
 
             assertEquals(expected, actual)
         }

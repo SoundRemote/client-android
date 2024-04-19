@@ -1,4 +1,4 @@
-package com.fake.soundremote.ui.keystrokelist
+package com.fake.soundremote.ui.hotkeylist
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
@@ -14,135 +14,135 @@ import androidx.compose.ui.test.performClick
 import com.fake.soundremote.R
 import com.fake.soundremote.stringResource
 import com.fake.soundremote.ui.theme.SoundRemoteTheme
-import com.fake.soundremote.util.KeystrokeDescription
+import com.fake.soundremote.util.HotkeyDescription
 import com.fake.soundremote.util.TestTag
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-internal class KeystrokeListScreenTest {
+internal class HotkeyListScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val navigateUp by composeTestRule.stringResource(R.string.navigate_up)
-    private val keystrokeActionsMenu by composeTestRule.stringResource(R.string.keystroke_actions_menu_description)
+    private val hotkeyActionsMenu by composeTestRule.stringResource(R.string.hotkey_actions_menu_description)
     private val actionEdit by composeTestRule.stringResource(R.string.edit)
     private val actionDelete by composeTestRule.stringResource(R.string.delete)
-    private val deleteConfirmationTemplate by composeTestRule.stringResource(R.string.keystroke_delete_confirmation)
+    private val deleteConfirmationTemplate by composeTestRule.stringResource(R.string.hotkey_delete_confirmation)
 
-    // Keystroke list screen should contain navigate up arrow
+    // Hotkey list screen should contain navigate up arrow
     @Test
     fun navigateUp_exist() {
         composeTestRule.setContent {
-            CreateKeystrokeListScreen()
+            CreateHotkeyListScreen()
         }
 
         composeTestRule.onNodeWithContentDescription(navigateUp).assertIsDisplayed()
     }
 
-    // Keystroke name and description are displayed
+    // Hotkey name and description are displayed
     @Test
-    fun keystroke_isDisplayed() {
+    fun hotkey_isDisplayed() {
         val name = "Test name"
         val desc = "Test description"
-        val keystrokeState = KeystrokeUIState(1, name, KeystrokeDescription.WithString(desc), false)
+        val hotkeyState = HotkeyUIState(1, name, HotkeyDescription.WithString(desc), false)
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(state = KeystrokeListUIState(listOf(keystrokeState)))
+            CreateHotkeyListScreen(state = HotkeyListUIState(listOf(hotkeyState)))
         }
 
         composeTestRule.onNodeWithText(name).assertIsDisplayed()
         composeTestRule.onNodeWithText(desc).assertIsDisplayed()
     }
 
-    // Keystroke favoured status switch is displayed
+    // Hotkey favoured status switch is displayed
     @Test
     fun favouredSwitch_isDisplayed() {
         val name = "Test name"
-        val desc = KeystrokeDescription.WithString("Test description")
-        val keystrokeState = KeystrokeUIState(1, name, desc, true)
+        val desc = HotkeyDescription.WithString("Test description")
+        val hotkeyState = HotkeyUIState(1, name, desc, true)
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(state = KeystrokeListUIState(listOf(keystrokeState)))
+            CreateHotkeyListScreen(state = HotkeyListUIState(listOf(hotkeyState)))
         }
 
         composeTestRule.onNodeWithTag(TestTag.FAVOURITE_SWITCH).assertIsDisplayed()
     }
 
-    // Keystroke favoured status switch is on for favoured keystroke
+    // Hotkey favoured status switch is on for a favoured hotkey
     @Test
-    fun favouredSwitch_keystrokeIsFavoured_isOn() {
+    fun favouredSwitch_hotkeyIsFavoured_isOn() {
         val name = "Test name"
-        val desc = KeystrokeDescription.WithString("Test description")
-        val keystrokeState = KeystrokeUIState(1, name, desc, true)
+        val desc = HotkeyDescription.WithString("Test description")
+        val hotkeyState = HotkeyUIState(1, name, desc, true)
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(state = KeystrokeListUIState(listOf(keystrokeState)))
+            CreateHotkeyListScreen(state = HotkeyListUIState(listOf(hotkeyState)))
         }
 
         composeTestRule.onNodeWithTag(TestTag.FAVOURITE_SWITCH).assertIsOn()
     }
 
-    // Keystroke favoured status switch is off for unfavoured keystroke
+    // Hotkey favoured status switch is off for an unfavoured hotkey
     @Test
-    fun favouredSwitch_keystrokeIsNotFavoured_isOff() {
+    fun favouredSwitch_hotkeyIsNotFavoured_isOff() {
         val name = "Test name"
-        val desc = KeystrokeDescription.WithString("Test description")
-        val keystrokeState = KeystrokeUIState(1, name, desc, false)
+        val desc = HotkeyDescription.WithString("Test description")
+        val hotkeyState = HotkeyUIState(1, name, desc, false)
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(state = KeystrokeListUIState(listOf(keystrokeState)))
+            CreateHotkeyListScreen(state = HotkeyListUIState(listOf(hotkeyState)))
         }
 
         composeTestRule.onNodeWithTag(TestTag.FAVOURITE_SWITCH).assertIsOff()
     }
 
-    // Keystroke actions menu is displayed on actions menu button click
+    // Hotkey actions menu is displayed on actions menu button click
     @Test
-    fun keystrokeActionsButton_onClick_displaysMenu() {
-        val desc = KeystrokeDescription.WithString("Desc")
-        val keystrokeState = KeystrokeUIState(1, "Name", desc, false)
+    fun hotkeyActionsButton_onClick_displaysMenu() {
+        val desc = HotkeyDescription.WithString("Desc")
+        val hotkeyState = HotkeyUIState(1, "Name", desc, false)
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(state = KeystrokeListUIState(listOf(keystrokeState)))
+            CreateHotkeyListScreen(state = HotkeyListUIState(listOf(hotkeyState)))
         }
 
         composeTestRule.apply {
-            onNodeWithContentDescription(keystrokeActionsMenu).performClick()
+            onNodeWithContentDescription(hotkeyActionsMenu).performClick()
             onNodeWithText(actionEdit).assertIsDisplayed()
             onNodeWithText(actionDelete).assertIsDisplayed()
         }
     }
 
-    // Keystroke edit action calls "onEdit" with correct id
+    // Hotkey edit action calls "onEdit" with correct id
     @Test
-    fun keystrokeActionEdit_onClick_callsEdit() {
+    fun hotkeyActionEdit_onClick_callsEdit() {
         val id = 42
-        val desc = KeystrokeDescription.WithString("Desc")
-        val keystrokeState = KeystrokeUIState(id, "Name", desc, false)
+        val desc = HotkeyDescription.WithString("Desc")
+        val hotkeyState = HotkeyUIState(id, "Name", desc, false)
         var actualId = -1
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(
-                state = KeystrokeListUIState(listOf(keystrokeState)),
+            CreateHotkeyListScreen(
+                state = HotkeyListUIState(listOf(hotkeyState)),
                 onEdit = { actualId = id },
             )
         }
 
-        composeTestRule.onNodeWithContentDescription(keystrokeActionsMenu).performClick()
+        composeTestRule.onNodeWithContentDescription(hotkeyActionsMenu).performClick()
         composeTestRule.onNodeWithText(actionEdit).performClick()
 
         assertEquals(id, actualId)
     }
 
-    // Keystroke delete action shows confirmation dialog
+    // Hotkey delete action shows confirmation dialog
     @Test
-    fun keystrokeActionDelete_onClick_showsConfirmationDialog() {
+    fun hotkeyActionDelete_onClick_showsConfirmationDialog() {
         val name = "Test name"
-        val desc = KeystrokeDescription.WithString("Desc")
-        val keystrokeState = KeystrokeUIState(1, name, desc, false)
+        val desc = HotkeyDescription.WithString("Desc")
+        val hotkeyState = HotkeyUIState(1, name, desc, false)
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(
-                state = KeystrokeListUIState(listOf(keystrokeState)),
+            CreateHotkeyListScreen(
+                state = HotkeyListUIState(listOf(hotkeyState)),
             )
         }
 
         composeTestRule.apply {
-            onNodeWithContentDescription(keystrokeActionsMenu).performClick()
+            onNodeWithContentDescription(hotkeyActionsMenu).performClick()
             onNodeWithText(actionDelete).performClick()
 
             val confirmationText = deleteConfirmationTemplate.format(name)
@@ -154,18 +154,18 @@ internal class KeystrokeListScreenTest {
     @Test
     fun deleteConfirmationDialog_onClickDelete_callsDelete() {
         val id = 42
-        val desc = KeystrokeDescription.WithString("Desc")
-        val keystrokeState = KeystrokeUIState(id, "Test name", desc, false)
+        val desc = HotkeyDescription.WithString("Desc")
+        val hotkeyState = HotkeyUIState(id, "Test name", desc, false)
         var actualId = -1
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(
-                state = KeystrokeListUIState(listOf(keystrokeState)),
+            CreateHotkeyListScreen(
+                state = HotkeyListUIState(listOf(hotkeyState)),
                 onDelete = { actualId = id },
             )
         }
 
         composeTestRule.apply {
-            onNodeWithContentDescription(keystrokeActionsMenu).performClick()
+            onNodeWithContentDescription(hotkeyActionsMenu).performClick()
             // Menu - Delete
             onNodeWithText(actionDelete).performClick()
             // Confirmation dialog - Delete button
@@ -175,17 +175,17 @@ internal class KeystrokeListScreenTest {
         assertEquals(id, actualId)
     }
 
-    // Click on keystroke calls "onEdit" function with correct id
+    // Click on Hotkey calls "onEdit" function with correct id
     @Test
-    fun keystroke_onClick_callsEdit() {
+    fun hotkey_onClick_callsEdit() {
         val id = 42
         val name = "Test name"
-        val desc = KeystrokeDescription.WithString("Desc")
-        val keystrokeState = KeystrokeUIState(id, name, desc, false)
+        val desc = HotkeyDescription.WithString("Desc")
+        val hotkeyState = HotkeyUIState(id, name, desc, false)
         var actualId = -1
         composeTestRule.setContent {
-            CreateKeystrokeListScreen(
-                state = KeystrokeListUIState(listOf(keystrokeState)),
+            CreateHotkeyListScreen(
+                state = HotkeyListUIState(listOf(hotkeyState)),
                 onEdit = { actualId = id },
             )
         }
@@ -197,9 +197,9 @@ internal class KeystrokeListScreenTest {
 
     @Suppress("TestFunctionName")
     @Composable
-    private fun CreateKeystrokeListScreen(
+    private fun CreateHotkeyListScreen(
         modifier: Modifier = Modifier,
-        state: KeystrokeListUIState = KeystrokeListUIState(),
+        state: HotkeyListUIState = HotkeyListUIState(),
         onCreate: () -> Unit = {},
         onEdit: (id: Int) -> Unit = {},
         onDelete: (id: Int) -> Unit = {},
@@ -208,10 +208,10 @@ internal class KeystrokeListScreenTest {
         onNavigateUp: () -> Unit = {},
     ) {
         SoundRemoteTheme {
-            KeystrokeListScreen(
+            HotkeyListScreen(
                 state,
-                onNavigateToKeystrokeCreate = onCreate,
-                onNavigateToKeystrokeEdit = onEdit,
+                onNavigateToHotkeyCreate = onCreate,
+                onNavigateToHotkeyEdit = onEdit,
                 onDelete = onDelete,
                 onChangeFavoured = onChangeFavoured,
                 onMove = onMove,

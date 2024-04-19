@@ -11,7 +11,7 @@ import org.junit.runner.RunWith
 
 @RunWith(Enclosed::class)
 class KeysTest {
-    class KeystrokeDescription {
+    class HotkeyDescription {
         private val context = ApplicationProvider.getApplicationContext<Context>()
         private val key = Key.BACK
         private val desc = generateDescription(

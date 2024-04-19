@@ -1,4 +1,4 @@
-package com.fake.soundremote.ui.keystrokelist
+package com.fake.soundremote.ui.hotkeylist
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,40 +11,40 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 
-private const val KEYSTROKE_LIST_ROUTE = "keystroke_list"
+private const val HOTKEY_LIST_ROUTE = "hotkey_list"
 
-fun NavController.navigateToKeystrokeList() {
-    navigate(KEYSTROKE_LIST_ROUTE)
+fun NavController.navigateToHotkeyList() {
+    navigate(HOTKEY_LIST_ROUTE)
 }
 
-fun NavGraphBuilder.keystrokeListScreen(
-    onNavigateToKeystrokeCreate: () -> Unit,
-    onNavigateToKeystrokeEdit: (keystrokeId: Int) -> Unit,
+fun NavGraphBuilder.hotkeyListScreen(
+    onNavigateToHotkeyCreate: () -> Unit,
+    onNavigateToHotkeyEdit: (hotkeyId: Int) -> Unit,
     onNavigateUp: () -> Unit,
     setFab: ((@Composable () -> Unit)?) -> Unit,
 ) {
-    composable(KEYSTROKE_LIST_ROUTE) {
-        val viewModel: KeystrokeListViewModel = hiltViewModel()
-        val state by viewModel.keystrokeListState.collectAsStateWithLifecycle()
+    composable(HOTKEY_LIST_ROUTE) {
+        val viewModel: HotkeyListViewModel = hiltViewModel()
+        val state by viewModel.hotkeyListState.collectAsStateWithLifecycle()
         val lifecycleOwner = LocalLifecycleOwner.current
-        KeystrokeListScreen(
+        HotkeyListScreen(
             state = state,
-            onNavigateToKeystrokeCreate = {
+            onNavigateToHotkeyCreate = {
                 if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-                    onNavigateToKeystrokeCreate()
+                    onNavigateToHotkeyCreate()
                 }
             },
-            onNavigateToKeystrokeEdit = { keystrokeId ->
+            onNavigateToHotkeyEdit = { hotkeyId ->
                 if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-                    onNavigateToKeystrokeEdit(keystrokeId)
+                    onNavigateToHotkeyEdit(hotkeyId)
                 }
             },
-            onDelete = { viewModel.deleteKeystroke(it) },
-            onChangeFavoured = { keystrokeId, favoured ->
-                viewModel.changeFavoured(keystrokeId, favoured)
+            onDelete = { viewModel.deleteHotkey(it) },
+            onChangeFavoured = { hotkeyId, favoured ->
+                viewModel.changeFavoured(hotkeyId, favoured)
             },
             onMove = { fromIndex: Int, toIndex: Int ->
-                viewModel.moveKeystroke(fromIndex, toIndex)
+                viewModel.moveHotkey(fromIndex, toIndex)
             },
             onNavigateUp = onNavigateUp,
         )

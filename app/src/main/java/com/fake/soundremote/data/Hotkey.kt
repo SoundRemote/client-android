@@ -9,8 +9,8 @@ import com.fake.soundremote.util.KeyCode
 import com.fake.soundremote.util.Mods
 import com.fake.soundremote.util.generateDescription
 
-@Entity(tableName = Keystroke.TABLE_NAME)
-data class Keystroke(
+@Entity(tableName = Hotkey.TABLE_NAME)
+data class Hotkey(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = COLUMN_ID)
     var id: Int = 0,
@@ -22,18 +22,18 @@ data class Keystroke(
     var name: String,
     @ColumnInfo(name = COLUMN_FAVOURED)
     var isFavoured: Boolean,
-    // Keystrokes are ordered by this number descending, so new items with order value of 0 will
+    // Hotkeys are ordered by this number descending, so new items with order value of 0 will
     // appear below.
     @ColumnInfo(name = COLUMN_ORDER, defaultValue = "$ORDER_DEFAULT_VALUE")
     var order: Int,
 ) {
     /**
-     * Creates Keystroke
+     * Creates [Hotkey]
      *
-     * @param keyCode  key's windows Virtual-Key code
-     * @param name     text description of the keystroke
-     * @param mods     mods bitfield
-     * @param favoured show the keystroke in the main app screen
+     * @param keyCode  Windows Virtual-Key code of the main key
+     * @param name     text description
+     * @param mods     modifier keys
+     * @param favoured should the hotkey be visible on the home screen
      */
     @Ignore
     constructor(keyCode: KeyCode, name: String, mods: Mods? = null, favoured: Boolean = true) :
@@ -53,7 +53,7 @@ data class Keystroke(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        other as Keystroke
+        other as Hotkey
         if (id != other.id) return false
         if (keyCode != other.keyCode) return false
         if (mods != other.mods) return false
@@ -83,20 +83,20 @@ data class Keystroke(
     }
 }
 
-data class KeystrokeInfo(
-    @ColumnInfo(name = Keystroke.COLUMN_ID)
+data class HotkeyInfo(
+    @ColumnInfo(name = Hotkey.COLUMN_ID)
     var id: Int,
-    @ColumnInfo(name = Keystroke.COLUMN_KEY_CODE)
+    @ColumnInfo(name = Hotkey.COLUMN_KEY_CODE)
     var keyCode: KeyCode,
-    @ColumnInfo(name = Keystroke.COLUMN_MODS)
+    @ColumnInfo(name = Hotkey.COLUMN_MODS)
     var mods: Mods,
-    @ColumnInfo(name = Keystroke.COLUMN_NAME)
+    @ColumnInfo(name = Hotkey.COLUMN_NAME)
     var name: String,
 )
 
-data class KeystrokeOrder(
-    @ColumnInfo(name = Keystroke.COLUMN_ID)
+data class HotkeyOrder(
+    @ColumnInfo(name = Hotkey.COLUMN_ID)
     var id: Int,
-    @ColumnInfo(name = Keystroke.COLUMN_ORDER)
+    @ColumnInfo(name = Hotkey.COLUMN_ORDER)
     var order: Int,
 )

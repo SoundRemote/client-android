@@ -1,4 +1,4 @@
-package com.fake.soundremote.ui.keystroke
+package com.fake.soundremote.ui.hotkey
 
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
@@ -14,27 +14,27 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.fake.soundremote.util.ModKey
 
-const val KEYSTROKE_ID_ARG = "keystrokeId"
-private const val KEYSTROKE_CREATE_ROUTE = "keystroke_create"
-private const val KEYSTROKE_EDIT_PREFIX = "keystroke_edit/"
-private const val KEYSTROKE_EDIT_ROUTE = "$KEYSTROKE_EDIT_PREFIX{$KEYSTROKE_ID_ARG}"
+const val HOTKEY_ID_ARG = "hotkeyId"
+private const val HOTKEY_CREATE_ROUTE = "hotkey_create"
+private const val HOTKEY_EDIT_PREFIX = "hotkey_edit/"
+private const val HOTKEY_EDIT_ROUTE = "$HOTKEY_EDIT_PREFIX{$HOTKEY_ID_ARG}"
 
-fun NavController.navigateToKeystrokeCreate() {
-    navigate(KEYSTROKE_CREATE_ROUTE)
+fun NavController.navigateToHotkeyCreate() {
+    navigate(HOTKEY_CREATE_ROUTE)
 }
 
-fun NavController.navigateToKeystrokeEdit(keystrokeId: Int) {
-    navigate("$KEYSTROKE_EDIT_PREFIX$keystrokeId")
+fun NavController.navigateToHotkeyEdit(hotkeyId: Int) {
+    navigate("$HOTKEY_EDIT_PREFIX$hotkeyId")
 }
 
-fun NavGraphBuilder.keystrokeCreateScreen(
+fun NavGraphBuilder.hotkeyCreateScreen(
     onNavigateUp: () -> Unit,
     showSnackbar: (String, SnackbarDuration) -> Unit,
     setFab: ((@Composable () -> Unit)?) -> Unit,
     compactHeight: Boolean,
 ) {
-    composable(KEYSTROKE_CREATE_ROUTE) {
-        KeystrokeScreenRoute(
+    composable(HOTKEY_CREATE_ROUTE) {
+        HotkeyScreenRoute(
             onNavigateUp = onNavigateUp,
             showSnackbar = showSnackbar,
             compactHeight = compactHeight
@@ -45,22 +45,22 @@ fun NavGraphBuilder.keystrokeCreateScreen(
     }
 }
 
-internal class KeystrokeEditArgs(val keystrokeId: Int?) {
+internal class HotkeyEditArgs(val hotkeyId: Int?) {
     constructor(savedStateHandle: SavedStateHandle) :
-            this(savedStateHandle.get<Int?>(KEYSTROKE_ID_ARG))
+            this(savedStateHandle.get<Int?>(HOTKEY_ID_ARG))
 }
 
-fun NavGraphBuilder.keystrokeEditScreen(
+fun NavGraphBuilder.hotkeyEditScreen(
     onNavigateUp: () -> Unit,
     showSnackbar: (String, SnackbarDuration) -> Unit,
     setFab: ((@Composable () -> Unit)?) -> Unit,
     compactHeight: Boolean,
 ) {
     composable(
-        route = KEYSTROKE_EDIT_ROUTE,
-        arguments = listOf(navArgument(KEYSTROKE_ID_ARG) { type = NavType.IntType }),
+        route = HOTKEY_EDIT_ROUTE,
+        arguments = listOf(navArgument(HOTKEY_ID_ARG) { type = NavType.IntType }),
     ) {
-        KeystrokeScreenRoute(
+        HotkeyScreenRoute(
             onNavigateUp = onNavigateUp,
             showSnackbar = showSnackbar,
             compactHeight = compactHeight
@@ -72,14 +72,14 @@ fun NavGraphBuilder.keystrokeEditScreen(
 }
 
 @Composable
-private fun KeystrokeScreenRoute(
+private fun HotkeyScreenRoute(
     onNavigateUp: () -> Unit,
     showSnackbar: (String, SnackbarDuration) -> Unit,
     compactHeight: Boolean,
 ) {
-    val viewModel: KeystrokeViewModel = hiltViewModel()
-    val state by viewModel.keystrokeScreenState.collectAsStateWithLifecycle()
-    KeystrokeScreen(
+    val viewModel: HotkeyViewModel = hiltViewModel()
+    val state by viewModel.hotkeyScreenState.collectAsStateWithLifecycle()
+    HotkeyScreen(
         state = state,
         onKeyCodeChange = { viewModel.updateKeyCode(it) },
         onWinChange = { viewModel.updateMod(ModKey.WIN, it) },
@@ -88,7 +88,7 @@ private fun KeystrokeScreenRoute(
         onAltChange = { viewModel.updateMod(ModKey.ALT, it) },
         onNameChange = { viewModel.updateName(it) },
         checkCanSave = viewModel::canSave,
-        onSave = viewModel::saveKeystroke,
+        onSave = viewModel::saveHotkey,
         onClose = onNavigateUp,
         showSnackbar = showSnackbar,
         compactHeight = compactHeight,

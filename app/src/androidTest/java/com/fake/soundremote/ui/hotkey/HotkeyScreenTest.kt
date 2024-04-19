@@ -1,4 +1,4 @@
-package com.fake.soundremote.ui.keystroke
+package com.fake.soundremote.ui.hotkey
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.SnackbarDuration
@@ -24,20 +24,20 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
-internal class KeystrokeScreenTest {
+internal class HotkeyScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val navigateUp by composeTestRule.stringResource(R.string.navigate_up)
-    private val name by composeTestRule.stringResource(R.string.keystroke_name_edit_label)
-    private val keyEdit by composeTestRule.stringResource(R.string.keystroke_key_edit_label)
+    private val name by composeTestRule.stringResource(R.string.hotkey_name_edit_label)
+    private val keyEdit by composeTestRule.stringResource(R.string.hotkey_key_edit_label)
     private val keyF12 by composeTestRule.stringResource(Key.F12.labelId)
 
-    // Keystroke screen should contain navigate up arrow
+    // Hotkey screen should contain navigate up arrow
     @Test
     fun navigateUp_exist() {
         composeTestRule.setContent {
-            CreateKeystrokeScreen()
+            CreateHotkeyScreen()
         }
 
         composeTestRule.onNodeWithContentDescription(navigateUp).assertIsDisplayed()
@@ -50,8 +50,8 @@ internal class KeystrokeScreenTest {
         val expected = !initial
         var actual: Boolean? = null
         composeTestRule.setContent {
-            CreateKeystrokeScreen(
-                state = KeystrokeScreenUIState(win = initial),
+            CreateHotkeyScreen(
+                state = HotkeyScreenUIState(win = initial),
                 onWinChange = { actual = it },
             )
         }
@@ -67,8 +67,8 @@ internal class KeystrokeScreenTest {
         val expected = !initial
         var actual: Boolean? = null
         composeTestRule.setContent {
-            CreateKeystrokeScreen(
-                state = KeystrokeScreenUIState(ctrl = initial),
+            CreateHotkeyScreen(
+                state = HotkeyScreenUIState(ctrl = initial),
                 onCtrlChange = { actual = it },
             )
         }
@@ -84,8 +84,8 @@ internal class KeystrokeScreenTest {
         val expected = !initial
         var actual: Boolean? = null
         composeTestRule.setContent {
-            CreateKeystrokeScreen(
-                state = KeystrokeScreenUIState(shift = initial),
+            CreateHotkeyScreen(
+                state = HotkeyScreenUIState(shift = initial),
                 onShiftChange = { actual = it },
             )
         }
@@ -101,8 +101,8 @@ internal class KeystrokeScreenTest {
         val expected = !initial
         var actual: Boolean? = null
         composeTestRule.setContent {
-            CreateKeystrokeScreen(
-                state = KeystrokeScreenUIState(alt = initial),
+            CreateHotkeyScreen(
+                state = HotkeyScreenUIState(alt = initial),
                 onAltChange = { actual = it },
             )
         }
@@ -117,8 +117,8 @@ internal class KeystrokeScreenTest {
         val expected = "Key Name"
         var actual = ""
         composeTestRule.setContent {
-            CreateKeystrokeScreen(
-                state = KeystrokeScreenUIState(),
+            CreateHotkeyScreen(
+                state = HotkeyScreenUIState(),
                 onNameChange = { actual = it },
             )
         }
@@ -132,7 +132,7 @@ internal class KeystrokeScreenTest {
     @Test
     fun keyGroupTabs_exist() {
         composeTestRule.setContent {
-            CreateKeystrokeScreen()
+            CreateHotkeyScreen()
         }
 
         for (keyGroup in KeyGroup.entries) {
@@ -148,8 +148,8 @@ internal class KeystrokeScreenTest {
         val expected = c.toKeyCode()
         var actual: KeyCode? = null
         composeTestRule.setContent {
-            CreateKeystrokeScreen(
-                state = KeystrokeScreenUIState(keyGroupIndex = KeyGroup.LETTER_DIGIT.index),
+            CreateHotkeyScreen(
+                state = HotkeyScreenUIState(keyGroupIndex = KeyGroup.LETTER_DIGIT.index),
                 onKeyCodeChange = { actual = it },
             )
         }
@@ -167,8 +167,8 @@ internal class KeystrokeScreenTest {
     fun keyEdit_invalidKeyInput_doesNotChangeKeyCode() {
         var actual: KeyCode? = null
         composeTestRule.setContent {
-            CreateKeystrokeScreen(
-                state = KeystrokeScreenUIState(keyGroupIndex = KeyGroup.LETTER_DIGIT.index),
+            CreateHotkeyScreen(
+                state = HotkeyScreenUIState(keyGroupIndex = KeyGroup.LETTER_DIGIT.index),
                 onKeyCodeChange = { actual = it },
             )
         }
@@ -187,8 +187,8 @@ internal class KeystrokeScreenTest {
         val expected = Key.F12.keyCode
         var actual: KeyCode? = null
         composeTestRule.setContent {
-            CreateKeystrokeScreen(
-                state = KeystrokeScreenUIState(keyGroupIndex = KeyGroup.FUNCTION.index),
+            CreateHotkeyScreen(
+                state = HotkeyScreenUIState(keyGroupIndex = KeyGroup.FUNCTION.index),
                 onKeyCodeChange = { actual = it },
             )
         }
@@ -204,9 +204,9 @@ internal class KeystrokeScreenTest {
 
     @Suppress("TestFunctionName")
     @Composable
-    private fun CreateKeystrokeScreen(
+    private fun CreateHotkeyScreen(
         modifier: Modifier = Modifier,
-        state: KeystrokeScreenUIState = KeystrokeScreenUIState(),
+        state: HotkeyScreenUIState = HotkeyScreenUIState(),
         onKeyCodeChange: (KeyCode?) -> Unit = {},
         onWinChange: (Boolean) -> Unit = {},
         onCtrlChange: (Boolean) -> Unit = {},
@@ -220,7 +220,7 @@ internal class KeystrokeScreenTest {
         compactHeight: Boolean = false,
     ) {
         SoundRemoteTheme {
-            KeystrokeScreen(
+            HotkeyScreen(
                 state,
                 onKeyCodeChange,
                 onWinChange,

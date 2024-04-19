@@ -7,11 +7,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.fake.soundremote.data.ActionData
 import com.fake.soundremote.data.ActionType
 import com.fake.soundremote.data.EventAction
-import com.fake.soundremote.data.Keystroke
+import com.fake.soundremote.data.Hotkey
 
 @Database(
     entities = [
-        Keystroke::class,
+        Hotkey::class,
         EventAction::class
     ],
     version = 3,
@@ -22,7 +22,7 @@ import com.fake.soundremote.data.Keystroke
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun keystrokeDao(): KeystrokeDao
+    abstract fun hotkeyDao(): HotkeyDao
     abstract fun eventActionDao(): EventActionDao
 
     class Callback : RoomDatabase.Callback() {
@@ -36,10 +36,10 @@ abstract class AppDatabase : RoomDatabase() {
 // When a hotkey is deleted also delete all the event actions with that hotkey
 val CREATE_TRIGGER_DELETE_EVENT_ACTION_ON_HOTKEY_DELETE = """
     CREATE TRIGGER IF NOT EXISTS delete_event_action_on_hotkey_delete
-    AFTER DELETE ON ${Keystroke.TABLE_NAME}
+    AFTER DELETE ON ${Hotkey.TABLE_NAME}
     BEGIN
         DELETE FROM ${EventAction.TABLE_NAME}
-        WHERE ${ActionData.COLUMN_TYPE} = ${ActionType.KEYSTROKE.id}
-        AND ${ActionData.COLUMN_ID} = OLD.${Keystroke.COLUMN_ID};
+        WHERE ${ActionData.COLUMN_TYPE} = ${ActionType.HOTKEY.id}
+        AND ${ActionData.COLUMN_ID} = OLD.${Hotkey.COLUMN_ID};
     END
     """.trimIndent()

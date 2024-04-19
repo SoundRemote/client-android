@@ -11,7 +11,7 @@ import com.fake.soundremote.data.AppAction
 import com.fake.soundremote.data.Event
 import com.fake.soundremote.data.EventAction
 import com.fake.soundremote.data.EventActionRepository
-import com.fake.soundremote.data.KeystrokeRepository
+import com.fake.soundremote.data.HotkeyRepository
 import com.fake.soundremote.util.AppPermission
 import com.fake.soundremote.util.TextValue
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,7 +45,7 @@ internal data class EventsUIState(
 @HiltViewModel
 internal class EventsViewModel @Inject constructor(
     private val eventActionRepository: EventActionRepository,
-    private val keystrokeRepository: KeystrokeRepository,
+    private val hotkeyRepository: HotkeyRepository,
 ) : ViewModel() {
     val uiState: StateFlow<EventsUIState> = combine(
         flowOf(Event.entries.toTypedArray()),
@@ -61,8 +61,8 @@ internal class EventsViewModel @Inject constructor(
                         TextValue.TextResource(AppAction.getById(action.actionId).nameStringId)
                     }
 
-                    ActionType.KEYSTROKE -> {
-                        TextValue.TextString(keystrokeRepository.getById(action.actionId)!!.name)
+                    ActionType.HOTKEY -> {
+                        TextValue.TextString(hotkeyRepository.getById(action.actionId)!!.name)
                     }
                 }
                 ActionUIState(type, action.actionId, name)

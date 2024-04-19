@@ -8,8 +8,8 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.fake.soundremote.R
-import com.fake.soundremote.data.Keystroke
-import com.fake.soundremote.data.KeystrokeInfo
+import com.fake.soundremote.data.Hotkey
+import com.fake.soundremote.data.HotkeyInfo
 
 /**
  * If this Char is a digit or an english alphabet letter, returns the corresponding virtual-key code.
@@ -25,9 +25,9 @@ fun Char.toKeyCode(): KeyCode? {
     } else null
 }
 
-sealed interface KeystrokeDescription {
-    data class WithString(val text: String) : KeystrokeDescription
-    data class WithLabelId(val mods: String, @StringRes val labelId: Int) : KeystrokeDescription
+sealed interface HotkeyDescription {
+    data class WithString(val text: String) : HotkeyDescription
+    data class WithLabelId(val mods: String, @StringRes val labelId: Int) : HotkeyDescription
 
     @Composable
     fun asString(): String =
@@ -40,31 +40,31 @@ sealed interface KeystrokeDescription {
 }
 
 /**
- * Generates a [KeystrokeDescription] for the [Keystroke]
+ * Generates a [HotkeyDescription] for the [Hotkey]
  *
- * @param keystroke the source [Keystroke]
+ * @param hotkey the source [Hotkey]
  * @return description
  */
-fun generateDescription(keystroke: Keystroke): KeystrokeDescription =
-    generateDescription(keystroke.keyCode, keystroke.mods)
+fun generateDescription(hotkey: Hotkey): HotkeyDescription =
+    generateDescription(hotkey.keyCode, hotkey.mods)
 
-fun generateDescription(keystroke: KeystrokeInfo): KeystrokeDescription =
-    generateDescription(keystroke.keyCode, keystroke.mods)
+fun generateDescription(hotkey: HotkeyInfo): HotkeyDescription =
+    generateDescription(hotkey.keyCode, hotkey.mods)
 
 /**
- * Generates a [KeystrokeDescription] for the keystroke
+ * Generates a [HotkeyDescription]
  *
  * @param keyCode main key virtual-key code
- * @param mods mods bitfield
+ * @param mods mods
  * @return description
  */
-fun generateDescription(keyCode: KeyCode, mods: Mods): KeystrokeDescription {
+fun generateDescription(keyCode: KeyCode, mods: Mods): HotkeyDescription {
     keyCode.toLetterOrDigitString()?.let {
         val desc = generateDescription(it, mods)
-        return KeystrokeDescription.WithString(desc)
+        return HotkeyDescription.WithString(desc)
     }
     val modsPrefix = mods.toPrefixString()
-    return KeystrokeDescription.WithLabelId(modsPrefix, keyCode.keyLabelId()!!)
+    return HotkeyDescription.WithLabelId(modsPrefix, keyCode.keyLabelId()!!)
 }
 
 fun generateDescription(keyLabel: String, mods: Mods): String =
@@ -212,12 +212,12 @@ enum class ModKey(val bitField: Int, val label: String) {
 }
 
 /**
- * Checks this keystroke for the specific mod key
+ * Checks this [Hotkey] for the specific mod key
  *
  * @param mod [ModKey] to check
- * @return true if this keystroke has the specified mod key active
+ * @return true if this [Hotkey] has the specified mod key active
  */
-fun Keystroke.isModActive(mod: ModKey): Boolean {
+fun Hotkey.isModActive(mod: ModKey): Boolean {
     return mods.isModActive(mod)
 }
 

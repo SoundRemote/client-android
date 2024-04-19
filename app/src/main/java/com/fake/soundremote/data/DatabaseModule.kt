@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room.databaseBuilder
 import com.fake.soundremote.data.room.AppDatabase
 import com.fake.soundremote.data.room.EventActionDao
-import com.fake.soundremote.data.room.KeystrokeDao
+import com.fake.soundremote.data.room.HotkeyDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,8 +26,8 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideKeystrokeDao(database: AppDatabase): KeystrokeDao {
-        return database.keystrokeDao()
+    fun provideHotkeyDao(database: AppDatabase): HotkeyDao {
+        return database.hotkeyDao()
     }
 
     @Provides

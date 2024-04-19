@@ -7,12 +7,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fake.soundremote.R
-import com.fake.soundremote.data.KeystrokeRepository
+import com.fake.soundremote.data.HotkeyRepository
 import com.fake.soundremote.data.preferences.PreferencesRepository
 import com.fake.soundremote.service.ServiceManager
 import com.fake.soundremote.util.ConnectionStatus
 import com.fake.soundremote.util.Key
-import com.fake.soundremote.util.KeystrokeDescription
+import com.fake.soundremote.util.HotkeyDescription
 import com.fake.soundremote.util.generateDescription
 import com.google.common.net.InetAddresses
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,43 +24,43 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeUIState(
-    val keystrokes: List<HomeKeystrokeUIState> = emptyList(),
+    val hotkeys: List<HomeHotkeyUIState> = emptyList(),
     val serverAddress: String = "",
     val recentServersAddresses: List<String> = emptyList(),
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
     val isMuted: Boolean = false,
 )
 
-data class HomeKeystrokeUIState(
+data class HomeHotkeyUIState(
     val id: Int,
     val name: String,
-    val description: KeystrokeDescription,
+    val description: HotkeyDescription,
 )
 
 @HiltViewModel
 internal class HomeViewModel @Inject constructor(
     private val userPreferencesRepo: PreferencesRepository,
-    private val keystrokeRepository: KeystrokeRepository,
+    private val hotkeyRepository: HotkeyRepository,
     private val serviceManager: ServiceManager,
 ) : ViewModel() {
 
     val homeUIState: StateFlow<HomeUIState> = combine(
-        keystrokeRepository.getFavouredOrdered(true),
+        hotkeyRepository.getFavouredOrdered(true),
         userPreferencesRepo.serverAddressesFlow,
         serviceManager.serviceState,
-    ) { keystrokes, addresses, serviceState ->
-        val keystrokeStates = keystrokes.map { keystroke ->
-            HomeKeystrokeUIState(
-                id = keystroke.id,
-                name = keystroke.name,
+    ) { hotkeys, addresses, serviceState ->
+        val hotkeyStates = hotkeys.map { hotkey ->
+            HomeHotkeyUIState(
+                id = hotkey.id,
+                name = hotkey.name,
                 description = generateDescription(
-                    keyCode = keystroke.keyCode,
-                    mods = keystroke.mods
+                    keyCode = hotkey.keyCode,
+                    mods = hotkey.mods
                 ),
             )
         }
         HomeUIState(
-            keystrokes = keystrokeStates,
+            hotkeys = hotkeyStates,
             serverAddress = addresses.last(),
             recentServersAddresses = addresses,
             connectionStatus = serviceState.connectionStatus,
@@ -102,10 +102,10 @@ internal class HomeViewModel @Inject constructor(
         serviceManager.disconnect()
     }
 
-    fun sendKeystroke(keystrokeId: Int) {
+    fun sendHotkey(hotkeyId: Int) {
         viewModelScope.launch {
-            keystrokeRepository.getById(keystrokeId)?.let {
-                serviceManager.sendKeystroke(it)
+            hotkeyRepository.getById(hotkeyId)?.let {
+                serviceManager.sendHotkey(it)
             }
         }
     }

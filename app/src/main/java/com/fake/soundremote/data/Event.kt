@@ -17,14 +17,14 @@ internal enum class Event(
     CALL_BEGIN(
         1,
         R.string.event_name_call_start,
-        setOf(ActionType.KEYSTROKE),
+        setOf(ActionType.HOTKEY),
         AppPermission.Phone,
         31,
     ),
     CALL_END(
         2,
         R.string.event_name_call_end,
-        setOf(ActionType.KEYSTROKE),
+        setOf(ActionType.HOTKEY),
         AppPermission.Phone,
         31,
     ),

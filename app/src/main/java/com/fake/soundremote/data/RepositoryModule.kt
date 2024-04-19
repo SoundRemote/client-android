@@ -16,9 +16,9 @@ interface RepositoryModule {
     ): PreferencesRepository
 
     @Binds
-    fun bindsKeystrokeRepository(
-        keystrokeRepository: UserKeystrokeRepository,
-    ): KeystrokeRepository
+    fun bindsHotkeyRepository(
+        hotkeyRepository: UserHotkeyRepository,
+    ): HotkeyRepository
 
     @Binds
     fun bindsEventActionRepository(

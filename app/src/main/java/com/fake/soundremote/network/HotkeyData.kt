@@ -5,7 +5,7 @@ import com.fake.soundremote.util.PacketKeyType
 import com.fake.soundremote.util.PacketModsType
 import java.nio.ByteBuffer
 
-data class KeystrokeData(val keyCode: PacketKeyType, val mods: PacketModsType) : PacketData {
+data class HotkeyData(val keyCode: PacketKeyType, val mods: PacketModsType) : PacketData {
 
     override fun write(dest: ByteBuffer) {
         require(dest.remaining() >= SIZE)

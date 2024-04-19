@@ -13,7 +13,7 @@ import com.fake.soundremote.data.ActionType
 import com.fake.soundremote.data.AppAction
 import com.fake.soundremote.stringResource
 import com.fake.soundremote.ui.theme.SoundRemoteTheme
-import com.fake.soundremote.util.KeystrokeDescription
+import com.fake.soundremote.util.HotkeyDescription
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -26,8 +26,8 @@ class ActionSelectDialogTest {
     private val cancel by composeTestRule.stringResource(R.string.cancel)
     private val noAction by composeTestRule.stringResource(R.string.action_none)
     private val appActionType by composeTestRule.stringResource(ActionType.APP.nameStringId)
-    private val keystrokeActionType by composeTestRule.stringResource(ActionType.KEYSTROKE.nameStringId)
-    private val allActionTypes by lazy { setOf(appActionType, keystrokeActionType) }
+    private val hotkeyActionType by composeTestRule.stringResource(ActionType.HOTKEY.nameStringId)
+    private val allActionTypes by lazy { setOf(appActionType, hotkeyActionType) }
 
     @Test
     fun cancelButton_onClick_dismisses() {
@@ -61,7 +61,7 @@ class ActionSelectDialogTest {
         }
 
         composeTestRule.onNodeWithText(appActionType).assertIsDisplayed()
-        composeTestRule.onNodeWithText(keystrokeActionType).assertDoesNotExist()
+        composeTestRule.onNodeWithText(hotkeyActionType).assertDoesNotExist()
     }
 
     // When initial action is null, `No action` option must stay selected on action type change
@@ -96,24 +96,24 @@ class ActionSelectDialogTest {
         }
     }
 
-    // Given: a long list of Keystrokes that doesn't fit into screen and initially selected
-    // keystroke id at the end of a that list.
-    // Expected: dialog should scroll to the selected Keystroke.
+    // Given: a long list of Hotkeys that doesn't fit into screen and initially selected
+    // hotkey id at the end of a that list.
+    // Expected: dialog should scroll to the selected hotkey.
     @Test
-    fun initialActionIsKeystroke_needsScrolling_isDisplayed() {
+    fun initialActionIsHotkey_needsScrolling_isDisplayed() {
         val count = 100
-        val keystrokes = buildList {
+        val hotkeys = buildList {
             repeat(count) {
                 val id = it + 1
-                val desc = KeystrokeDescription.WithString("Desc $id")
-                add(KeystrokeInfoUIState(id, "Key $id", desc))
+                val desc = HotkeyDescription.WithString("Desc $id")
+                add(HotkeyInfoUIState(id, "Key $id", desc))
             }
         }
         composeTestRule.setContent {
             CreateActionSelectDialog(
                 availableActionTypes = ActionType.entries.toSet(),
-                initialAction = Action(ActionType.KEYSTROKE, count),
-                keystrokes = keystrokes,
+                initialAction = Action(ActionType.HOTKEY, count),
+                hotkeys = hotkeys,
             )
         }
 
@@ -126,26 +126,26 @@ class ActionSelectDialogTest {
     @Test
     fun okButton_onClick_confirmsWithCorrectAction() {
         val count = 5
-        val expected = Action(ActionType.KEYSTROKE, 1)
+        val expected = Action(ActionType.HOTKEY, 1)
         var actual: Action? = null
         composeTestRule.setContent {
-            val keystrokes = buildList {
+            val hotkeys = buildList {
                 repeat(count) {
                     val id = it + 1
-                    val desc = KeystrokeDescription.WithString("Desc $id")
-                    add(KeystrokeInfoUIState(id, "Key $id", desc))
+                    val desc = HotkeyDescription.WithString("Desc $id")
+                    add(HotkeyInfoUIState(id, "Key $id", desc))
                 }
             }
             CreateActionSelectDialog(
                 availableActionTypes = ActionType.entries.toSet(),
                 initialAction = Action(ActionType.APP, AppAction.DISCONNECT.id),
-                keystrokes = keystrokes,
+                hotkeys = hotkeys,
                 onConfirm = { actual = it },
             )
         }
 
         composeTestRule.apply {
-            onNodeWithText(keystrokeActionType).performClick()
+            onNodeWithText(hotkeyActionType).performClick()
             onNodeWithText("Key 1").performClick()
             onNodeWithText(ok).performClick()
         }
@@ -158,7 +158,7 @@ class ActionSelectDialogTest {
     private fun CreateActionSelectDialog(
         availableActionTypes: Set<ActionType> = ActionType.entries.toSet(),
         initialAction: Action? = null,
-        keystrokes: List<KeystrokeInfoUIState> = emptyList(),
+        hotkeys: List<HotkeyInfoUIState> = emptyList(),
         onConfirm: (Action?) -> Unit = {},
         onDismiss: () -> Unit = {},
     ) {
@@ -166,7 +166,7 @@ class ActionSelectDialogTest {
             ActionSelectDialog(
                 availableActionTypes = availableActionTypes,
                 initialAction = initialAction,
-                keystrokes = keystrokes,
+                hotkeys = hotkeys,
                 onConfirm = onConfirm,
                 onDismiss = onDismiss,
             )

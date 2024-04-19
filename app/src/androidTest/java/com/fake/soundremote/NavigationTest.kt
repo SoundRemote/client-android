@@ -41,15 +41,15 @@ class NavigationTest {
     private val eventsTitle by composeTestRule.stringResource(R.string.event_list_title)
     private val settingsTitle by composeTestRule.stringResource(R.string.settings_title)
     private val aboutTitleTemplate by composeTestRule.stringResource(R.string.about_title_template)
-    private val keystrokesTitle by composeTestRule.stringResource(R.string.keystroke_list_title)
-    private val createKeystrokeTitle by composeTestRule.stringResource(R.string.keystroke_create_title)
+    private val hotkeysTitle by composeTestRule.stringResource(R.string.hotkey_list_title)
+    private val createHotkeyTitle by composeTestRule.stringResource(R.string.hotkey_create_title)
 
     private val navigationMenu by composeTestRule.stringResource(R.string.navigation_menu)
     private val menuEvents by composeTestRule.stringResource(R.string.action_events)
     private val menuSettings by composeTestRule.stringResource(R.string.action_settings)
     private val menuAbout by composeTestRule.stringResource(R.string.action_about)
-    private val editKeystrokes by composeTestRule.stringResource(R.string.action_edit_keystrokes)
-    private val createKeystroke by composeTestRule.stringResource(R.string.action_keystroke_create)
+    private val editHotkeys by composeTestRule.stringResource(R.string.action_edit_hotkeys)
+    private val createHotkey by composeTestRule.stringResource(R.string.action_hotkey_create)
 
 
     // First screen is HomeScreen
@@ -144,19 +144,19 @@ class NavigationTest {
         composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
     }
 
-    // Edit keystrokes FAB navigates to keystrokes screen
+    // Edit hotkeys FAB navigates to hotkeys screen
     @Test
-    fun editKeystrokesFab_click_navigatesToHomeScreen() {
-        composeTestRule.onNodeWithContentDescription(editKeystrokes).performClick()
-        composeTestRule.onNodeWithText(keystrokesTitle).assertIsDisplayed()
+    fun editHotkeysFab_click_navigatesToHomeScreen() {
+        composeTestRule.onNodeWithContentDescription(editHotkeys).performClick()
+        composeTestRule.onNodeWithText(hotkeysTitle).assertIsDisplayed()
     }
 
-    // Back from keystrokes screen returns to home screen
+    // Back from hotkeys screen returns to home screen
     @Test
-    fun keystrokesScreen_back_returnsToHomeScreen() {
+    fun hotkeysScreen_back_returnsToHomeScreen() {
         composeTestRule.apply {
-            onNodeWithContentDescription(editKeystrokes).performClick()
-            onNodeWithText(keystrokesTitle).assertIsDisplayed()
+            onNodeWithContentDescription(editHotkeys).performClick()
+            onNodeWithText(hotkeysTitle).assertIsDisplayed()
         }
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
@@ -186,14 +186,14 @@ class NavigationTest {
         composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
     }
 
-    // Given: multiple simultaneous clicks on `Edit keystrokes` FAB on `Home` screen.
-    // Clicking back on `Keystrokes` screen should return to `Home` screen.
-    // I.e. app should not navigate to `Keystrokes` screens more than once.
+    // Given: multiple simultaneous clicks on `Edit hotkeys` FAB on `Home` screen.
+    // Clicking back on `Hotkeys` screen should return to `Home` screen.
+    // I.e. app should not navigate to `Hotkeys` screens more than once.
     @Test
-    fun multipleClicksEditKeystrokes_back_returnsToHomeScreen() {
+    fun multipleClicksEditHotkeys_back_returnsToHomeScreen() {
         composeTestRule.apply {
-            // Imitate double click on `Edit keystrokes` button
-            onNodeWithContentDescription(editKeystrokes)
+            // Imitate double click on `Edit hotkeys` button
+            onNodeWithContentDescription(editHotkeys)
                 .performSimultaneousDoubleClick(composeTestRule.mainClock)
         }
         // Press back
@@ -204,49 +204,49 @@ class NavigationTest {
         composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
     }
 
-    // Create keystroke button navigates to create keystroke screen
+    // Create hotkey button navigates to create hotkey screen
     @Test
-    fun createKeystroke_click_navigatesToCreateKeystrokeScreen() {
+    fun createHotkey_click_navigatesToCreateHotkeyScreen() {
         composeTestRule.apply {
-            onNodeWithContentDescription(editKeystrokes).performClick()
-            onNodeWithContentDescription(createKeystroke).performClick()
+            onNodeWithContentDescription(editHotkeys).performClick()
+            onNodeWithContentDescription(createHotkey).performClick()
         }
-        composeTestRule.onNodeWithText(createKeystrokeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithText(createHotkeyTitle).assertIsDisplayed()
     }
 
-    // Back from create keystroke screen returns to keystrokes screen
+    // Back from create hotkey screen returns to hotkeys screen
     @Test
-    fun createKeystroke_back_returnsToKeystrokesScreen() {
+    fun createHotkey_back_returnsToHotkeysScreen() {
         composeTestRule.apply {
-            onNodeWithContentDescription(editKeystrokes).performClick()
-            onNodeWithContentDescription(createKeystroke).performClick()
-            onNodeWithText(createKeystrokeTitle).assertIsDisplayed()
+            onNodeWithContentDescription(editHotkeys).performClick()
+            onNodeWithContentDescription(createHotkey).performClick()
+            onNodeWithText(createHotkeyTitle).assertIsDisplayed()
         }
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        composeTestRule.onNodeWithText(keystrokesTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithText(hotkeysTitle).assertIsDisplayed()
     }
 
-    // Given: multiple simultaneous clicks on `create keystroke` button on `Keystrokes` screen.
-    // Clicking back on `Create keystroke` screen should return to `Keystrokes` screen
-    // I.e. app should not navigate to `Create keystroke` screen more than once.
+    // Given: multiple simultaneous clicks on `create hotkey` button on `Hotkeys` screen.
+    // Clicking back on `Create hotkey` screen should return to `Hotkeys` screen
+    // I.e. app should not navigate to `Create hotkey` screen more than once.
     @Test
-    fun multipleClicksCreateKeystroke_back_returnsToKeystrokesScreen() {
+    fun multipleClicksCreateHotkey_back_returnsToHotkeysScreen() {
         composeTestRule.apply {
-            // Go to `Keystrokes` screen
-            onNodeWithContentDescription(editKeystrokes).performClick()
+            // Go to `Hotkeys` screen
+            onNodeWithContentDescription(editHotkeys).performClick()
 
-            // Imitate double click on `Create keystroke` button
-            onNodeWithContentDescription(createKeystroke)
+            // Imitate double click on `Create hotkey` button
+            onNodeWithContentDescription(createHotkey)
                 .performSimultaneousDoubleClick(composeTestRule.mainClock)
         }
         // Press back
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        // Assert that app is back on `Keystrokes` screen
-        composeTestRule.onNodeWithText(keystrokesTitle).assertIsDisplayed()
+        // Assert that app is back on `Hotkeys` screen
+        composeTestRule.onNodeWithText(hotkeysTitle).assertIsDisplayed()
     }
 }
 
