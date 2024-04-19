@@ -15,6 +15,7 @@ class MigrationTest {
 
     private val migrations = listOf(
         DatabaseMigrations.Schema1to2(),
+        DatabaseMigrations.Schema2to3(),
     )
 
     @get:Rule

@@ -72,7 +72,7 @@ data class Keystroke(
     }
 
     companion object {
-        const val TABLE_NAME = "keystroke"
+        const val TABLE_NAME = "hotkey"
         const val COLUMN_ID = BaseColumns._ID
         const val COLUMN_KEY_CODE = "key_code"
         const val COLUMN_MODS = "mods"

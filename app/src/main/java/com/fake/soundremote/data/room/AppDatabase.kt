@@ -14,9 +14,10 @@ import com.fake.soundremote.data.Keystroke
         Keystroke::class,
         EventAction::class
     ],
-    version = 2,
+    version = 3,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = DatabaseMigrations.Schema1to2::class),
+        AutoMigration(from = 2, to = 3, spec = DatabaseMigrations.Schema2to3::class),
     ],
     exportSchema = true,
 )
@@ -27,14 +28,14 @@ abstract class AppDatabase : RoomDatabase() {
     class Callback : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
-            db.execSQL(DELETE_EVENT_ACTION_ON_KEYSTROKE_DELETE)
+            db.execSQL(CREATE_TRIGGER_DELETE_EVENT_ACTION_ON_HOTKEY_DELETE)
         }
     }
 }
 
-// When a keystroke is deleted also delete all event actions with that keystroke
-val DELETE_EVENT_ACTION_ON_KEYSTROKE_DELETE = """
-    CREATE TRIGGER IF NOT EXISTS delete_event_action_on_keystroke_delete
+// When a hotkey is deleted also delete all the event actions with that hotkey
+val CREATE_TRIGGER_DELETE_EVENT_ACTION_ON_HOTKEY_DELETE = """
+    CREATE TRIGGER IF NOT EXISTS delete_event_action_on_hotkey_delete
     AFTER DELETE ON ${Keystroke.TABLE_NAME}
     BEGIN
         DELETE FROM ${EventAction.TABLE_NAME}
