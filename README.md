@@ -1,14 +1,16 @@
 # SoundRemote android client
 
 An Android app that, when paired up with [SoundRemote server](https://github.com/ashipo/SoundRemote-server), allows to:
+
 - Capture and stream audio from a PC to an Android device
-- Send back keyboard commands, media keys from the Android media notification and bind commands to certain events like device shake or phone call
+- Execute keyboard commands on the PC remotely from the Android app either directly through its UI or by binding to certain events such as device shaking or incoming phone call
+- Control media on the PC through the Android media notification
 
 ## Screenshots
 
 <img src="https://github.com/ashipo/SoundRemote-android/assets/24320267/2086773b-536b-4240-a4c3-556b8c506f32" alt="Home screen" title="Home screen" width="250"/>
-<img src="https://github.com/ashipo/SoundRemote-android/assets/24320267/ed2c87b1-e03e-4c03-9a29-9548f6bdbfa1" alt="Events screen" title="Events screen" width="250"/>
-<img src="https://github.com/ashipo/SoundRemote-android/assets/24320267/7ad183d2-e749-434b-8e05-a63c4a69209b" alt="Notification" title="Notification" width="250"/>
+<img src="https://github.com/ashipo/SoundRemote-android/assets/24320267/fa27d4e0-718f-473c-861f-b4a7bc41715d" alt="Events screen" title="Events screen" width="250"/>
+<img src="https://github.com/ashipo/SoundRemote-android/assets/24320267/5a384b21-7760-43d1-b90b-1a1f93e55b50" alt="Notification" title="Notification" width="250"/>
 
 ## Build
 
