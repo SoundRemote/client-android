@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  JOPUS_VERSION: 'v0.2.0'
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,46 +13,12 @@ jobs:
     - name: Checkout SoundRemote
       uses: actions/checkout@v4
 
-    - name: Restore cached JOpus
-      id: restore-jopus
-      uses: actions/cache/restore@v4
-      with:
-        key: lib-jopus-${{ env.JOPUS_VERSION }}
-        path: jopus/lib/build/outputs/aar/lib-release.aar
-
-    - name: Checkout JOpus
-      if: steps.restore-jopus.outputs.cache-hit != 'true'
-      uses: actions/checkout@v4
-      with:
-        repository: ashipo/JOpus
-        ref: ${{ env.JOPUS_VERSION }}
-        path: jopus
-
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-
-    - name: Build JOpus
-      if: steps.restore-jopus.outputs.cache-hit != 'true'
-      run: |
-        cd jopus
-        chmod +x ./gradlew
-        ./gradlew --no-daemon lib:assembleRelease
-
-    - name: Cache JOpus
-      if: steps.restore-jopus.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
-      with:
-        key: ${{ steps.restore-jopus.outputs.cache-primary-key }}
-        path: jopus/lib/build/outputs/aar/lib-release.aar
-
-    - name: Move JOpus lib file
-      run: |
-        mkdir -p app/libs
-        mv jopus/lib/build/outputs/aar/lib-release.aar app/libs/
 
     - name: Build SoundRemote
       run: |
