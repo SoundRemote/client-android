@@ -17,7 +17,7 @@ kotlin {
 
 android {
     namespace = "com.fake.soundremote"
-    compileSdk = 35
+    compileSdk = 34
     defaultConfig {
         applicationId = "com.fake.soundremote"
         minSdk = 21
