@@ -24,3 +24,10 @@ jobs:
       run: |
         chmod +x ./gradlew
         ./gradlew --no-daemon build
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Release apk
+        path: app/build/build/outputs/apk/release/*.apk
+        retention-days: 3
