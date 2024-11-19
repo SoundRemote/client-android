@@ -1,7 +1,7 @@
 package io.github.soundremote.audio.decoder
 
-import com.fake.jopus.OPUS_OK
-import com.fake.jopus.Opus
+import ashipo.jopus.OPUS_OK
+import ashipo.jopus.Opus
 import io.github.soundremote.util.Audio.CHANNELS
 import io.github.soundremote.util.Audio.PACKET_DURATION
 import io.github.soundremote.util.Audio.SAMPLE_RATE
