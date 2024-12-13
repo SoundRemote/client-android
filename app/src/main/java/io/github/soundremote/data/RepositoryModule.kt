@@ -12,16 +12,16 @@ import dagger.hilt.components.SingletonComponent
 interface RepositoryModule {
     @Binds
     fun bindsPreferencesRepository(
-        preferencesRepository: UserPreferencesRepository,
-    ): PreferencesRepository
+        preferencesRepository: UserPreferencesRepository?,
+    ): PreferencesRepository?
 
     @Binds
     fun bindsHotkeyRepository(
-        hotkeyRepository: UserHotkeyRepository,
-    ): HotkeyRepository
+        hotkeyRepository: UserHotkeyRepository?,
+    ): HotkeyRepository?
 
     @Binds
     fun bindsEventActionRepository(
-        eventActionRepository: SystemEventActionRepository,
-    ): EventActionRepository
+        eventActionRepository: SystemEventActionRepository?,
+    ): EventActionRepository?
 }

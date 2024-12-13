@@ -67,7 +67,7 @@ room {
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.media)
-    implementation(libs.androidx.ktx)
+    implementation(libs.androidx.core.ktx)
     implementation(libs.material)
     implementation(libs.androidx.activity.ktx)  // For the predictive back gesture
     implementation(libs.bundles.androidx.lifeycle)
@@ -101,10 +101,10 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.android.compiler)
+    kaptAndroidTest(libs.hilt.compiler)
 // Navigation
     implementation(libs.androidx.navigation.compose)
 // Accompanist

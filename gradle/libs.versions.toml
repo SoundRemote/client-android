@@ -1,27 +1,29 @@
 [versions]
-androidGradlePlugin = "8.7.2"
+androidGradlePlugin = "8.7.3"
+# kotlin 2.1 causes issues with hilt on windows
+# https://github.com/google/dagger/issues/4525
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.26"
 
 accompanist = "0.36.0"
-activity-ktx = "1.9.3"
-appcompat = "1.7.0"
-composeBom = "2024.11.00"
-datastore-preferences = "1.1.1"
+androidxActivity = "1.9.3"
+androidxAppcompat = "1.7.0"
+androidxCore = "1.15.0"
+androidxTestCore = "1.6.1"
+composeBom = "2024.12.01"
+datastorePreferences = "1.1.1"
 guava = "33.3.1-android"
 hilt = "2.52"
-hilt-navigation-compose = "1.2.0"
+hiltNavigationCompose = "1.2.0"
 jopus = "0.3.1"
 jupiter = "5.10.3"
-kotlinx-coroutines = "1.9.0"
-ktx = "1.15.0"
-ktx-test = "1.6.1"
+kotlinxCoroutines = "1.9.0"
 lifecycle = "2.8.7"
 material = "1.12.0"
 media = "1.7.0"
 mockk = "1.13.13"
-navigation = "2.8.4"
-preference-ktx = "1.2.1"
+navigation = "2.8.5"
+preference = "1.2.1"
 room = "2.6.1"
 runner = "1.6.2"
 seismic = "1.0.3"
@@ -29,8 +31,8 @@ timber = "5.0.1"
 
 [libraries]
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
-androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-ktx" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidxActivity" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidxAppcompat" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material3-windowsize = { group = "androidx.compose.material3", name = "material3-window-size-class" }
@@ -38,28 +40,28 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore-preferences" }
-androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
-androidx-ktx = { module = "androidx.core:core-ktx", version.ref = "ktx" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-media = { module = "androidx.media:media", version.ref = "media" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
-androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preference-ktx" }
+androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
-androidx-test-ktx = { module = "androidx.test:core-ktx", version.ref = "ktx-test" }
+androidx-test-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "androidxTestCore" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 jopus = { group = "com.github.ashipo", name = "jopus", version.ref = "jopus" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
 mockk-agent = { group = "io.mockk", name = "mockk-agent", version.ref = "mockk" }
 seismic = { group = "com.squareup", name = "seismic", version.ref = "seismic" }

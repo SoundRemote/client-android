@@ -10,6 +10,6 @@ import dagger.hilt.components.SingletonComponent
 internal interface ServiceModule {
     @Binds
     fun bindsServiceManager(
-        serviceManager: MainServiceManager,
-    ): ServiceManager
+        serviceManager: MainServiceManager?,
+    ): ServiceManager?
 }
