@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -23,7 +22,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun SoundRemoteApp(
-    windowSizeClass: WindowSizeClass,
     viewModel: AppViewModel = hiltViewModel(),
 ) {
     val scope = rememberCoroutineScope()
@@ -58,7 +56,6 @@ internal fun SoundRemoteApp(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         AppNavigation(
-            windowSizeClass,
             showSnackbar = { message, duration ->
                 scope.launch {
                     snackbarHostState.showSnackbar(message = message, duration = duration)

@@ -38,7 +38,7 @@ fun NavGraphBuilder.homeScreen(
             onNavigateToSettings = onNavigateToSettings,
             onNavigateToAbout = onNavigateToAbout,
             showSnackbar = showSnackbar,
-            compactHeight = compactHeight,
+            showAddressInTopBar = compactHeight,
         )
     }
 }

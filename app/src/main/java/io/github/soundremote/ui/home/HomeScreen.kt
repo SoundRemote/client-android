@@ -73,11 +73,11 @@ import io.github.soundremote.util.HotkeyDescription
 import io.github.soundremote.util.Key
 import io.github.soundremote.util.TestTag
 
-private val paddingMod = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)
+private val listItemPadding = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
 private val hotkeyItemModifier = Modifier
     .fillMaxWidth()
     .height(72.dp)
-    .then(paddingMod)
+    .then(listItemPadding)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,7 +96,7 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToAbout: () -> Unit,
     showSnackbar: (String, SnackbarDuration) -> Unit,
-    compactHeight: Boolean,
+    showAddressInTopBar: Boolean,
     modifier: Modifier = Modifier,
 ) {
     // Messages
@@ -112,7 +112,6 @@ fun HomeScreen(
     val onAddressChange: (TextFieldValue) -> Unit = { newAddressValue ->
         cleanAddressInput(newAddressValue, address)?.let { address = it }
     }
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     Scaffold(
         topBar = {
@@ -122,7 +121,8 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(stringResource(R.string.app_name))
-                        if (compactHeight) {
+                        if (showAddressInTopBar) {
+                            Spacer(modifier = Modifier.size(16.dp))
                             ConnectComponent(
                                 address = address,
                                 recentAddresses = uiState.recentServersAddresses,
@@ -160,6 +160,7 @@ fun HomeScreen(
                                 contentDescription = stringResource(R.string.navigation_menu)
                             )
                         }
+                        val lifecycleOwner = LocalLifecycleOwner.current
                         DropdownMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
@@ -208,7 +209,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier.padding(paddingValues)
         ) {
-            if (!compactHeight) {
+            if (!showAddressInTopBar) {
                 ConnectComponent(
                     address = address,
                     recentAddresses = uiState.recentServersAddresses,
@@ -217,6 +218,7 @@ fun HomeScreen(
                     onConnect = { onConnect(it) },
                     onDisconnect = onDisconnect,
                     topBar = false,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
             LazyColumn(
@@ -252,7 +254,7 @@ private fun ConnectComponent(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.then(paddingMod)
+        modifier = modifier,
     ) {
         AddressEdit(
             address = address,
@@ -260,7 +262,7 @@ private fun ConnectComponent(
             onChange = onAddressChange,
             onConnect = { onConnect(address.text) },
             modifier = Modifier.weight(1f),
-            topBar = topBar,
+            hideLabel = topBar,
         )
         Spacer(Modifier.width(16.dp))
         ConnectButton(
@@ -289,11 +291,11 @@ private fun AddressEdit(
     recentAddresses: List<String>,
     onChange: (TextFieldValue) -> Unit,
     onConnect: () -> Unit,
-    topBar: Boolean,
+    hideLabel: Boolean,
     modifier: Modifier = Modifier
 ) {
     // Hide label when in top bar mode because it doesn't fit
-    val label: @Composable (() -> Unit)? = if (topBar) {
+    val label: @Composable (() -> Unit)? = if (hideLabel) {
         null
     } else {
         { Text(stringResource(R.string.address_label)) }
@@ -342,7 +344,7 @@ private fun AddressEdit(
                                 }
                                 .height(56.dp)
                                 .fillMaxWidth()
-                                .then(paddingMod),
+                                .then(listItemPadding),
                         )
                     }
                 }
@@ -508,7 +510,7 @@ private fun HomePreview(compactHeight: Boolean) {
             onNavigateToSettings = {},
             onNavigateToAbout = {},
             showSnackbar = { _, _ -> },
-            compactHeight = compactHeight,
+            showAddressInTopBar = compactHeight,
         )
     }
 }

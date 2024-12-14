@@ -78,7 +78,7 @@ dependencies {
     androidTestImplementation(composeBom)
     // UI
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.windowsize)
+    implementation(libs.androidx.compose.material3.adaptive)
     // Android Studio Preview support
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
