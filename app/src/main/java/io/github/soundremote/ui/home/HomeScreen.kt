@@ -122,7 +122,6 @@ fun HomeScreen(
                     ) {
                         Text(stringResource(R.string.app_name))
                         if (showAddressInTopBar) {
-                            Spacer(modifier = Modifier.size(16.dp))
                             ConnectComponent(
                                 address = address,
                                 recentAddresses = uiState.recentServersAddresses,
@@ -131,6 +130,7 @@ fun HomeScreen(
                                 onConnect = { onConnect(it) },
                                 onDisconnect = onDisconnect,
                                 topBar = true,
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
                     }
