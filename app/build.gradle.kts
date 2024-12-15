@@ -98,7 +98,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 // Preference datastore
-    implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.datastore.preferences)
 // Hilt
     implementation(libs.hilt.android)
