@@ -1,0 +1,2 @@
+- Added fastlane metadata
+- Minor bug fixes and optimizations
