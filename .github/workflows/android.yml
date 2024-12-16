@@ -24,7 +24,7 @@ jobs:
       env:
           KEYSTORE_JKS_BASE64: ${{ secrets.KEYSTORE_JKS_BASE64 }}
       run: |
-        echo $KEYSTORE_JKS_BASE64 | base64 --decode > keystore.jks
+        echo $KEYSTORE_JKS_BASE64 | base64 --decode > "${{ github.workspace }}/keystore.jks"
 
     - name: Create keystore.properties
       env:
@@ -32,7 +32,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
       run: |
-        echo -e "storeFile=keystore.jks\nkeyAlias=$KEY_ALIAS\nkeyPassword=$KEY_PASSWORD\nstorePassword=$STORE_PASSWORD" > keystore.properties
+        echo -e "storeFile=${{ github.workspace }}/keystore.jks\nkeyAlias=$KEY_ALIAS\nkeyPassword=$KEY_PASSWORD\nstorePassword=$STORE_PASSWORD" > keystore.properties
 
     - name: Build SoundRemote
       run: |
