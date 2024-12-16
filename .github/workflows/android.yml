@@ -33,7 +33,7 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
       run: |
         echo "storeFile=keystore.jks\nkeyAlias=$KEY_ALIAS\nkeyPassword=$KEY_PASSWORD\nstorePassword=$STORE_PASSWORD" > keystore.properties
-        cat >> keystore.properties
+        cat keystore.properties
 
     - name: Build SoundRemote
       run: |
