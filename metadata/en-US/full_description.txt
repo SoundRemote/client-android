@@ -1,8 +1,8 @@
-Listen to audio from your computer on your phone.
+Listen to audio from your PC.
 
-Execute hotkeys on your computer from your phone. For example, you can:
+Control your PC by executing hotkeys remotely. For example, you can:
 
-- Skip to the next track by shaking the phone
+- Skip to the next track by shaking your phone
 - Pause video from lock screen
 - Add and execute custom hotkeys
 

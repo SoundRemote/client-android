@@ -1,1 +1,1 @@
-Stream audio from PC to Android phone. Control your PC from your phone.
+Listen to audio from your PC and control it from your phone
