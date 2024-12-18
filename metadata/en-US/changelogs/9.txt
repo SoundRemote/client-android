@@ -1,0 +1,1 @@
+Fixed a bug where it was impossible to edit a previously added hotkey
