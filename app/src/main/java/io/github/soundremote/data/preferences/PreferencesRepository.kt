@@ -3,6 +3,7 @@ package io.github.soundremote.data.preferences
 import kotlinx.coroutines.flow.Flow
 
 interface PreferencesRepository {
+
     val settingsScreenPreferencesFlow: Flow<SettingsScreenPreferences>
 
     /**
@@ -11,6 +12,8 @@ interface PreferencesRepository {
     val serverAddressesFlow: Flow<List<String>>
 
     val audioCompressionFlow: Flow<Int>
+
+    val ignoreAudioFocusFlow: Flow<Boolean>
 
     suspend fun setServerAddress(serverAddress: String)
 
@@ -27,4 +30,8 @@ interface PreferencesRepository {
     suspend fun setAudioCompression(value: Int)
 
     suspend fun getAudioCompression(): Int
+
+    suspend fun setIgnoreAudioFocus(value: Boolean)
+
+    suspend fun getIgnoreAudioFocus(): Boolean
 }
