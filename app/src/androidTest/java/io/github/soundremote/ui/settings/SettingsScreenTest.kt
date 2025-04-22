@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasText
@@ -32,11 +33,13 @@ internal class SettingsScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val navigateUp by composeTestRule.stringResource(R.string.navigate_up)
+    private val advanced by composeTestRule.stringResource(R.string.settings_advanced_title)
     private val audioCompression by composeTestRule.stringResource(R.string.pref_compression_title)
     private val clientPort by composeTestRule.stringResource(R.string.pref_client_port_title)
     private val serverPort by composeTestRule.stringResource(R.string.pref_server_port_title)
     private val compressionNone by composeTestRule.stringResource(R.string.compression_none)
     private val compression320 by composeTestRule.stringResource(R.string.compression_320)
+    private val ignoreFocus by composeTestRule.stringResource(R.string.pref_ignore_focus_title)
     private val ok by composeTestRule.stringResource(android.R.string.ok)
 
     // Settings screen should contain navigate up arrow
@@ -49,16 +52,40 @@ internal class SettingsScreenTest {
         composeTestRule.onNodeWithContentDescription(navigateUp).assertIsDisplayed()
     }
 
-    // All settings are displayed
+    // All (non advanced) settings exist by default
     @Test
-    fun allSettings_areDisplayed() {
+    fun allSettings_byDefault_areDisplayed() {
         composeTestRule.setContent {
             CreateSettingsScreen()
         }
 
-        composeTestRule.onNodeWithText(audioCompression).assertIsDisplayed()
-        composeTestRule.onNodeWithText(clientPort).assertIsDisplayed()
-        composeTestRule.onNodeWithText(serverPort).assertIsDisplayed()
+        composeTestRule.onNodeWithText(audioCompression).assertExists()
+        composeTestRule.onNodeWithText(clientPort).assertExists()
+        composeTestRule.onNodeWithText(serverPort).assertExists()
+    }
+
+    // Advanced settings do not exist by default
+    @Test
+    fun advancedSettings_byDefault_doesNotExist() {
+        composeTestRule.setContent {
+            CreateSettingsScreen()
+        }
+
+        composeTestRule.apply {
+            onNodeWithText(ignoreFocus).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun advancedSettings_onClickAdvanced_exist() {
+        composeTestRule.setContent {
+            CreateSettingsScreen()
+        }
+
+        composeTestRule.apply {
+            onNodeWithText(advanced).performClick()
+            onNodeWithText(ignoreFocus).assertExists()
+        }
     }
 
     // Current value display
@@ -109,6 +136,19 @@ internal class SettingsScreenTest {
 
         composeTestRule.onNodeWithText(this.clientPort)
             .assertTextContains("$value", true)
+    }
+
+    @Test
+    fun ignoreFocus_displaysCurrentValue() {
+        val expected = true
+        composeTestRule.setContent {
+            CreateSettingsScreen(settings = SettingsUIState(ignoreAudioFocus = expected))
+        }
+
+        composeTestRule.apply {
+            onNodeWithText(advanced).performClick()
+            onNodeWithText(ignoreFocus).assertIsOn()
+        }
     }
 
     // On click
@@ -220,6 +260,25 @@ internal class SettingsScreenTest {
         assertEquals(expected, actual)
     }
 
+    @Test
+    fun ignoreFocus_onClick_updatesPreference() {
+        val initialValue = true
+        val expected = !initialValue
+        var updatedValue: Boolean? = null
+        composeTestRule.setContent {
+            CreateSettingsScreen(
+                settings = SettingsUIState(ignoreAudioFocus = initialValue),
+                onSetIgnoreAudioFocus = { updatedValue = it },
+            )
+        }
+
+        composeTestRule.apply {
+            onNodeWithText(advanced).performClick()
+            onNodeWithText(ignoreFocus).performClick()
+        }
+        assertEquals(expected, updatedValue)
+    }
+
     @Suppress("TestFunctionName")
     @Composable
     private fun CreateSettingsScreen(
@@ -228,6 +287,7 @@ internal class SettingsScreenTest {
         onSetServerPort: (Int) -> Unit = {},
         onSetClientPort: (Int) -> Unit = {},
         onSetAudioCompression: (Int) -> Unit = {},
+        onSetIgnoreAudioFocus: (Boolean) -> Unit = {},
         onNavigateUp: () -> Unit = {},
     ) {
         SoundRemoteTheme {
@@ -236,6 +296,7 @@ internal class SettingsScreenTest {
                 onSetServerPort = onSetServerPort,
                 onSetClientPort = onSetClientPort,
                 onSetAudioCompression = onSetAudioCompression,
+                onSetIgnoreAudioFocus = onSetIgnoreAudioFocus,
                 onNavigateUp = onNavigateUp,
                 modifier = modifier,
             )
