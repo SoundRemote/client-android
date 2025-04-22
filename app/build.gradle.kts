@@ -29,8 +29,8 @@ android {
         applicationId = "io.github.soundremote"
         minSdk = 21
         targetSdk = 35
-        versionCode = 10
-        versionName = "0.4.5"
+        versionCode = 11
+        versionName = "0.5.0-beta01"
         testInstrumentationRunner = "io.github.soundremote.CustomTestRunner"
     }
     signingConfigs {
