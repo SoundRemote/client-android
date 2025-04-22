@@ -32,6 +32,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
+import com.squareup.seismic.ShakeDetector
+import dagger.hilt.android.AndroidEntryPoint
 import io.github.soundremote.R
 import io.github.soundremote.audio.AudioPipe
 import io.github.soundremote.audio.AudioPipe.Companion.PIPE_PLAYING
@@ -50,8 +52,6 @@ import io.github.soundremote.util.Key
 import io.github.soundremote.util.KeyCode
 import io.github.soundremote.util.Net
 import io.github.soundremote.util.SystemMessage
-import com.squareup.seismic.ShakeDetector
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -105,6 +105,13 @@ internal class MainService : MediaBrowserServiceCompat() {
     // Flag to detect the initial collected compression value
     private var initialCompressionValue = true
 
+    // Audio focus
+    /**
+     * Change this variable together with Requesting/abandoning focus, synchronized by [focusLock]
+     */
+    private var holdingFocus = false
+    private val focusLock = Any()
+
     // Call state
     @Suppress("DEPRECATION")
     private lateinit var phoneStateListener: android.telephony.PhoneStateListener
@@ -156,6 +163,19 @@ internal class MainService : MediaBrowserServiceCompat() {
                     stopShakeDetection()
                 } else {
                     startShakeDetection()
+                }
+            }
+        }
+        scope.launch {
+            userPreferencesRepo.ignoreAudioFocusFlow.collect { ignore ->
+                if (ignore) {
+                    // Abandon audio focus in case we have it
+                    abandonAudioFocus()
+                } else {
+                    // If currently playing audio, should get audio focus or mute if denied
+                    if (audioPipe.state == PIPE_PLAYING) {
+                        getFocusOrMute()
+                    }
                 }
             }
         }
@@ -229,31 +249,37 @@ internal class MainService : MediaBrowserServiceCompat() {
         return binder
     }
 
-    private fun updatePlaybackState() {
+    private fun updatePlaybackState() = scope.launch {
         if (connectionStatus.value == ConnectionStatus.CONNECTED &&
             !isMuted.value &&
             audioPipe.state != PIPE_PLAYING
         ) {
-            if (requestAudioFocus()) {
-                Timber.i("Starting playback")
-                audioPipe.start()
-                val noisyFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-                registerReceiver(becomingNoisyReceiver, noisyFilter)
-                connection.processAudio = true
-            } else {
-                scope.launch {
-                    _systemMessages.send(SystemMessage.MESSAGE_AUDIO_FOCUS_REQUEST_FAILED)
-                }
-                disconnect()
+            val canStart = userPreferencesRepo.getIgnoreAudioFocus() || getFocusOrMute()
+            if (canStart) {
+                startPlayback()
             }
         } else {
-            if (audioPipe.state != PIPE_PLAYING) return
-            Timber.i("Stopping playback")
-            connection.processAudio = false
-            unregisterReceiver(becomingNoisyReceiver)
-            abandonAudioFocus()
-            audioPipe.stop()
+            stopPlayback()
         }
+    }
+
+    private val becomingNoisyFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+
+    private fun startPlayback() {
+        if (audioPipe.state == PIPE_PLAYING) return
+        Timber.i("Starting playback")
+        audioPipe.start()
+        registerReceiver(becomingNoisyReceiver, becomingNoisyFilter)
+        connection.processAudio = true
+    }
+
+    private fun stopPlayback() {
+        if (audioPipe.state != PIPE_PLAYING) return
+        Timber.i("Stopping playback")
+        connection.processAudio = false
+        unregisterReceiver(becomingNoisyReceiver)
+        abandonAudioFocus()
+        audioPipe.stop()
     }
 
     // Service API
@@ -293,7 +319,7 @@ internal class MainService : MediaBrowserServiceCompat() {
     }
 
     // Audio focus
-    // https://developer.android.com/guide/topics/media-apps/audio-focus
+    // https://developer.android.com/media/optimize/audio-focus
 
     private val afChangeListener = OnAudioFocusChangeListener { focusChange ->
         when (focusChange) {
@@ -318,18 +344,31 @@ internal class MainService : MediaBrowserServiceCompat() {
         }
     }
 
+    /**
+     * Requests audio focus. If the request is denied, sends the system message and mutes.
+     * @return true if audio focus was gained successfully, false otherwise
+     */
+    private suspend fun getFocusOrMute(): Boolean {
+        if (requestAudioFocus()) return true
+        _systemMessages.send(SystemMessage.MESSAGE_AUDIO_FOCUS_REQUEST_FAILED)
+        setMuted(true)
+        return false
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private lateinit var focusRequest: AudioFocusRequest
 
-    private fun requestAudioFocus(): Boolean {
+    private fun requestAudioFocus(): Boolean = synchronized(focusLock) {
+        if (holdingFocus) return true
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-        val res = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val requestResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(AudioAttributes.Builder().run {
-                    setUsage(AudioAttributes.USAGE_MEDIA)
-                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    build()
-                })
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
                 .setAcceptsDelayedFocusGain(false)
                 .setOnAudioFocusChangeListener(afChangeListener)
                 .build()
@@ -342,19 +381,23 @@ internal class MainService : MediaBrowserServiceCompat() {
                 AudioManager.AUDIOFOCUS_GAIN
             )
         }
-        return when (res) {
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> true
-            else -> false
-        }
+        holdingFocus = requestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        holdingFocus.also { Timber.i("Focus was granted: $it") }
     }
 
+
     private fun abandonAudioFocus() {
-        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioManager.abandonAudioFocusRequest(focusRequest)
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager.abandonAudioFocus(afChangeListener)
+        synchronized(focusLock) {
+            if (!holdingFocus) return
+            Timber.i("Abandoning focus")
+            val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                audioManager.abandonAudioFocusRequest(focusRequest)
+            } else {
+                @Suppress("DEPRECATION")
+                audioManager.abandonAudioFocus(afChangeListener)
+            }
+            holdingFocus = false
         }
     }
 

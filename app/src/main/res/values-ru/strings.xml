@@ -69,12 +69,15 @@
     <string name="event_name_shake">Встряхивание</string>
     <!--Settings-->
     <string name="settings_title">Настройки</string>
+    <string name="settings_advanced_title">Расширенные</string>
     <string name="pref_server_port_title">Порт сервера</string>
     <string name="pref_client_port_title">Порт клиента</string>
     <string name="pref_compression_title">Сжатие аудио</string>
     <string name="pref_server_port_summary">Должен совпадать с портом сервера, используемым сервером.</string>
     <string name="pref_client_port_summary">Должен совпадать с портом клиента, используемым сервером.</string>
     <string name="pref_default_value_template">Значение по умолчанию: %1s.</string>
+    <string name="pref_ignore_focus_title">Игнорировать аудиофокус</string>
+    <string name="pref_ignore_focus_summary">Разрешить воспроизведение аудио одновременно с другими приложениями</string>
     <!--About-->
     <string name="about_title_template">О %s</string>
     <string name="show_license">лицензия</string>

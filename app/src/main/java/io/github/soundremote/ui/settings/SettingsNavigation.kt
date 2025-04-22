@@ -23,9 +23,10 @@ fun NavGraphBuilder.settingsScreen(
         val settings by viewModel.settings.collectAsStateWithLifecycle()
         SettingsScreen(
             settings = settings,
-            onSetServerPort = { viewModel.setServerPort(it) },
-            onSetClientPort = { viewModel.setClientPort(it) },
-            onSetAudioCompression = { viewModel.setAudioCompression(it) },
+            onSetServerPort = viewModel::setServerPort,
+            onSetClientPort = viewModel::setClientPort,
+            onSetAudioCompression = viewModel::setAudioCompression,
+            onSetIgnoreAudioFocus = viewModel::setIgnoreAudioFocus,
             onNavigateUp = onNavigateUp,
         )
     }

@@ -19,12 +19,12 @@ private const val USER_PREFERENCES_NAME = "user_preferences"
 @InstallIn(SingletonComponent::class)
 @Module
 object DataStoreModule {
+
     @Singleton
     @Provides
-    fun providePreferencesDatastore(@ApplicationContext appContext: Context): DataStore<Preferences> {
-        return PreferenceDataStoreFactory.create(
+    fun providePreferencesDatastore(@ApplicationContext appContext: Context): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
             produceFile = { appContext.preferencesDataStoreFile(USER_PREFERENCES_NAME) }
         )
-    }
 }

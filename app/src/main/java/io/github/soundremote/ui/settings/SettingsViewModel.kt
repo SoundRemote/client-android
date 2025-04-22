@@ -21,6 +21,7 @@ class SettingsViewModel @Inject constructor(
                 serverPort = prefs.serverPort,
                 clientPort = prefs.clientPort,
                 audioCompression = prefs.audioCompression,
+                ignoreAudioFocus = prefs.ignoreAudioFocus,
             )
         }.stateIn(
             scope = viewModelScope,
@@ -39,10 +40,15 @@ class SettingsViewModel @Inject constructor(
     fun setAudioCompression(value: Int) {
         viewModelScope.launch { preferencesRepository.setAudioCompression(value) }
     }
+
+    fun setIgnoreAudioFocus(value: Boolean) {
+        viewModelScope.launch { preferencesRepository.setIgnoreAudioFocus(value) }
+    }
 }
 
 data class SettingsUIState(
     val serverPort: Int = 0,
     val clientPort: Int = 0,
     val audioCompression: Int = 0,
+    val ignoreAudioFocus: Boolean = false,
 )

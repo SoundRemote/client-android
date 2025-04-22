@@ -2,6 +2,7 @@ package io.github.soundremote.data.preferences
 
 import io.github.soundremote.util.DEFAULT_AUDIO_COMPRESSION
 import io.github.soundremote.util.DEFAULT_CLIENT_PORT
+import io.github.soundremote.util.DEFAULT_IGNORE_AUDIO_FOCUS
 import io.github.soundremote.util.DEFAULT_SERVER_ADDRESS
 import io.github.soundremote.util.DEFAULT_SERVER_PORT
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +14,8 @@ class TestPreferencesRepository : PreferencesRepository {
         SettingsScreenPreferences(
             DEFAULT_SERVER_PORT,
             DEFAULT_CLIENT_PORT,
-            DEFAULT_AUDIO_COMPRESSION
+            DEFAULT_AUDIO_COMPRESSION,
+            DEFAULT_IGNORE_AUDIO_FOCUS,
         )
     )
     override val settingsScreenPreferencesFlow: Flow<SettingsScreenPreferences>
@@ -27,6 +29,10 @@ class TestPreferencesRepository : PreferencesRepository {
     private val _audioCompressionFlow = MutableStateFlow(DEFAULT_AUDIO_COMPRESSION)
     override val audioCompressionFlow: Flow<Int>
         get() = _audioCompressionFlow
+
+    private val _ignoreAudioFocusFlow = MutableStateFlow(DEFAULT_IGNORE_AUDIO_FOCUS)
+    override val ignoreAudioFocusFlow: Flow<Boolean>
+        get() = _ignoreAudioFocusFlow
 
     override suspend fun setServerAddress(serverAddress: String) {
         val current = LinkedHashSet(serverAddressesFlow.first())
@@ -68,5 +74,15 @@ class TestPreferencesRepository : PreferencesRepository {
 
     override suspend fun getAudioCompression(): Int {
         return _audioCompressionFlow.value
+    }
+
+    override suspend fun setIgnoreAudioFocus(value: Boolean) {
+        _settingsScreenPreferencesFlow.value =
+            _settingsScreenPreferencesFlow.value.copy(ignoreAudioFocus = value)
+        _ignoreAudioFocusFlow.value = value
+    }
+
+    override suspend fun getIgnoreAudioFocus(): Boolean {
+        return _settingsScreenPreferencesFlow.value.ignoreAudioFocus
     }
 }
