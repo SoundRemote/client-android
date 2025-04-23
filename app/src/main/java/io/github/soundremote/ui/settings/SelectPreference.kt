@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -35,7 +36,7 @@ internal fun <T : Any> SelectPreference(
     title: String,
     summary: String,
     options: List<SelectableOption<T>>,
-    selected: T,
+    selectedValue: T,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -55,7 +56,7 @@ internal fun <T : Any> SelectPreference(
             text = {
                 Options(
                     options = options,
-                    selected = selected,
+                    selected = selectedValue,
                     onSelect = {
                         onSelect(it)
                         dismiss.invoke()
@@ -82,7 +83,10 @@ private fun <T : Any> Options(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        state = rememberLazyListState(options.indexOfFirst { it.value == selected }),
+        state = rememberLazyListState(
+            options.indexOfFirst { it.value == selected }
+                .coerceAtLeast(0)
+        ),
         modifier = modifier
             .padding(top = 8.dp, bottom = 8.dp),
     ) {
@@ -93,7 +97,8 @@ private fun <T : Any> Options(
             OptionItem(
                 text = stringResource(option.textStringId),
                 selected = option.value == selected,
-                onClick = { onSelect(option.value) }
+                onClick = { onSelect(option.value) },
+                modifier = Modifier.testTag("selectable:${option.value}"),
             )
         }
     }

@@ -64,7 +64,7 @@ internal fun SettingsScreen(
                 stringResource(compressionSummaryId)
             },
             options = compressionOptions,
-            selected = settings.audioCompression,
+            selectedValue = settings.audioCompression,
             onSelect = onSetAudioCompression,
         )
         IntPreference(
