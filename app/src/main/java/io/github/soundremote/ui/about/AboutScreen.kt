@@ -159,7 +159,7 @@ private suspend fun getLicense(context: Context, fileName: String): String =
         }
     }
 
-private val paddingMod = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 24.dp)
+private val paddingMod = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
 
 @Composable
 private fun Credit(
