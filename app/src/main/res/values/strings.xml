@@ -35,7 +35,7 @@
     <!--Home screen-->
     <string name="connect_caption">Connect</string>
     <string name="disconnect_caption">Disconnect</string>
-    <string name="address_label">Server address</string>
+    <string name="server_address">Server address</string>
     <string name="navigation_menu" tools:override="true">Navigation menu</string>
     <string name="action_settings">Settings</string>
     <string name="action_about">About</string>

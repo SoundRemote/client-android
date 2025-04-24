@@ -19,8 +19,8 @@ import io.github.soundremote.R
 import io.github.soundremote.stringResource
 import io.github.soundremote.ui.theme.SoundRemoteTheme
 import io.github.soundremote.util.ConnectionStatus
-import io.github.soundremote.util.Key
 import io.github.soundremote.util.HotkeyDescription
+import io.github.soundremote.util.Key
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -305,7 +305,6 @@ internal class HomeScreenTest {
                 onNavigateToAbout = onNavigateToAbout,
                 showSnackbar = showSnackbar,
                 modifier = modifier,
-                showAddressInTopBar = false,
             )
         }
     }

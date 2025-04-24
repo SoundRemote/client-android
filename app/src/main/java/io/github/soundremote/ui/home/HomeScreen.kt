@@ -8,13 +8,10 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -38,21 +35,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -96,7 +96,6 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToAbout: () -> Unit,
     showSnackbar: (String, SnackbarDuration) -> Unit,
-    showAddressInTopBar: Boolean,
     modifier: Modifier = Modifier,
 ) {
     // Messages
@@ -112,30 +111,28 @@ fun HomeScreen(
     val onAddressChange: (TextFieldValue) -> Unit = { newAddressValue ->
         cleanAddressInput(newAddressValue, address)?.let { address = it }
     }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(stringResource(R.string.app_name))
-                        if (showAddressInTopBar) {
-                            ConnectComponent(
-                                address = address,
-                                recentAddresses = uiState.recentServersAddresses,
-                                onAddressChange = onAddressChange,
-                                connectionStatus = uiState.connectionStatus,
-                                onConnect = { onConnect(it) },
-                                onDisconnect = onDisconnect,
-                                topBar = true,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
-                        }
-                    }
+                    AddressEdit(
+                        address = address,
+                        recentAddresses = uiState.recentServersAddresses,
+                        onChange = onAddressChange,
+                        onConnect = { onConnect(address.text) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 16.dp)
+                    )
                 },
                 actions = {
+                    ConnectButton(
+                        connectionStatus = uiState.connectionStatus,
+                        onConnect = { onConnect(address.text) },
+                        onDisconnect = onDisconnect,
+                    )
                     IconToggleButton(
                         checked = uiState.isMuted,
                         onCheckedChange = { onSetMuted(it) }
@@ -190,7 +187,8 @@ fun HomeScreen(
                             )
                         }
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {
@@ -205,24 +203,14 @@ fun HomeScreen(
             }
         },
         modifier = modifier
+            .testTag("homeScreen")
     ) { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues)
         ) {
-            if (!showAddressInTopBar) {
-                ConnectComponent(
-                    address = address,
-                    recentAddresses = uiState.recentServersAddresses,
-                    onAddressChange = onAddressChange,
-                    connectionStatus = uiState.connectionStatus,
-                    onConnect = { onConnect(it) },
-                    onDisconnect = onDisconnect,
-                    topBar = false,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                )
-            }
             LazyColumn(
                 modifier = Modifier
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .weight(1f),
             ) {
                 items(items = uiState.hotkeys, key = { it.id }) { hotkey ->
@@ -238,40 +226,6 @@ fun HomeScreen(
             }
             MediaBar(onSendKey)
         }
-    }
-}
-
-@Composable
-private fun ConnectComponent(
-    address: TextFieldValue,
-    recentAddresses: List<String>,
-    onAddressChange: (TextFieldValue) -> Unit,
-    connectionStatus: ConnectionStatus,
-    onConnect: (String) -> Unit,
-    onDisconnect: () -> Unit,
-    topBar: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier,
-    ) {
-        AddressEdit(
-            address = address,
-            recentAddresses = recentAddresses,
-            onChange = onAddressChange,
-            onConnect = { onConnect(address.text) },
-            modifier = Modifier.weight(1f),
-            hideLabel = topBar,
-        )
-        Spacer(Modifier.width(16.dp))
-        ConnectButton(
-            connectionStatus = connectionStatus,
-            onConnect = { onConnect(address.text) },
-            onDisconnect = onDisconnect,
-            // Padding to look aligned with OutlinedTextField vertically
-            modifier = if (topBar) Modifier else Modifier.padding(top = 8.dp)
-        )
     }
 }
 
@@ -291,20 +245,15 @@ private fun AddressEdit(
     recentAddresses: List<String>,
     onChange: (TextFieldValue) -> Unit,
     onConnect: () -> Unit,
-    hideLabel: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // Hide label when in top bar mode because it doesn't fit
-    val label: @Composable (() -> Unit)? = if (hideLabel) {
-        null
-    } else {
-        { Text(stringResource(R.string.address_label)) }
-    }
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    var showRecentServers by rememberSaveable { mutableStateOf(false) }
     OutlinedTextField(
         value = address,
         onValueChange = onChange,
-        label = label,
+        placeholder = { Text(stringResource(R.string.server_address)) },
+        // To prevent font size change when TextField is in TopAppBar
+        textStyle = LocalTextStyle.current.copy(fontSize = MaterialTheme.typography.bodyLarge.fontSize),
         singleLine = true,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Go,
@@ -320,14 +269,16 @@ private fun AddressEdit(
                     stringResource(R.string.action_recent_servers),
                     Modifier
                         .size(24.dp)
-                        .rotate(if (expanded) 180f else 0f)
-                        .clickable { expanded = !expanded },
+                        .rotate(if (showRecentServers) 180f else 0f)
+                        .clickable { showRecentServers = !showRecentServers },
                 )
             }
         },
-        modifier = modifier,
+        modifier = modifier
+            // To prevent TextField size change when is in TopAppBar
+            .height(56.dp)
     )
-    if (expanded) {
+    if (showRecentServers) {
         AlertDialog(
             title = {
                 Text(stringResource(R.string.recent_servers_title))
@@ -340,7 +291,7 @@ private fun AddressEdit(
                             modifier = Modifier
                                 .clickable {
                                     onChange(TextFieldValue(recentAddresses[i]))
-                                    expanded = false
+                                    showRecentServers = false
                                 }
                                 .height(56.dp)
                                 .fillMaxWidth()
@@ -349,10 +300,10 @@ private fun AddressEdit(
                     }
                 }
             },
-            onDismissRequest = { expanded = false },
+            onDismissRequest = { showRecentServers = false },
             dismissButton = {
                 TextButton(
-                    onClick = { expanded = false }
+                    onClick = { showRecentServers = false }
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
@@ -452,7 +403,7 @@ private fun HotkeyItem(
 )
 @Composable
 private fun Portrait() {
-    HomePreview(false)
+    HomePreview()
 }
 
 @Preview(
@@ -465,11 +416,11 @@ private fun Portrait() {
 )
 @Composable
 private fun Landscape() {
-    HomePreview(true)
+    HomePreview()
 }
 
 @Composable
-private fun HomePreview(compactHeight: Boolean) {
+private fun HomePreview() {
     var status by remember { mutableStateOf(ConnectionStatus.DISCONNECTED) }
     var id = 0
     SoundRemoteTheme {
@@ -510,7 +461,6 @@ private fun HomePreview(compactHeight: Boolean) {
             onNavigateToSettings = {},
             onNavigateToAbout = {},
             showSnackbar = { _, _ -> },
-            showAddressInTopBar = compactHeight,
         )
     }
 }

@@ -25,9 +25,9 @@ import io.github.soundremote.ui.settings.settingsScreen
 
 @Composable
 fun AppNavigation(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     showSnackbar: (String, SnackbarDuration) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val compactHeight = windowSizeClass.windowHeightSizeClass == WindowHeightSizeClass.COMPACT
@@ -45,7 +45,6 @@ fun AppNavigation(
                 navController.navigateToHotkeyEdit(hotkeyId)
             },
             showSnackbar = showSnackbar,
-            compactHeight = compactHeight,
         )
         hotkeyListScreen(
             onNavigateToHotkeyCreate = navController::navigateToHotkeyCreate,
