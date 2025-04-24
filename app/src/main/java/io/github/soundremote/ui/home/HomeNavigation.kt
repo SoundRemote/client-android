@@ -18,7 +18,6 @@ fun NavGraphBuilder.homeScreen(
     onNavigateToAbout: () -> Unit,
     onNavigateToEditHotkey: (hotkeyId: Int) -> Unit,
     showSnackbar: (String, SnackbarDuration) -> Unit,
-    compactHeight: Boolean,
 ) {
     composable<HomeRoute> {
         val viewModel: HomeViewModel = hiltViewModel()
@@ -38,7 +37,6 @@ fun NavGraphBuilder.homeScreen(
             onNavigateToSettings = onNavigateToSettings,
             onNavigateToAbout = onNavigateToAbout,
             showSnackbar = showSnackbar,
-            showAddressInTopBar = compactHeight,
         )
     }
 }

@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,10 +34,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import io.github.soundremote.R
 import io.github.soundremote.data.Action
 import io.github.soundremote.data.ActionType
@@ -47,11 +54,6 @@ import io.github.soundremote.ui.components.ListItemSupport
 import io.github.soundremote.ui.components.NavigateUpButton
 import io.github.soundremote.util.TextValue
 import io.github.soundremote.util.showAppInfo
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -129,17 +131,20 @@ private fun Events(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         TopAppBar(
             title = { Text(stringResource(R.string.event_list_title)) },
             navigationIcon = { NavigateUpButton(onNavigateUp) },
+            scrollBehavior = scrollBehavior,
         )
-        LazyColumn(
-            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+        val scrollState = rememberScrollState()
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(scrollState)
         ) {
-            items(
-                items = events,
-                key = { eventState -> eventState.id }
-            ) { event ->
+            for (event in events) {
                 EventItem(
                     eventName = stringResource(event.nameStringId),
                     actionName = event.action?.let { action ->
@@ -164,7 +169,7 @@ private fun Events(
 
 private val eventItemModifier = Modifier
     .height(72.dp)
-    .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 24.dp)
+    .padding(horizontal = 16.dp, vertical = 8.dp)
 
 @Composable
 private fun EventItem(

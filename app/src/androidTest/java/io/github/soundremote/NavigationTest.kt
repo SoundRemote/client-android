@@ -32,7 +32,6 @@ class NavigationTest {
     private val appName by composeTestRule.stringResource(R.string.app_name)
 
     // Screen titles
-    private val homeTitle by composeTestRule.stringResource(R.string.app_name)
     private val eventsTitle by composeTestRule.stringResource(R.string.event_list_title)
     private val settingsTitle by composeTestRule.stringResource(R.string.settings_title)
     private val aboutTitleTemplate by composeTestRule.stringResource(R.string.about_title_template)
@@ -49,7 +48,7 @@ class NavigationTest {
     // First screen is HomeScreen
     @Test
     fun firstScreen_isHomeScreen() {
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // HomeScreen navigation menu button opens navigation menu
@@ -85,7 +84,7 @@ class NavigationTest {
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Multiple clicks on events menu navigate only once
@@ -104,7 +103,7 @@ class NavigationTest {
         }
 
         // Assert that app is back on Home screen
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Menu Settings navigates to settings screen
@@ -128,7 +127,7 @@ class NavigationTest {
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Multiple clicks on settings menu navigate only once
@@ -147,7 +146,7 @@ class NavigationTest {
         }
 
         // Assert that app is back on Home screen
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Menu About navigates to about screen
@@ -173,7 +172,7 @@ class NavigationTest {
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Multiple clicks on about menu navigate only once
@@ -193,7 +192,7 @@ class NavigationTest {
         }
 
         // Assert that app is back on Home screen
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Edit hotkeys FAB navigates to hotkeys screen
@@ -213,7 +212,7 @@ class NavigationTest {
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Given: simultaneous clicks on different navigation menu items on `Home` screen.
@@ -235,7 +234,7 @@ class NavigationTest {
             activity.onBackPressedDispatcher.onBackPressed()
         }
         // Should be on `Home` screen
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Given: multiple simultaneous clicks on `Edit hotkeys` FAB on `Home` screen.
@@ -253,7 +252,7 @@ class NavigationTest {
             activity.onBackPressedDispatcher.onBackPressed()
         }
         // Should be on `Home` screen
-        composeTestRule.onNodeWithText(homeTitle).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("homeScreen").assertIsDisplayed()
     }
 
     // Create hotkey button navigates to create hotkey screen

@@ -31,7 +31,7 @@
     <!--Home screen-->
     <string name="connect_caption">Подключиться</string>
     <string name="disconnect_caption">Отключиться</string>
-    <string name="address_label">Адрес сервера</string>
+    <string name="server_address">Адрес сервера</string>
     <string name="navigation_menu" tools:override="true">Меню навигации</string>
     <string name="action_settings">Настройки</string>
     <string name="action_about">О приложении</string>

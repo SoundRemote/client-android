@@ -64,14 +64,14 @@ internal fun SettingsScreen(
                 stringResource(compressionSummaryId)
             },
             options = compressionOptions,
-            selected = settings.audioCompression,
+            selectedValue = settings.audioCompression,
             onSelect = onSetAudioCompression,
         )
         IntPreference(
             title = stringResource(R.string.pref_server_port_title),
             summary = stringResource(R.string.pref_server_port_summary),
             value = settings.serverPort,
-            onUpdate = { onSetServerPort(it) },
+            onPreferenceChange = onSetServerPort,
             validValues = validPorts,
             defaultValue = DEFAULT_SERVER_PORT,
         )
@@ -79,7 +79,7 @@ internal fun SettingsScreen(
             title = stringResource(R.string.pref_client_port_title),
             summary = stringResource(R.string.pref_client_port_summary),
             value = settings.clientPort,
-            onUpdate = { onSetClientPort(it) },
+            onPreferenceChange = onSetClientPort,
             validValues = validPorts,
             defaultValue = DEFAULT_CLIENT_PORT,
         )

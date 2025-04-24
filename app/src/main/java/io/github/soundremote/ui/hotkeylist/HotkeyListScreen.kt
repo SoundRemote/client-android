@@ -31,6 +31,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -71,6 +73,7 @@ internal fun HotkeyListScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         TopAppBar(
             title = { Text(stringResource(R.string.hotkey_list_title)) },
             navigationIcon = { NavigateUpButton(onNavigateUp) },
@@ -82,7 +85,8 @@ internal fun HotkeyListScreen(
                 ) {
                     Icon(Icons.Default.Add, stringResource(R.string.action_hotkey_create))
                 }
-            }
+            },
+            scrollBehavior = scrollBehavior,
         )
         HotkeyList(
             hotkeys = state.hotkeys,
@@ -90,6 +94,7 @@ internal fun HotkeyListScreen(
             onEdit = onNavigateToHotkeyEdit,
             onMove = { from, to -> onMove(from, to) },
             onDelete = { onDelete(it) },
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         )
     }
 }

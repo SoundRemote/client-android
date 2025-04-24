@@ -29,7 +29,7 @@ internal fun IntPreference(
     title: String,
     summary: String,
     value: Int,
-    onUpdate: (Int) -> Unit,
+    onPreferenceChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     validValues: IntRange? = null,
     defaultValue: Int? = null,
@@ -56,7 +56,7 @@ internal fun IntPreference(
         }
         val isValidValue by remember {
             derivedStateOf {
-                validValues?.contains(editValue.text.toIntOrNull()) ?: true
+                validValues?.contains(editValue.text.toIntOrNull()) != false
             }
         }
         AlertDialog(
@@ -91,7 +91,7 @@ internal fun IntPreference(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onUpdate(editValue.text.toInt())
+                        onPreferenceChange(editValue.text.toInt())
                         showEdit = false
                     },
                     enabled = isValidValue,
@@ -124,7 +124,7 @@ private fun IntPreferencePreview() {
         title = "Title",
         summary = "This is a very, very long and descriptive summary.",
         value = 1337,
-        onUpdate = {},
+        onPreferenceChange = {},
         defaultValue = 8976,
     )
 }
@@ -136,6 +136,6 @@ private fun IntPreferenceNoDefaultPreview() {
         title = "Title",
         summary = "This is a very, very long and descriptive summary.",
         value = 1337,
-        onUpdate = {},
+        onPreferenceChange = {},
     )
 }

@@ -33,6 +33,7 @@ class AudioPipe(
     private val playLock = Any()
     private val stopLock = Any()
 
+    @Volatile
     @PipeState
     var state: Int = PIPE_STOPPED
         private set
