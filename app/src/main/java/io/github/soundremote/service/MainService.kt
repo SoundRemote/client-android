@@ -277,7 +277,11 @@ internal class MainService : MediaBrowserServiceCompat() {
         if (audioPipe.state != PIPE_PLAYING) return
         Timber.i("Stopping playback")
         connection.processAudio = false
-        unregisterReceiver(becomingNoisyReceiver)
+        try {
+            unregisterReceiver(becomingNoisyReceiver)
+        } catch (_: IllegalArgumentException) {
+            // if the receiver was not previously registered or already unregistered
+        }
         abandonAudioFocus()
         audioPipe.stop()
     }
