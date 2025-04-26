@@ -112,6 +112,9 @@ internal class MainService : MediaBrowserServiceCompat() {
     private var holdingFocus = false
     private val focusLock = Any()
 
+    @Volatile
+    private var ignoreAudioFocus = false
+
     // Call state
     @Suppress("DEPRECATION")
     private lateinit var phoneStateListener: android.telephony.PhoneStateListener
@@ -168,6 +171,7 @@ internal class MainService : MediaBrowserServiceCompat() {
         }
         scope.launch {
             userPreferencesRepo.ignoreAudioFocusFlow.collect { ignore ->
+                ignoreAudioFocus = ignore
                 if (ignore) {
                     // Abandon audio focus in case we have it
                     abandonAudioFocus()
@@ -249,13 +253,12 @@ internal class MainService : MediaBrowserServiceCompat() {
         return binder
     }
 
-    private fun updatePlaybackState() = scope.launch {
+    private fun updatePlaybackState() {
         if (connectionStatus.value == ConnectionStatus.CONNECTED &&
             !isMuted.value &&
             audioPipe.state != PIPE_PLAYING
         ) {
-            val canStart = userPreferencesRepo.getIgnoreAudioFocus() || getFocusOrMute()
-            if (canStart) {
+            if (ignoreAudioFocus || getFocusOrMute()) {
                 startPlayback()
             }
         } else {
@@ -352,10 +355,12 @@ internal class MainService : MediaBrowserServiceCompat() {
      * Requests audio focus. If the request is denied, sends the system message and mutes.
      * @return true if audio focus was gained successfully, false otherwise
      */
-    private suspend fun getFocusOrMute(): Boolean {
+    private fun getFocusOrMute(): Boolean {
         if (requestAudioFocus()) return true
-        _systemMessages.send(SystemMessage.MESSAGE_AUDIO_FOCUS_REQUEST_FAILED)
         setMuted(true)
+        scope.launch {
+            _systemMessages.send(SystemMessage.MESSAGE_AUDIO_FOCUS_REQUEST_FAILED)
+        }
         return false
     }
 
