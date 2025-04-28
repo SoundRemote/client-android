@@ -6,8 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -137,12 +141,10 @@ private fun Events(
             navigationIcon = { NavigateUpButton(onNavigateUp) },
             scrollBehavior = scrollBehavior,
         )
-        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
-                .padding(vertical = 8.dp)
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .verticalScroll(scrollState)
+                .verticalScroll(rememberScrollState())
         ) {
             for (event in events) {
                 EventItem(
@@ -163,6 +165,7 @@ private fun Events(
                     }
                 )
             }
+            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
         }
     }
 }
