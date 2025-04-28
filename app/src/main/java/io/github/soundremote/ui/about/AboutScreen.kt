@@ -93,7 +93,7 @@ internal fun AboutScreen(
                 }
             }
             Text(
-                text = "© 2024 Aleksandr Shipovskii",
+                text = "© 2025 Aleksandr Shipovskii",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = paddingMod
             )
