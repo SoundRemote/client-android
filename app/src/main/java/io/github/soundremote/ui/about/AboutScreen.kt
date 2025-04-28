@@ -6,7 +6,11 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -15,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,10 +28,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import io.github.soundremote.BuildConfig
 import io.github.soundremote.R
 import io.github.soundremote.ui.components.ListItemHeadline
@@ -56,70 +63,79 @@ internal fun AboutScreen(
     }
 
     Column(modifier) {
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         TopAppBar(
             title = {
                 Text(stringResource(R.string.about_title_template).format(appName))
             },
             navigationIcon = { NavigateUpButton(onNavigateUp) },
+            scrollBehavior = scrollBehavior,
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = paddingMod
+        Column(
+            modifier = Modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(rememberScrollState())
         ) {
-            Text(
-                text = appName + ' ' + BuildConfig.VERSION_NAME,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            TextButton(
-                onClick = { openUrl("https://soundremote.github.io", context) },
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = paddingMod
             ) {
-                Text(stringResource(R.string.open_homepage))
+                Text(
+                    text = appName + ' ' + BuildConfig.VERSION_NAME,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(
+                    onClick = { openUrl("https://soundremote.github.io", context) },
+                ) {
+                    Text(stringResource(R.string.open_homepage))
+                }
             }
-        }
-        Text(
-            text = "© 2024 Aleksandr Shipovskii",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = paddingMod
-        )
-        val loadLicense: (String) -> Unit = { fileName ->
-            if (fileName != licenseFile) {
-                licenseText = ""
-                licenseFile = fileName
+            Text(
+                text = "© 2024 Aleksandr Shipovskii",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = paddingMod
+            )
+            val loadLicense: (String) -> Unit = { fileName ->
+                if (fileName != licenseFile) {
+                    licenseText = ""
+                    licenseFile = fileName
+                }
+                showLicense = true
             }
-            showLicense = true
+            Credit(
+                name = "Accompanist",
+                onShowLicense = { loadLicense(apache2File) },
+                onOpenHomepage = { openUrl("https://google.github.io/accompanist", context) }
+            )
+            Credit(
+                name = "Guava",
+                onShowLicense = { loadLicense(apache2File) },
+                onOpenHomepage = { openUrl("https://guava.dev", context) }
+            )
+            Credit(
+                name = "Hilt",
+                onShowLicense = { loadLicense(apache2File) },
+                onOpenHomepage = { openUrl("https://dagger.dev/hilt/", context) }
+            )
+            Credit(
+                name = "Opus",
+                onShowLicense = { loadLicense(opusFile) },
+                onOpenHomepage = { openUrl("https://opus-codec.org", context) }
+            )
+            Credit(
+                name = "Seismic",
+                onShowLicense = { loadLicense(apache2File) },
+                onOpenHomepage = { openUrl("https://github.com/square/seismic", context) }
+            )
+            Credit(
+                name = "Timber",
+                onShowLicense = { loadLicense(apache2File) },
+                onOpenHomepage = { openUrl("https://github.com/JakeWharton/timber", context) }
+            )
+            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
         }
-        Credit(
-            name = "Accompanist",
-            onShowLicense = { loadLicense(apache2File) },
-            onOpenHomepage = { openUrl("https://google.github.io/accompanist", context) }
-        )
-        Credit(
-            name = "Guava",
-            onShowLicense = { loadLicense(apache2File) },
-            onOpenHomepage = { openUrl("https://guava.dev", context) }
-        )
-        Credit(
-            name = "Hilt",
-            onShowLicense = { loadLicense(apache2File) },
-            onOpenHomepage = { openUrl("https://dagger.dev/hilt/", context) }
-        )
-        Credit(
-            name = "Opus",
-            onShowLicense = { loadLicense(opusFile) },
-            onOpenHomepage = { openUrl("https://opus-codec.org", context) }
-        )
-        Credit(
-            name = "Seismic",
-            onShowLicense = { loadLicense(apache2File) },
-            onOpenHomepage = { openUrl("https://github.com/square/seismic", context) }
-        )
-        Credit(
-            name = "Timber",
-            onShowLicense = { loadLicense(apache2File) },
-            onOpenHomepage = { openUrl("https://github.com/JakeWharton/timber", context) }
-        )
     }
     if (showLicense) {
         AlertDialog(
@@ -143,7 +159,7 @@ internal fun AboutScreen(
 }
 
 private fun openUrl(url: String, context: Context) {
-    val webpage: Uri = Uri.parse(url)
+    val webpage: Uri = url.toUri()
     val intent = Intent(Intent.ACTION_VIEW, webpage)
     if (intent.resolveActivity(context.packageManager) != null) {
         context.startActivity(intent)

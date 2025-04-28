@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -91,7 +92,7 @@ internal fun HotkeyScreen(
         return context.getString(keyCode.keyLabelId()!!)
     }
 
-    Column {
+    Column(modifier) {
         TopAppBar(
             title = {
                 val title = when (state.mode) {
@@ -121,7 +122,11 @@ internal fun HotkeyScreen(
                 }
             }
         )
-        Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+        Column(
+            modifier = Modifier
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+        ) {
             KeySelect(
                 keyCode = state.keyCode,
                 keyGroupIndex = state.keyGroupIndex,
