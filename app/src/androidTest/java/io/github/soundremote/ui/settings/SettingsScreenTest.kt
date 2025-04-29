@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -15,6 +16,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import io.github.soundremote.R
@@ -29,6 +32,7 @@ import org.junit.Rule
 import org.junit.Test
 
 internal class SettingsScreenTest {
+
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
@@ -54,7 +58,7 @@ internal class SettingsScreenTest {
 
     // All (non advanced) settings exist by default
     @Test
-    fun allSettings_byDefault_areDisplayed() {
+    fun allSettings_byDefault_exist() {
         composeTestRule.setContent {
             CreateSettingsScreen()
         }
@@ -83,7 +87,10 @@ internal class SettingsScreenTest {
         }
 
         composeTestRule.apply {
-            onNodeWithText(advanced).performClick()
+            onNodeWithText(advanced).apply {
+                performScrollTo()
+                performClick()
+            }
             onNodeWithText(ignoreFocus).assertExists()
         }
     }
@@ -146,7 +153,11 @@ internal class SettingsScreenTest {
         }
 
         composeTestRule.apply {
-            onNodeWithText(advanced).performClick()
+            // Click "Advanced"
+            onNodeWithText(advanced).apply {
+                performScrollTo()
+                performClick()
+            }
             onNodeWithText(ignoreFocus).assertIsOn()
         }
     }
@@ -160,7 +171,10 @@ internal class SettingsScreenTest {
             CreateSettingsScreen()
         }
 
-        composeTestRule.onNodeWithText(audioCompression).performClick()
+        composeTestRule.onNodeWithText(audioCompression).apply {
+            performScrollTo()
+            performClick()
+        }
 
         composeTestRule.onNode(
             hasText(audioCompression)
@@ -174,7 +188,10 @@ internal class SettingsScreenTest {
         composeTestRule.setContent {
             CreateSettingsScreen()
         }
-        composeTestRule.onNodeWithText(serverPort).performClick()
+        composeTestRule.onNodeWithText(serverPort).apply {
+            performScrollTo()
+            performClick()
+        }
 
         composeTestRule.onNode(
             hasText(serverPort)
@@ -189,7 +206,10 @@ internal class SettingsScreenTest {
             CreateSettingsScreen()
         }
 
-        composeTestRule.onNodeWithText(clientPort).performClick()
+        composeTestRule.onNodeWithText(clientPort).apply {
+            performScrollTo()
+            performClick()
+        }
 
         composeTestRule.onNode(
             hasText(clientPort)
@@ -208,9 +228,17 @@ internal class SettingsScreenTest {
         }
 
         composeTestRule.apply {
-            onNodeWithText(audioCompression).performClick()
-            onNodeWithText(compression320).assertIsNotSelected()
-            onNodeWithText(compression320).performClick()
+            onNodeWithText(audioCompression).apply {
+                performScrollTo()
+                performClick()
+            }
+            // Scroll the Lazy list with the compression options
+            onNode(hasScrollAction() and hasAnyAncestor(isDialog()))
+                .performScrollToNode(hasText(compression320))
+            onNodeWithText(compression320).apply {
+                assertIsNotSelected()
+                performClick()
+            }
         }
 
         assertEquals(COMPRESSION_320, actual)
@@ -229,7 +257,10 @@ internal class SettingsScreenTest {
 
         val expected = 22_322
         composeTestRule.apply {
-            onNodeWithText(serverPort).performClick()
+            onNodeWithText(serverPort).apply {
+                performScrollTo()
+                performClick()
+            }
             onNodeWithTag(TestTag.INPUT_FIELD).performTextClearance()
             onNodeWithTag(TestTag.INPUT_FIELD).performTextInput("$expected")
             onNodeWithText(ok).performClick()
@@ -251,7 +282,10 @@ internal class SettingsScreenTest {
 
         val expected = 22_322
         composeTestRule.apply {
-            onNodeWithText(clientPort).performClick()
+            onNodeWithText(clientPort).apply {
+                performScrollTo()
+                performClick()
+            }
             onNodeWithTag(TestTag.INPUT_FIELD).performTextClearance()
             onNodeWithTag(TestTag.INPUT_FIELD).performTextInput("$expected")
             onNodeWithText(ok).performClick()
@@ -273,7 +307,10 @@ internal class SettingsScreenTest {
         }
 
         composeTestRule.apply {
-            onNodeWithText(advanced).performClick()
+            onNodeWithText(advanced).apply {
+                performScrollTo()
+                performClick()
+            }
             onNodeWithText(ignoreFocus).performClick()
         }
         assertEquals(expected, updatedValue)

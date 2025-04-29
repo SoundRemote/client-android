@@ -4,9 +4,12 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import io.github.soundremote.R
 import io.github.soundremote.data.Action
 import io.github.soundremote.data.ActionType
@@ -19,6 +22,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class ActionSelectDialogTest {
+
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
@@ -83,7 +87,7 @@ class ActionSelectDialogTest {
 
     // All actions exist for app action type
     @Test
-    fun appActionType_allActions_areDisplayed() {
+    fun appActionType_allActions_exist() {
         composeTestRule.setContent {
             CreateActionSelectDialog(
                 availableActionTypes = setOf(ActionType.APP),
@@ -92,7 +96,10 @@ class ActionSelectDialogTest {
 
         for (appAction in AppAction.entries) {
             val name = composeTestRule.activity.getString(appAction.nameStringId)
-            composeTestRule.onNodeWithText(name).assertExists()
+            composeTestRule.apply {
+                onNode(hasScrollAction()).performScrollToNode(hasText(name))
+                onNodeWithText(name).assertExists()
+            }
         }
     }
 

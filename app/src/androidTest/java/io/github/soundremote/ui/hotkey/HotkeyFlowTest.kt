@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -53,6 +54,7 @@ class HotkeyFlowTest {
         composeTestRule.apply {
             onNodeWithText(hotkeyEdit).performClick()
             onNodeWithText(hotkeyEdit).performTextInput(originalKey)
+            onNodeWithText(altMod).performScrollTo()
             onNodeWithText(altMod).performClick()
             onNodeWithText(name).performTextInput(originalName)
             onNodeWithContentDescription(save).performClick()
@@ -73,7 +75,9 @@ class HotkeyFlowTest {
             onNodeWithText(originalName).performClick()
             onNodeWithText(hotkeyEdit).performClick()
             onNodeWithText(hotkeyEdit).performTextInput(editedKey)
+            onNodeWithText(altMod).performScrollTo()
             onNodeWithText(altMod).performClick()
+            onNodeWithText(ctrlMod).performScrollTo()
             onNodeWithText(ctrlMod).performClick()
             onNodeWithContentDescription(clear).performClick()
             onNodeWithText(name).performTextInput(editedName)

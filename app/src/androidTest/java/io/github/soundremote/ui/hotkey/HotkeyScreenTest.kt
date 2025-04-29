@@ -56,7 +56,10 @@ internal class HotkeyScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText(ModKey.WIN.label).performClick()
+        composeTestRule.onNodeWithText(ModKey.WIN.label).apply {
+            performScrollTo()
+            performClick()
+        }
 
         assertEquals(expected, actual)
     }
@@ -73,7 +76,10 @@ internal class HotkeyScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText(ModKey.CTRL.label).performClick()
+        composeTestRule.onNodeWithText(ModKey.CTRL.label).apply {
+            performScrollTo()
+            performClick()
+        }
 
         assertEquals(expected, actual)
     }
@@ -90,7 +96,10 @@ internal class HotkeyScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText(ModKey.SHIFT.label).performClick()
+        composeTestRule.onNodeWithText(ModKey.SHIFT.label).apply {
+            performScrollTo()
+            performClick()
+        }
 
         assertEquals(expected, actual)
     }
@@ -107,7 +116,10 @@ internal class HotkeyScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText(ModKey.ALT.label).performClick()
+        composeTestRule.onNodeWithText(ModKey.ALT.label).apply {
+            performScrollTo()
+            performClick()
+        }
 
         assertEquals(expected, actual)
     }
