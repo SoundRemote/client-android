@@ -5,11 +5,12 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
-@InstallIn(SingletonComponent::class)
 @Module
+@InstallIn(SingletonComponent::class)
 internal interface ServiceModule {
+
     @Binds
     fun bindsServiceManager(
-        serviceManager: MainServiceManager?,
-    ): ServiceManager?
+        serviceManager: MainServiceManager,
+    ): ServiceManager
 }

@@ -16,8 +16,8 @@ import javax.inject.Singleton
 
 private const val USER_PREFERENCES_NAME = "user_preferences"
 
-@InstallIn(SingletonComponent::class)
 @Module
+@InstallIn(SingletonComponent::class)
 object DataStoreModule {
 
     @Singleton
