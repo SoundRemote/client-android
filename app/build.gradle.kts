@@ -110,6 +110,7 @@ dependencies {
     androidTestImplementation(libs.androidx.room.testing)
 // Local tests
     testImplementation(libs.bundles.local.tests)
+    testRuntimeOnly(libs.junit.platform.launcher)
 // JOpus
     implementation(libs.jopus)
 // Room
