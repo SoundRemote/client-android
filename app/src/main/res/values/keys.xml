@@ -11,7 +11,6 @@
 
     <string name="key_group_label_letter_digit" translatable="false">a-9</string>
     <string name="key_group_label_typing" translatable="false">\' \\</string>
-    <string name="key_group_label_media" translatable="false">⏯</string>
     <string name="key_group_label_navigation" translatable="false">→</string>
     <string name="key_group_label_numpad" translatable="false">*</string>
     <string name="key_group_label_control" translatable="false">Esc</string>
