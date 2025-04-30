@@ -1,6 +1,5 @@
 package io.github.soundremote.network
 
-import io.github.soundremote.network.PacketHeader.Companion.SIZE
 import io.github.soundremote.util.Net.uByte
 import io.github.soundremote.util.PacketProtocolType
 import java.nio.ByteBuffer
@@ -9,6 +8,7 @@ import java.nio.ByteBuffer
  * Custom data for ACK response on a Connect request.
  */
 data class AckConnectData(val protocol: PacketProtocolType) {
+
     companion object {
         /*
         unsigned 8bit   protocol version

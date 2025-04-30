@@ -1,12 +1,12 @@
 package io.github.soundremote.network
 
-import io.github.soundremote.network.PacketHeader.Companion.SIZE
 import io.github.soundremote.util.Net
 import io.github.soundremote.util.Net.uShort
 import io.github.soundremote.util.PacketRequestIdType
 import java.nio.ByteBuffer
 
 data class AckData(val requestId: PacketRequestIdType, val customData: ByteBuffer) {
+
     companion object {
         const val CUSTOM_DATA_SIZE = 4
 
