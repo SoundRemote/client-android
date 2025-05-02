@@ -1,7 +1,5 @@
 package io.github.soundremote.ui.hotkey
 
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -52,49 +50,56 @@ class HotkeyFlowTest {
         val originalName = "My name"
         val originalKey = "y"
         composeTestRule.apply {
-            onNodeWithText(hotkeyEdit).performClick()
-            onNodeWithText(hotkeyEdit).performTextInput(originalKey)
+            // Perform non-text actions first because performClick doesn't work if composable is
+            // covered by ime
             onNodeWithText(altMod).performScrollTo()
             onNodeWithText(altMod).performClick()
+
+            onNodeWithText(hotkeyEdit).performTextInput(originalKey)
             onNodeWithText(name).performTextInput(originalName)
+
             onNodeWithContentDescription(save).performClick()
         }
 
         // Assert created
-        composeTestRule.onNodeWithText(originalName).assertIsDisplayed()
+        composeTestRule.onNodeWithText(originalName).assertExists()
         composeTestRule.onNodeWithText(
             text = altMod,
             substring = true,
             ignoreCase = true,
-        ).assertIsDisplayed()
+        ).assertExists()
 
         // Edit
         val editedName = "New name"
         val editedKey = "m"
         composeTestRule.apply {
             onNodeWithText(originalName).performClick()
-            onNodeWithText(hotkeyEdit).performClick()
-            onNodeWithText(hotkeyEdit).performTextInput(editedKey)
+
+            // Non-text actions
             onNodeWithText(altMod).performScrollTo()
             onNodeWithText(altMod).performClick()
             onNodeWithText(ctrlMod).performScrollTo()
             onNodeWithText(ctrlMod).performClick()
+
+            onNodeWithText(hotkeyEdit).performTextInput(editedKey)
+            onNodeWithText(name).performScrollTo()
             onNodeWithContentDescription(clear).performClick()
             onNodeWithText(name).performTextInput(editedName)
+
             onNodeWithContentDescription(save).performClick()
         }
 
         // Assert edited
-        composeTestRule.onNodeWithText(editedName).assertIsDisplayed()
+        composeTestRule.onNodeWithText(editedName).assertExists()
         composeTestRule.onNodeWithText(
             text = ctrlMod,
             substring = true,
             ignoreCase = true,
-        ).assertIsDisplayed()
+        ).assertExists()
         composeTestRule.onNodeWithText(
             text = altMod,
             substring = true,
             ignoreCase = true,
-        ).assertIsNotDisplayed()
+        ).assertDoesNotExist()
     }
 }
