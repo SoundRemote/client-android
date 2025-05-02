@@ -132,17 +132,16 @@ class ActionSelectDialogTest {
 
     @Test
     fun okButton_onClick_confirmsWithCorrectAction() {
-        val count = 5
+        val hotkeys = buildList {
+            repeat(5) {
+                val id = it + 1
+                val desc = HotkeyDescription.WithString("Desc $id")
+                add(HotkeyInfoUIState(id, "Key $id", desc))
+            }
+        }
         val expected = Action(ActionType.HOTKEY, 1)
         var actual: Action? = null
         composeTestRule.setContent {
-            val hotkeys = buildList {
-                repeat(count) {
-                    val id = it + 1
-                    val desc = HotkeyDescription.WithString("Desc $id")
-                    add(HotkeyInfoUIState(id, "Key $id", desc))
-                }
-            }
             CreateActionSelectDialog(
                 availableActionTypes = ActionType.entries.toSet(),
                 initialAction = Action(ActionType.APP, AppAction.DISCONNECT.id),
@@ -152,8 +151,13 @@ class ActionSelectDialogTest {
         }
 
         composeTestRule.apply {
+            // Select hotkey actions
             onNodeWithText(hotkeyActionType).performClick()
+
+            // Hotkeys are in a lazy list, we need to scroll it first
+            onNode(hasScrollAction()).performScrollToNode(hasText("Key 1"))
             onNodeWithText("Key 1").performClick()
+
             onNodeWithText(ok).performClick()
         }
 
