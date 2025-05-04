@@ -7,14 +7,14 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
@@ -139,8 +139,11 @@ private fun HotkeyList(
     }
 
     LazyColumn(
-        modifier = modifier.fillMaxHeight(),
         state = listState,
+        contentPadding = PaddingValues(
+            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+        ),
+        modifier = modifier.fillMaxHeight()
     ) {
         itemsIndexed(
             items = hotkeys,
@@ -162,7 +165,6 @@ private fun HotkeyList(
                 isDragActive = listDragState.isDragActive,
             )
         }
-        item { Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing)) }
     }
     if (toDelete != null) {
         val dismiss = { toDelete = null }
