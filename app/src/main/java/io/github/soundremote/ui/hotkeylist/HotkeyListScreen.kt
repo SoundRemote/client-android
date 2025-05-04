@@ -94,10 +94,10 @@ internal fun HotkeyListScreen(
         )
         HotkeyList(
             hotkeys = state.hotkeys,
-            onChangeFavoured = { id, fav -> onChangeFavoured(id, fav) },
+            onChangeFavoured = onChangeFavoured,
             onEdit = onNavigateToHotkeyEdit,
-            onMove = { from, to -> onMove(from, to) },
-            onDelete = { onDelete(it) },
+            onMove = onMove,
+            onDelete = onDelete,
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         )
     }
@@ -124,13 +124,12 @@ private fun HotkeyList(
      * replaced by dragging.
      */
     var firstVisibleItem: VisibleItemInfo? by remember { mutableStateOf(null) }
-    val listDragState =
-        rememberListDragState(
-            key = hotkeys,
-            onMove = onMove,
-            listState = listState,
-            onFirstItemChange = { firstVisibleItem = it },
-        )
+    val listDragState = rememberListDragState(
+        key = hotkeys,
+        onMove = onMove,
+        onFirstVisibleItemChange = { firstVisibleItem = it },
+        listState = listState,
+    )
     LaunchedEffect(hotkeys) {
         firstVisibleItem?.let {
             listState.scrollToItem(it.index, it.offset)
@@ -305,17 +304,20 @@ private fun HotkeyItem(
 }
 
 @Composable
+/**
+ * @param onMove from to
+ */
 private fun rememberListDragState(
     key: Any?,
     onMove: (from: Int, to: Int) -> Unit,
+    onFirstVisibleItemChange: (VisibleItemInfo) -> Unit,
     listState: LazyListState = rememberLazyListState(),
-    onFirstItemChange: (VisibleItemInfo) -> Unit,
 ): ListDragState {
     return remember(key) {
         ListDragState(
             listState = listState,
             onMove = onMove,
-            onFirstItemChange = onFirstItemChange
+            onFirstVisibleItemChange = onFirstVisibleItemChange
         )
     }
 }
@@ -323,7 +325,7 @@ private fun rememberListDragState(
 private class ListDragState(
     private val listState: LazyListState,
     private val onMove: (from: Int, to: Int) -> Unit,
-    private val onFirstItemChange: (VisibleItemInfo) -> Unit,
+    private val onFirstVisibleItemChange: (VisibleItemInfo) -> Unit,
 ) {
     private val itemsInfo by derivedStateOf { listState.layoutInfo.visibleItemsInfo }
 
@@ -379,8 +381,8 @@ private class ListDragState(
                 if (offsetSign < 0) shiftedItemsIndices.last else shiftedItemsIndices.first
             val firstItemOffset = listState.firstVisibleItemScrollOffset
             when (listState.firstVisibleItemIndex) {
-                fromIndex -> onFirstItemChange(VisibleItemInfo(fromIndex, firstItemOffset))
-                toIndex -> onFirstItemChange(VisibleItemInfo(toIndex, firstItemOffset))
+                fromIndex -> onFirstVisibleItemChange(VisibleItemInfo(fromIndex, firstItemOffset))
+                toIndex -> onFirstVisibleItemChange(VisibleItemInfo(toIndex, firstItemOffset))
             }
             onMove(fromIndex, toIndex)
         }
