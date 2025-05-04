@@ -53,6 +53,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -327,24 +328,12 @@ private fun ConnectButton(
     modifier: Modifier = Modifier
 ) {
     val connectedColor = colorResource(R.color.indicatorConnected)
-    Box(modifier = modifier) {
-        val statusIndicatorSize = Modifier.size(48.dp)
-        when (connectionStatus) {
-            ConnectionStatus.DISCONNECTED -> {}
-
-            ConnectionStatus.CONNECTING -> {
-                CircularProgressIndicator(
-                    modifier = statusIndicatorSize,
-                )
-            }
-
-            ConnectionStatus.CONNECTED -> {
-                CircularProgressIndicator(
-                    progress = { 1f },
-                    modifier = statusIndicatorSize,
-                    color = connectedColor,
-                )
-            }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        if (connectionStatus == ConnectionStatus.CONNECTING) {
+            CircularProgressIndicator()
         }
         when (connectionStatus) {
             ConnectionStatus.DISCONNECTED -> {
