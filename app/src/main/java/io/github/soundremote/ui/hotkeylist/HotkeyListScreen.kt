@@ -7,17 +7,15 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListItemInfo
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -39,9 +37,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -94,16 +90,16 @@ internal fun HotkeyListScreen(
         )
         HotkeyList(
             hotkeys = state.hotkeys,
-            onChangeFavoured = { id, fav -> onChangeFavoured(id, fav) },
+            onChangeFavoured = onChangeFavoured,
             onEdit = onNavigateToHotkeyEdit,
-            onMove = { from, to -> onMove(from, to) },
-            onDelete = { onDelete(it) },
+            onMove = onMove,
+            onDelete = onDelete,
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         )
     }
 }
 
-private data class VisibleItemInfo(var index: Int, var offset: Int)
+data class VisibleItemInfo(var index: Int, var offset: Int)
 private data class DeleteInfo(val id: Int, val name: String) : Serializable
 
 @Composable
@@ -124,13 +120,12 @@ private fun HotkeyList(
      * replaced by dragging.
      */
     var firstVisibleItem: VisibleItemInfo? by remember { mutableStateOf(null) }
-    val listDragState =
-        rememberListDragState(
-            key = hotkeys,
-            onMove = onMove,
-            listState = listState,
-            onFirstItemChange = { firstVisibleItem = it },
-        )
+    val listDragState = rememberListDragState(
+        key = hotkeys,
+        onMove = onMove,
+        onFirstVisibleItemChange = { firstVisibleItem = it },
+        listState = listState,
+    )
     LaunchedEffect(hotkeys) {
         firstVisibleItem?.let {
             listState.scrollToItem(it.index, it.offset)
@@ -139,8 +134,11 @@ private fun HotkeyList(
     }
 
     LazyColumn(
-        modifier = modifier.fillMaxHeight(),
         state = listState,
+        contentPadding = PaddingValues(
+            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+        ),
+        modifier = modifier.fillMaxHeight()
     ) {
         itemsIndexed(
             items = hotkeys,
@@ -162,7 +160,6 @@ private fun HotkeyList(
                 isDragActive = listDragState.isDragActive,
             )
         }
-        item { Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing)) }
     }
     if (toDelete != null) {
         val dismiss = { toDelete = null }
@@ -200,9 +197,6 @@ private fun HotkeyList(
         )
     }
 }
-
-private enum class DragState { DRAGGED, SHIFTED, DEFAULT }
-private data class DragInfo(val state: DragState = DragState.DEFAULT, val offset: Float = 0f)
 
 @Composable
 private fun HotkeyItem(
@@ -298,102 +292,6 @@ private fun HotkeyItem(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun rememberListDragState(
-    key: Any?,
-    onMove: (from: Int, to: Int) -> Unit,
-    listState: LazyListState = rememberLazyListState(),
-    onFirstItemChange: (VisibleItemInfo) -> Unit,
-): ListDragState {
-    return remember(key) {
-        ListDragState(
-            listState = listState,
-            onMove = onMove,
-            onFirstItemChange = onFirstItemChange
-        )
-    }
-}
-
-private class ListDragState(
-    private val listState: LazyListState,
-    private val onMove: (from: Int, to: Int) -> Unit,
-    private val onFirstItemChange: (VisibleItemInfo) -> Unit,
-) {
-    private val itemsInfo by derivedStateOf { listState.layoutInfo.visibleItemsInfo }
-
-    private var draggedItemInfo: LazyListItemInfo? by mutableStateOf(null)
-    private var draggedDistance: Float by mutableFloatStateOf(0f)
-
-    // Items that are currently shifted by the dragged item.
-    private val shiftedItemsIndices by derivedStateOf {
-        val draggedIndex = draggedItemInfo?.index ?: return@derivedStateOf IntRange.EMPTY
-        val draggedOffsetTotal = draggedDistance + draggedItemInfo!!.offset
-        if (draggedDistance > 0) {
-            var currentItemVisibleIndex = itemsInfo.lastIndex
-            while (
-                currentItemVisibleIndex > 0 &&
-                itemsInfo[currentItemVisibleIndex].index > draggedIndex &&
-                itemsInfo[currentItemVisibleIndex].offset > draggedOffsetTotal
-            ) {
-                currentItemVisibleIndex--
-            }
-            (draggedIndex + 1)..itemsInfo[currentItemVisibleIndex].index
-        } else {
-            var currentItemVisibleIndex = 0
-            while (
-                currentItemVisibleIndex < itemsInfo.lastIndex &&
-                itemsInfo[currentItemVisibleIndex].index < draggedIndex &&
-                itemsInfo[currentItemVisibleIndex].offset < draggedOffsetTotal
-            ) {
-                currentItemVisibleIndex++
-            }
-            itemsInfo[currentItemVisibleIndex].index until draggedIndex
-        }
-    }
-    private val offsetSign by derivedStateOf { if (draggedDistance > 0) -1 else 1 }
-
-    val isDragActive: Boolean
-        get() = draggedItemInfo != null
-
-    fun onDragStart(draggedItemAbsoluteIndex: Int) {
-        draggedItemInfo = itemsInfo[draggedItemAbsoluteIndex - listState.firstVisibleItemIndex]
-    }
-
-    fun onDrag(delta: Float) {
-        draggedDistance += delta
-    }
-
-    fun onDragStop() {
-        if (shiftedItemsIndices.isEmpty()) {
-            draggedItemInfo = null
-            draggedDistance = 0f
-        } else {
-            val fromIndex = draggedItemInfo!!.index
-            val toIndex =
-                if (offsetSign < 0) shiftedItemsIndices.last else shiftedItemsIndices.first
-            val firstItemOffset = listState.firstVisibleItemScrollOffset
-            when (listState.firstVisibleItemIndex) {
-                fromIndex -> onFirstItemChange(VisibleItemInfo(fromIndex, firstItemOffset))
-                toIndex -> onFirstItemChange(VisibleItemInfo(toIndex, firstItemOffset))
-            }
-            onMove(fromIndex, toIndex)
-        }
-    }
-
-    fun dragInfo(index: Int): DragInfo {
-        val draggedItem = draggedItemInfo ?: return DragInfo()
-        return when (index) {
-            draggedItem.index -> DragInfo(DragState.DRAGGED, draggedDistance)
-            in shiftedItemsIndices -> DragInfo(
-                DragState.SHIFTED,
-                (draggedItem.size * offsetSign).toFloat()
-            )
-
-            else -> DragInfo()
         }
     }
 }
