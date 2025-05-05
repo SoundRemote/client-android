@@ -83,7 +83,10 @@ class ListDragState(
     }
 
     fun onDragStop() {
-        if (!shiftedItemsIndices.isEmpty()) {
+        if (shiftedItemsIndices.isEmpty()) {
+            draggedItemInfo = null
+            draggedDistance = 0f
+        } else {
             val fromIndex = draggedItemInfo!!.index
             val toIndex =
                 if (offsetSign < 0) shiftedItemsIndices.last else shiftedItemsIndices.first
@@ -92,8 +95,6 @@ class ListDragState(
             onFirstVisibleItemChange(VisibleItemInfo(firstItemIndex, firstItemOffset))
             onMove(fromIndex, toIndex)
         }
-        draggedItemInfo = null
-        draggedDistance = 0f
     }
 
     fun dragInfo(index: Int): DragInfo {
