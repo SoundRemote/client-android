@@ -157,7 +157,6 @@ private fun HotkeyList(
                 onDrag = { listDragState.onDrag(it) },
                 onDragStop = { listDragState.onDragStop() },
                 dragInfo = listDragState.dragInfo(index),
-                isDragActive = listDragState.isDragActive,
             )
         }
     }
@@ -210,17 +209,16 @@ private fun HotkeyItem(
     onDrag: (Float) -> Unit,
     onDragStop: () -> Unit,
     dragInfo: DragInfo,
-    isDragActive: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val animateOffset by animateFloatAsState(
         if (dragInfo.state == DragState.SHIFTED) dragInfo.offset else 0f,
         label = "Hotkey item drag"
     )
-    val offsetY = when {
-        !isDragActive -> 0f
-        (dragInfo.state == DragState.DRAGGED) -> dragInfo.offset
-        else -> animateOffset
+    val offsetY = when (dragInfo.state) {
+        DragState.DEFAULT -> 0f
+        DragState.DRAGGED -> dragInfo.offset
+        DragState.SHIFTED -> animateOffset
     }
     val draggedElevation = 8.dp
     Surface(
@@ -310,7 +308,6 @@ private fun CheckedItemPreview() {
         onDrag = {},
         onDragStop = {},
         dragInfo = DragInfo(),
-        isDragActive = true,
     )
 }
 
@@ -328,6 +325,5 @@ private fun UncheckedItemPreview() {
         onDrag = {},
         onDragStop = {},
         dragInfo = DragInfo(),
-        isDragActive = true,
     )
 }

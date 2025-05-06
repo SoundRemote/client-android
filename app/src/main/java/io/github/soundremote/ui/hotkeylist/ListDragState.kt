@@ -70,9 +70,6 @@ class ListDragState(
     }
     private val offsetSign by derivedStateOf { if (draggedDistance > 0) -1 else 1 }
 
-    val isDragActive: Boolean
-        get() = draggedItemInfo != null
-
     fun onDragStart(draggedItemAbsoluteIndex: Int) {
         val draggedItemVisibleIndex = draggedItemAbsoluteIndex - listState.firstVisibleItemIndex
         draggedItemInfo = listState.layoutInfo.visibleItemsInfo[draggedItemVisibleIndex]
