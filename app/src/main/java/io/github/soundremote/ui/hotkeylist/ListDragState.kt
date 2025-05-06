@@ -8,6 +8,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,9 +29,11 @@ fun rememberListDragState(
     }
 }
 
-enum class DragState { DRAGGED, SHIFTED, DEFAULT }
-
-data class DragInfo(val state: DragState = DragState.DEFAULT, val offset: Float = 0f)
+sealed interface DragState {
+    data object Dragged : DragState
+    data class Shifted(val offset: Int) : DragState
+    data object Default : DragState
+}
 
 @Stable
 class ListDragState(
@@ -41,10 +44,16 @@ class ListDragState(
     private var draggedItemInfo: LazyListItemInfo? by mutableStateOf(null)
     private var draggedDistance: Float by mutableFloatStateOf(0f)
 
+    var draggedItemIndex by mutableIntStateOf(-1)
+        private set
+
+    var shiftedState: DragState by mutableStateOf(DragState.Shifted(0))
+        private set
+
     // Items that are currently shifted by the dragged item.
-    private val shiftedItemsIndices by derivedStateOf {
-        val visibleItems = listState.layoutInfo.visibleItemsInfo
+    val shiftedItemsIndices by derivedStateOf {
         val draggedItem = draggedItemInfo ?: return@derivedStateOf IntRange.EMPTY
+        val visibleItems = listState.layoutInfo.visibleItemsInfo
         val draggedOffsetTotal = draggedItem.offset + draggedDistance
         if (draggedDistance > 0) {
             var currentVisibleItemIndex = visibleItems.lastIndex
@@ -73,14 +82,20 @@ class ListDragState(
     fun onDragStart(draggedItemAbsoluteIndex: Int) {
         val draggedItemVisibleIndex = draggedItemAbsoluteIndex - listState.firstVisibleItemIndex
         draggedItemInfo = listState.layoutInfo.visibleItemsInfo[draggedItemVisibleIndex]
+        draggedItemIndex = draggedItemAbsoluteIndex
     }
 
     fun onDrag(delta: Float) {
         draggedDistance += delta
+        val draggedItemSize = draggedItemInfo?.size ?: return
+        shiftedState = DragState.Shifted(
+            if (draggedDistance > 0) -draggedItemSize else draggedItemSize
+        )
     }
 
     fun onDragStop() {
         if (shiftedItemsIndices.isEmpty()) {
+            draggedItemIndex = -1
             draggedItemInfo = null
             draggedDistance = 0f
         } else {
@@ -91,19 +106,6 @@ class ListDragState(
             val firstItemOffset = listState.firstVisibleItemScrollOffset
             onFirstVisibleItemChange(VisibleItemInfo(firstItemIndex, firstItemOffset))
             onMove(fromIndex, toIndex)
-        }
-    }
-
-    fun dragInfo(index: Int): DragInfo {
-        val draggedItem = draggedItemInfo ?: return DragInfo()
-        return when (index) {
-            draggedItem.index -> DragInfo(DragState.DRAGGED, draggedDistance)
-            in shiftedItemsIndices -> DragInfo(
-                DragState.SHIFTED,
-                (draggedItem.size * offsetSign).toFloat()
-            )
-
-            else -> DragInfo()
         }
     }
 }

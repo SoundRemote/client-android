@@ -1,6 +1,6 @@
 package io.github.soundremote.ui.hotkeylist
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -38,18 +40,19 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -59,6 +62,7 @@ import io.github.soundremote.ui.components.ListItemSupport
 import io.github.soundremote.ui.components.NavigateUpButton
 import io.github.soundremote.util.TestTag
 import java.io.Serializable
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,10 +157,13 @@ private fun HotkeyList(
                     onEdit(hotkeyState.id)
                 },
                 onDelete = { toDelete = DeleteInfo(hotkeyState.id, hotkeyState.name) },
-                onDragStart = { listDragState.onDragStart(index) },
-                onDrag = { listDragState.onDrag(it) },
-                onDragStop = { listDragState.onDragStop() },
-                dragInfo = listDragState.dragInfo(index),
+                index = index,
+                listDragState = listDragState,
+                dragState = when (index) {
+                    listDragState.draggedItemIndex -> DragState.Dragged
+                    in listDragState.shiftedItemsIndices -> listDragState.shiftedState
+                    else -> DragState.Default
+                }
             )
         }
     }
@@ -205,32 +212,30 @@ private fun HotkeyItem(
     onChangeFavoured: (Boolean) -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onDragStart: () -> Unit,
-    onDrag: (Float) -> Unit,
-    onDragStop: () -> Unit,
-    dragInfo: DragInfo,
+    index: Int,
+    listDragState: ListDragState,
+    dragState: DragState,
     modifier: Modifier = Modifier,
 ) {
-    val animateOffset by animateFloatAsState(
-        if (dragInfo.state == DragState.SHIFTED) dragInfo.offset else 0f,
-        label = "Hotkey item drag"
+    val animateOffset by animateIntAsState(
+        if (dragState is DragState.Shifted) dragState.offset else 0,
+        label = "Shifted Hotkey item animation"
     )
-    val offsetY = when (dragInfo.state) {
-        DragState.DEFAULT -> 0f
-        DragState.DRAGGED -> dragInfo.offset
-        DragState.SHIFTED -> animateOffset
+    var draggedBy by remember { mutableFloatStateOf(0f) }
+    val offsetY = when (dragState) {
+        DragState.Dragged -> draggedBy.roundToInt()
+        is DragState.Shifted -> animateOffset
+        else -> 0
     }
     val draggedElevation = 8.dp
     Surface(
         onClick = onEdit,
+        tonalElevation = if (dragState == DragState.Dragged) draggedElevation else 0.dp,
+        shadowElevation = if (dragState == DragState.Dragged) draggedElevation else 0.dp,
         modifier = modifier
             .height(72.dp)
-            .zIndex(if (dragInfo.state == DragState.DRAGGED) 1f else 0f)
-            .graphicsLayer(
-                translationY = offsetY,
-            ),
-        tonalElevation = if (dragInfo.state == DragState.DRAGGED) draggedElevation else 0.dp,
-        shadowElevation = if (dragInfo.state == DragState.DRAGGED) draggedElevation else 0.dp,
+            .zIndex(if (dragState == DragState.Dragged) 1f else 0f)
+            .offset { IntOffset(0, offsetY) }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -255,11 +260,19 @@ private fun HotkeyItem(
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
                     .draggable(
-                        state = rememberDraggableState { onDrag(it) },
+                        state = rememberDraggableState { delta ->
+                            draggedBy += delta
+                            listDragState.onDrag(delta)
+                        },
                         orientation = Orientation.Vertical,
                         startDragImmediately = true,
-                        onDragStarted = { onDragStart() },
-                        onDragStopped = { onDragStop() },
+                        onDragStarted = {
+                            draggedBy = 0f
+                            listDragState.onDragStart(index)
+                        },
+                        onDragStopped = {
+                            listDragState.onDragStop()
+                        },
                     )
             )
             Box {
@@ -304,10 +317,9 @@ private fun CheckedItemPreview() {
         onChangeFavoured = {},
         onEdit = {},
         onDelete = {},
-        onDragStart = {},
-        onDrag = {},
-        onDragStop = {},
-        dragInfo = DragInfo(),
+        index = 1,
+        listDragState = ListDragState(LazyListState(), { _, _ -> }, {}),
+        dragState = DragState.Default,
     )
 }
 
@@ -321,9 +333,8 @@ private fun UncheckedItemPreview() {
         onChangeFavoured = {},
         onEdit = {},
         onDelete = {},
-        onDragStart = {},
-        onDrag = {},
-        onDragStop = {},
-        dragInfo = DragInfo(),
+        index = 2,
+        listDragState = ListDragState(LazyListState(), { _, _ -> }, {}),
+        dragState = DragState.Default,
     )
 }
