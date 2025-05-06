@@ -1,6 +1,7 @@
 package io.github.soundremote.ui.hotkeylist
 
-import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -217,15 +218,22 @@ private fun HotkeyItem(
     dragState: DragState,
     modifier: Modifier = Modifier,
 ) {
-    val animateOffset by animateIntAsState(
-        if (dragState is DragState.Shifted) dragState.offset else 0,
-        label = "Shifted Hotkey item animation"
-    )
+    val animateOffset = remember { Animatable(0, Int.VectorConverter) }
+    // When item is moved
+    LaunchedEffect(index) {
+        animateOffset.snapTo(0)
+    }
+    LaunchedEffect(dragState) {
+        if (dragState is DragState.Shifted) {
+            animateOffset.animateTo(dragState.offset)
+        } else if (dragState is DragState.Default) {
+            animateOffset.animateTo(0)
+        }
+    }
     var draggedBy by remember { mutableFloatStateOf(0f) }
-    val offsetY = when (dragState) {
+    val offsetY: Int = when (dragState) {
         DragState.Dragged -> draggedBy.roundToInt()
-        is DragState.Shifted -> animateOffset
-        else -> 0
+        else -> animateOffset.value
     }
     val draggedElevation = 8.dp
     Surface(
