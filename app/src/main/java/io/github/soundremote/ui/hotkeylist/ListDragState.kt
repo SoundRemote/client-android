@@ -77,7 +77,6 @@ class ListDragState(
             visibleItems[currentItemVisibleIndex].index until draggedItem.index
         }
     }
-    private val offsetSign by derivedStateOf { if (draggedDistance > 0) -1 else 1 }
 
     fun onDragStart(draggedItemAbsoluteIndex: Int) {
         val draggedItemVisibleIndex = draggedItemAbsoluteIndex - listState.firstVisibleItemIndex
@@ -101,7 +100,7 @@ class ListDragState(
         } else {
             val fromIndex = draggedItemInfo!!.index
             val toIndex =
-                if (offsetSign < 0) shiftedItemsIndices.last else shiftedItemsIndices.first
+                if (draggedDistance > 0) shiftedItemsIndices.last else shiftedItemsIndices.first
             val firstItemIndex = listState.firstVisibleItemIndex
             if (firstItemIndex == draggedItemIndex || firstItemIndex in shiftedItemsIndices) {
                 val firstItemOffset = listState.firstVisibleItemScrollOffset
