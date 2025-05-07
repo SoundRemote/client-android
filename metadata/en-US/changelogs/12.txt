@@ -1,0 +1,4 @@
+- Added a preference that allows to play audio simultaneously with other apps
+- UI changes
+- Bug fixes and optimizations
+- Updated dependencies
