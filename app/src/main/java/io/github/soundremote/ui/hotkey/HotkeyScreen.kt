@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.dropUnlessResumed
 import io.github.soundremote.R
 import io.github.soundremote.ui.components.NavigateUpButton
 import io.github.soundremote.util.Key
@@ -108,7 +109,7 @@ internal fun HotkeyScreen(
             navigationIcon = { NavigateUpButton(onClose) },
             actions = {
                 IconButton(
-                    onClick = {
+                    onClick = dropUnlessResumed {
                         if (checkCanSave()) {
                             val keyLabel = getKeyLabel(state.keyCode!!)
                             onSave(keyLabel)
