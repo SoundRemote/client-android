@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -219,9 +220,11 @@ private fun HotkeyItem(
     modifier: Modifier = Modifier,
 ) {
     val animateOffset = remember { Animatable(0, Int.VectorConverter) }
-    // When item is moved
+    var currentIndex by rememberSaveable { mutableIntStateOf(index) }
+
     LaunchedEffect(index) {
         animateOffset.snapTo(0)
+        currentIndex = index
     }
     LaunchedEffect(dragState) {
         if (dragState is DragState.Shifted) {
@@ -231,8 +234,9 @@ private fun HotkeyItem(
         }
     }
     var draggedBy by remember { mutableFloatStateOf(0f) }
-    val offsetY: Int = when (dragState) {
-        DragState.Dragged -> draggedBy.roundToInt()
+    val offsetY = when {
+        index != currentIndex -> 0
+        dragState is DragState.Dragged -> draggedBy.roundToInt()
         else -> animateOffset.value
     }
     val draggedElevation = 8.dp
