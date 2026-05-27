@@ -4,13 +4,11 @@ import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
-    id("kotlin-kapt")
     id("kotlinx-serialization")
 }
 
@@ -56,12 +54,8 @@ android {
         compose = true
         buildConfig = true
     }
-    ksp {
-        arg("room.generateKotlin", "true")
-    }
-    buildToolsVersion = "35.0.0"
-    sourceSets {
-        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    sourceSets.getByName("androidTest") {
+        kotlin.directories += "$projectDir/schemas"
     }
     lint {
         warning.add("MissingTranslation")
@@ -120,10 +114,10 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.compiler)
+    kspAndroidTest(libs.hilt.compiler)
 // Navigation
     implementation(libs.androidx.navigation.compose)
 // Serialization
