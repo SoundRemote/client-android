@@ -1,6 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -22,10 +22,10 @@ keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "io.github.soundremote"
-    compileSdk = 35
+    compileSdk = 37
     defaultConfig {
         applicationId = "io.github.soundremote"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 35
         versionCode = 12
         versionName = "0.5.0"
@@ -78,10 +78,8 @@ room {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.media)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
     implementation(libs.androidx.activity.ktx)  // For the predictive back gesture
     implementation(libs.bundles.androidx.lifeycle)
 // Compose
@@ -108,6 +106,7 @@ dependencies {
 // JOpus
     implementation(libs.jopus)
 // Room
+    implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 // Preference datastore

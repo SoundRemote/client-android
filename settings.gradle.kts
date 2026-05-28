@@ -11,7 +11,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            url = uri("https://www.jitpack.io")
+            url = uri("https://jitpack.io")
             content { includeGroup("com.github.ashipo") }
         }
     }
