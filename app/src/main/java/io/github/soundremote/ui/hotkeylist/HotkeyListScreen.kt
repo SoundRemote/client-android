@@ -21,10 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -51,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -89,7 +86,10 @@ internal fun HotkeyListScreen(
                         onNavigateToHotkeyCreate()
                     },
                 ) {
-                    Icon(Icons.Default.Add, stringResource(R.string.action_hotkey_create))
+                    Icon(
+                        painterResource(R.drawable.ic_add),
+                        stringResource(R.string.action_hotkey_create),
+                    )
                 }
             },
             scrollBehavior = scrollBehavior,
@@ -267,7 +267,7 @@ private fun HotkeyItem(
                 ListItemSupport(description)
             }
             Icon(
-                Icons.Default.Menu,
+                painterResource(R.drawable.ic_menu),
                 contentDescription = stringResource(R.string.drag_handle_description),
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
@@ -291,8 +291,8 @@ private fun HotkeyItem(
                 var showMenu by remember { mutableStateOf(false) }
                 IconButton(onClick = { showMenu = true }) {
                     Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.hotkey_actions_menu_description)
+                        painterResource(R.drawable.ic_more_vert),
+                        stringResource(R.string.hotkey_actions_menu_description),
                     )
                 }
                 DropdownMenu(

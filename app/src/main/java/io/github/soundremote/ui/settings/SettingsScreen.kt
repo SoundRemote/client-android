@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -29,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -119,7 +118,7 @@ internal fun SettingsScreen(
                     Column(Modifier.weight(1f)) {
                         ListItemHeadline(stringResource(R.string.settings_advanced_title))
                     }
-                    Icon(Icons.Default.KeyboardArrowDown, null)
+                    Icon(painterResource(R.drawable.ic_keyboard_arrow_down), null)
                 }
             }
             Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))

@@ -20,17 +20,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryNotEditable
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MenuAnchorType.Companion.PrimaryNotEditable
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarDuration
@@ -119,7 +116,7 @@ internal fun HotkeyScreen(
                         }
                     }
                 ) {
-                    Icon(Icons.Default.Done, stringResource(R.string.save))
+                    Icon(painterResource(R.drawable.ic_save_filled), stringResource(R.string.save))
                 }
             }
         )
@@ -192,7 +189,7 @@ internal fun HotkeyScreen(
 }
 
 /**
- * Returns a map of KeyGroup.index to all the Key entities that belong to that KeyGroup
+ * Returns a map of `KeyGroup.index` to all the Key entities that belong to that KeyGroup
  */
 private fun keyOptions(): Map<Int, List<Key>> {
     val result = mutableMapOf<Int, MutableList<Key>>()
@@ -416,8 +413,8 @@ private fun NameEdit(
             if (value.isNotEmpty()) {
                 IconButton(onClick = { onChange("") }) {
                     Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(R.string.clear)
+                        painterResource(R.drawable.ic_close),
+                        stringResource(R.string.clear),
                     )
                 }
             }

@@ -21,12 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -157,7 +151,7 @@ fun HomeScreen(
                         var showMenu by remember { mutableStateOf(false) }
                         IconButton(onClick = { showMenu = true }) {
                             Icon(
-                                Icons.Default.MoreVert,
+                                painterResource(R.drawable.ic_more_vert),
                                 contentDescription = stringResource(R.string.navigation_menu)
                             )
                         }
@@ -203,7 +197,10 @@ fun HomeScreen(
                 modifier = Modifier
                     .padding(bottom = 48.dp),
             ) {
-                Icon(Icons.Default.Edit, stringResource(R.string.action_edit_hotkeys))
+                Icon(
+                    painterResource(R.drawable.ic_edit_filled),
+                    stringResource(R.string.action_edit_hotkeys),
+                )
             }
         },
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -272,7 +269,7 @@ private fun AddressEdit(
         } else {
             {
                 Icon(
-                    Icons.Default.ArrowDropDown,
+                    painterResource(R.drawable.ic_arrow_drop_down),
                     stringResource(R.string.action_recent_servers),
                     Modifier
                         .size(24.dp)
@@ -341,8 +338,8 @@ private fun ConnectButton(
                     onClick = onConnect,
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                        contentDescription = stringResource(R.string.connect_caption),
+                        painterResource(R.drawable.ic_arrow_forward),
+                        stringResource(R.string.connect_caption),
                     )
                 }
             }
@@ -358,7 +355,7 @@ private fun ConnectButton(
                     onClick = onDisconnect,
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Close,
+                        painter = painterResource(R.drawable.ic_close),
                         contentDescription = stringResource(R.string.disconnect_caption),
                         tint = tint
                     )
