@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import androidx.window.core.layout.WindowHeightSizeClass
+import androidx.window.core.layout.WindowSizeClass
 import io.github.soundremote.ui.about.aboutScreen
 import io.github.soundremote.ui.about.navigateToAbout
 import io.github.soundremote.ui.events.eventsScreen
@@ -30,7 +30,9 @@ fun AppNavigation(
     showSnackbar: (String, SnackbarDuration) -> Unit,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    val compactHeight = windowSizeClass.windowHeightSizeClass == WindowHeightSizeClass.COMPACT
+    val compactHeight = !windowSizeClass.isHeightAtLeastBreakpoint(
+        WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND
+    )
     NavHost(
         navController = navController,
         startDestination = HomeRoute,
