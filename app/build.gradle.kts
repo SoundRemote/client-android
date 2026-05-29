@@ -1,16 +1,14 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
-    id("kotlin-kapt")
     id("kotlinx-serialization")
 }
 
@@ -24,10 +22,10 @@ keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "io.github.soundremote"
-    compileSdk = 35
+    compileSdk = 37
     defaultConfig {
         applicationId = "io.github.soundremote"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 35
         versionCode = 12
         versionName = "0.5.0"
@@ -56,12 +54,8 @@ android {
         compose = true
         buildConfig = true
     }
-    ksp {
-        arg("room.generateKotlin", "true")
-    }
-    buildToolsVersion = "35.0.0"
-    sourceSets {
-        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    sourceSets.getByName("androidTest") {
+        kotlin.directories += "$projectDir/schemas"
     }
     lint {
         warning.add("MissingTranslation")
@@ -84,10 +78,8 @@ room {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.media)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
     implementation(libs.androidx.activity.ktx)  // For the predictive back gesture
     implementation(libs.bundles.androidx.lifeycle)
 // Compose
@@ -114,16 +106,17 @@ dependencies {
 // JOpus
     implementation(libs.jopus)
 // Room
+    implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 // Preference datastore
     implementation(libs.androidx.datastore.preferences)
 // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.compiler)
+    kspAndroidTest(libs.hilt.compiler)
 // Navigation
     implementation(libs.androidx.navigation.compose)
 // Serialization

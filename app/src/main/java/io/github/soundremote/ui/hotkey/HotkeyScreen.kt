@@ -20,17 +20,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryNotEditable
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MenuAnchorType.Companion.PrimaryNotEditable
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarDuration
@@ -45,8 +42,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -86,12 +83,10 @@ internal fun HotkeyScreen(
     modifier: Modifier = Modifier,
 ) {
     val invalidKeyError = stringResource(R.string.error_invalid_key)
-    val context = LocalContext.current
-
-    fun getKeyLabel(keyCode: KeyCode): String {
-        keyCode.toLetterOrDigitString()?.let { return it }
-        return context.getString(keyCode.keyLabelId()!!)
-    }
+    val resources = LocalResources.current
+    fun getKeyLabel(keyCode: KeyCode): String =
+        keyCode.toLetterOrDigitString()
+            ?: resources.getString(keyCode.keyLabelId()!!)
 
     Column(modifier) {
         TopAppBar(
@@ -119,7 +114,7 @@ internal fun HotkeyScreen(
                         }
                     }
                 ) {
-                    Icon(Icons.Default.Done, stringResource(R.string.save))
+                    Icon(painterResource(R.drawable.ic_save_filled), stringResource(R.string.save))
                 }
             }
         )
@@ -192,7 +187,7 @@ internal fun HotkeyScreen(
 }
 
 /**
- * Returns a map of KeyGroup.index to all the Key entities that belong to that KeyGroup
+ * Returns a map of `KeyGroup.index` to all the Key entities that belong to that KeyGroup
  */
 private fun keyOptions(): Map<Int, List<Key>> {
     val result = mutableMapOf<Int, MutableList<Key>>()
@@ -416,8 +411,8 @@ private fun NameEdit(
             if (value.isNotEmpty()) {
                 IconButton(onClick = { onChange("") }) {
                     Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(R.string.clear)
+                        painterResource(R.drawable.ic_close),
+                        stringResource(R.string.clear),
                     )
                 }
             }

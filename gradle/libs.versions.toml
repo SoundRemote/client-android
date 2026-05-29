@@ -1,38 +1,33 @@
 [versions]
-androidGradlePlugin = "8.9.2"
-kotlin = "2.1.20"
-ksp = "2.1.20-2.0.0"
-kotlinSerialization = "2.1.20"
-kotlinxSerializationJson = "1.8.1"
+androidGradlePlugin = "9.2.1"
+kotlin = "2.3.21"
+ksp = "2.3.8"
 
 accompanist = "0.37.3"
-androidxActivity = "1.10.1"
-androidxAppcompat = "1.7.0"
-androidxCore = "1.16.0"
-androidxTestCore = "1.6.1"
-composeBom = "2025.04.01"
-# datastore 1.1.5 is bugged - https://issuetracker.google.com/issues/413061399
-datastorePreferences = "1.1.4"
-guava = "33.4.8-android"
-hilt = "2.56.2"
-hiltNavigationCompose = "1.2.0"
-jopus = "0.3.1"
-jupiter = "5.12.2"
-kotlinxCoroutines = "1.10.2"
-lifecycle = "2.8.7"
-material = "1.12.0"
-media = "1.7.0"
-mockk = "1.14.0"
-navigation = "2.8.9"
-room = "2.7.1"
-runner = "1.6.2"
+androidxActivity = "1.13.0"
+androidxCore = "1.18.0"
+composeBom = "2026.05.01"
+datastorePreferences = "1.2.1"
+guava = "33.6.0-android"
+hilt = "2.59.2"
+hiltNavigationCompose = "1.3.0"
+jopus = "0.4.0"
+jupiter = "6.1.0"
+kotlinxCoroutines = "1.11.0"
+kotlinxSerializationJson = "1.11.0"
+lifecycle = "2.10.0"
+media = "1.8.0"
+mockk = "1.14.9"
+navigation = "2.9.8"
+room = "2.8.4"
 seismic = "1.0.3"
+testCore = "1.7.0"
+testRunner = "1.7.0"
 timber = "5.0.1"
 
 [libraries]
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidxActivity" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidxAppcompat" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -48,11 +43,12 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 androidx-media = { module = "androidx.media:media", version.ref = "media" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
-androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
-androidx-test-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "androidxTestCore" }
+androidx-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
+androidx-test-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "testCore" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
@@ -60,7 +56,6 @@ hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testi
 jopus = { group = "com.github.ashipo", name = "jopus", version.ref = "jopus" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "jupiter" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
-material = { module = "com.google.android.material:material", version.ref = "material" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
@@ -82,9 +77,8 @@ local-tests = [
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
