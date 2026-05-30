@@ -27,7 +27,7 @@ import io.github.soundremote.util.Net
 import io.github.soundremote.util.Net.COMPRESSION_320
 import io.github.soundremote.util.Net.COMPRESSION_NONE
 import io.github.soundremote.util.TestTag
-import org.junit.Assert.assertEquals
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 
@@ -241,7 +241,7 @@ internal class SettingsScreenTest {
             }
         }
 
-        assertEquals(COMPRESSION_320, actual)
+        actual shouldBe COMPRESSION_320
     }
 
     // Clicking confirm button in edit server port dialog invokes update callback with correct value
@@ -266,7 +266,7 @@ internal class SettingsScreenTest {
             onNodeWithText(ok).performClick()
         }
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     // Clicking confirm button in edit client port dialog invokes update callback with correct value
@@ -291,7 +291,7 @@ internal class SettingsScreenTest {
             onNodeWithText(ok).performClick()
         }
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -313,7 +313,8 @@ internal class SettingsScreenTest {
             }
             onNodeWithText(ignoreFocus).performClick()
         }
-        assertEquals(expected, updatedValue)
+
+        updatedValue shouldBe expected
     }
 
     @Suppress("TestFunctionName")

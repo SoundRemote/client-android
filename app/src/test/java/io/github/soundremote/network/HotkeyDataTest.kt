@@ -4,7 +4,7 @@ import io.github.soundremote.util.Net
 import io.github.soundremote.util.Net.putUByte
 import io.github.soundremote.util.PacketKeyType
 import io.github.soundremote.util.PacketModsType
-import org.junit.jupiter.api.Assertions
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -18,7 +18,7 @@ internal class HotkeyDataTest {
 
         val actual = HotkeyData.SIZE
 
-        Assertions.assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @DisplayName("write() writes correctly")
@@ -35,6 +35,6 @@ internal class HotkeyDataTest {
         HotkeyData(key, mods).write(actual)
         actual.rewind()
 
-        Assertions.assertEquals(expected, actual)
+        actual shouldBe expected
     }
 }

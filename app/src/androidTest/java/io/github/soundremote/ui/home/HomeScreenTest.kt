@@ -21,9 +21,9 @@ import io.github.soundremote.ui.theme.SoundRemoteTheme
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.HotkeyDescription
 import io.github.soundremote.util.Key
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 
@@ -85,7 +85,7 @@ internal class HomeScreenTest {
 
         composeTestRule.onNodeWithContentDescription(muteApp).performClick()
 
-        assertTrue(actual)
+        actual.shouldBeTrue()
     }
 
     // Click on unmute button unmutes
@@ -99,7 +99,7 @@ internal class HomeScreenTest {
 
         composeTestRule.onNodeWithContentDescription(unmuteApp).performClick()
 
-        assertFalse(actual)
+        actual.shouldBeFalse()
     }
 
     // Click on MediaBar button invokes callback
@@ -112,7 +112,7 @@ internal class HomeScreenTest {
 
         composeTestRule.onNodeWithContentDescription(mediaStop).performClick()
 
-        assertEquals(Key.MEDIA_STOP, actual)
+        actual shouldBe Key.MEDIA_STOP
     }
 
     // Connect button is displayed when disconnected
@@ -172,7 +172,7 @@ internal class HomeScreenTest {
 
         composeTestRule.onNodeWithContentDescription(connect).performClick()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     // Click on the disconnect button disconnects
@@ -188,7 +188,7 @@ internal class HomeScreenTest {
 
         composeTestRule.onNodeWithContentDescription(disconnect).performClick()
 
-        assertTrue(actualPerformed)
+        actualPerformed.shouldBeTrue()
     }
 
     // Click on a hotkey calls onSendHotkey
@@ -208,7 +208,7 @@ internal class HomeScreenTest {
 
         composeTestRule.onNodeWithText(name).performClick()
 
-        assertEquals(expectedId, actualId)
+        actualId shouldBe expectedId
     }
 
     // Long click on a hotkey calls onEditHotkey
@@ -228,7 +228,7 @@ internal class HomeScreenTest {
 
         composeTestRule.onNodeWithText(name).performTouchInput { longClick() }
 
-        assertEquals(expectedId, actualId)
+        actualId shouldBe expectedId
     }
 
     // Click on recent servers button shows recent servers dialog

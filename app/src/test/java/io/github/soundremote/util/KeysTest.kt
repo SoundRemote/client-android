@@ -1,7 +1,11 @@
 package io.github.soundremote.util
 
 import io.github.soundremote.getHotkey
-import org.junit.jupiter.api.Assertions.*
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
@@ -15,72 +19,64 @@ internal class KeysTest {
     @DisplayName("Char.toKeyCode")
     @Nested
     inner class ToKeyCodeTests {
+
         @ParameterizedTest
         @DisplayName("returns the correct code for a digit or [a-z/A-Z] letter Char")
         @CsvSource("0, 48", "9, 57", "a, 65", "A, 65", "z, 90", "Z, 90")
         fun validChar_returnsCorrectCode(ch: Char, expected: Int) {
-            val actual = ch.toKeyCode()
-
-            assertEquals(KeyCode(expected), actual)
+            ch.toKeyCode() shouldBe KeyCode(expected)
         }
 
         @ParameterizedTest
         @DisplayName("returns null for a non digit or [a-z/A-Z] letter Char")
         @ValueSource(chars = ['%', 'Ж', '©'])
         fun invalidChar_returnsNull(ch: Char) {
-            val actual = ch.toKeyCode()
-
-            assertNull(actual)
+            ch.toKeyCode().shouldBeNull()
         }
     }
 
     @DisplayName("KeyCode.toLetterOrDigitChar")
     @Nested
     inner class KeyCodeToCharTests {
+
         @ParameterizedTest
         @DisplayName("returns the correct Char for a digit or [a-z/A-Z] letter key code")
         @CsvSource("48, 0", "57, 9", "65, a", "90, z")
         fun validCode_returnsCorrectChar(code: Int, expected: Char) {
-            val actual = KeyCode(code).toLetterOrDigitChar()
-
-            assertEquals(expected, actual)
+            KeyCode(code).toLetterOrDigitChar() shouldBe expected
         }
 
         @ParameterizedTest
         @DisplayName("returns null for a non digit or [a-z/A-Z] letter key code")
         @ValueSource(ints = [-1, 0, 200, 500])
         fun invalidCode_returnsNull(code: Int) {
-            val actual = KeyCode(code).toLetterOrDigitChar()
-
-            assertNull(actual)
+            KeyCode(code).toLetterOrDigitChar().shouldBeNull()
         }
     }
 
     @DisplayName("KeyCode.toLetterOrDigitString")
     @Nested
     inner class KeyCodeToStringTests {
+
         @ParameterizedTest
         @DisplayName("returns the correct (uppercase) String for a digit or [a-z/A-Z] letter key code")
         @CsvSource("0x30, 0", "0x39, 9", "0x41, A", "0x5A, Z")
         fun validCode_returnsCorrectChar(code: Int, expected: String) {
-            val actual = KeyCode(code).toLetterOrDigitString()
-
-            assertEquals(expected, actual)
+            KeyCode(code).toLetterOrDigitString() shouldBe expected
         }
 
         @ParameterizedTest
         @DisplayName("returns null for a non digit or [a-z/A-Z] letter key code")
         @ValueSource(ints = [-1, 0, 200, 500])
         fun invalidCode_returnsNull(code: Int) {
-            val actual = KeyCode(code).toLetterOrDigitChar()
-
-            assertNull(actual)
+            KeyCode(code).toLetterOrDigitChar().shouldBeNull()
         }
     }
 
     @DisplayName("generateDescription")
     @Nested
     inner class GenerateDescriptionTests {
+
         @ParameterizedTest
         @DisplayName("produces a description without mod key labels for a hotkey without mods")
         @EnumSource(ModKey::class)
@@ -89,10 +85,9 @@ internal class KeysTest {
 
             val description = generateDescription(hotkey)
 
-            assertTrue(description is HotkeyDescription.WithString)
-            description as HotkeyDescription.WithString
+            description.shouldBeInstanceOf<HotkeyDescription.WithString>()
             val actual = description.text.lowercase().contains(mod.label.lowercase())
-            assertFalse(actual)
+            actual.shouldBeFalse()
         }
 
         @ParameterizedTest
@@ -103,10 +98,9 @@ internal class KeysTest {
 
             val description = generateDescription(hotkey)
 
-            assertTrue(description is HotkeyDescription.WithString)
-            description as HotkeyDescription.WithString
+            description.shouldBeInstanceOf<HotkeyDescription.WithString>()
             val actual = description.text.lowercase().contains(mod.label.lowercase())
-            assertTrue(actual)
+            actual.shouldBeTrue()
         }
 
         @ParameterizedTest
@@ -117,10 +111,9 @@ internal class KeysTest {
 
             val description = generateDescription(hotkey)
 
-            assertTrue(description is HotkeyDescription.WithString)
-            description as HotkeyDescription.WithString
+            description.shouldBeInstanceOf<HotkeyDescription.WithString>()
             val actual = description.text.lowercase().contains(label.lowercase())
-            assertTrue(actual)
+            actual.shouldBeTrue()
         }
 
         @ParameterizedTest
@@ -131,9 +124,8 @@ internal class KeysTest {
 
             val description = generateDescription(hotkey)
 
-            assertTrue(description is HotkeyDescription.WithLabelId)
-            description as HotkeyDescription.WithLabelId
-            assertEquals(key.labelId, description.labelId)
+            description.shouldBeInstanceOf<HotkeyDescription.WithLabelId>()
+            description.labelId shouldBe key.labelId
         }
     }
 }

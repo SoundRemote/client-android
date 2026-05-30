@@ -100,6 +100,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ktx)
     androidTestImplementation(libs.androidx.navigation.testing)
     androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.kotest.assertions.core)
 // Local tests
     testImplementation(libs.bundles.local.tests)
     testRuntimeOnly(libs.junit.platform.launcher)

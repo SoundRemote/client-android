@@ -5,13 +5,13 @@ import io.github.soundremote.data.Hotkey
 import io.github.soundremote.data.TestHotkeyRepository
 import io.github.soundremote.getHotkey
 import io.github.soundremote.ui.hotkeylist.HotkeyListViewModel
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertIterableEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -25,8 +25,8 @@ import java.util.stream.Stream
 @ExtendWith(MainDispatcherExtension::class)
 @DisplayName("HotkeyListViewModel")
 class HotkeyListViewModelTest {
-    private var hotkeyRepository = TestHotkeyRepository()
 
+    private var hotkeyRepository = TestHotkeyRepository()
     private lateinit var viewModel: HotkeyListViewModel
 
     @BeforeEach
@@ -51,7 +51,7 @@ class HotkeyListViewModelTest {
         viewModel.deleteHotkey(id)
 
         val actual = viewModel.hotkeyListState.value.hotkeys.find { it.id == id }
-        assertNull(actual)
+        actual.shouldBeNull()
 
         collectJob.cancel()
     }
@@ -70,7 +70,7 @@ class HotkeyListViewModelTest {
         viewModel.changeFavoured(id, false)
 
         val actual = viewModel.hotkeyListState.value.hotkeys.find { it.id == id }!!.favoured
-        assertFalse(actual)
+        actual.shouldBeFalse()
 
         collectJob.cancel()
     }
@@ -93,7 +93,8 @@ class HotkeyListViewModelTest {
         viewModel.moveHotkey(from, to)
 
         val actual = viewModel.hotkeyListState.value.hotkeys.map { it.id }
-        assertIterableEquals(expected, actual)
+
+        actual shouldContainExactly expected
 
         collectJob.cancel()
     }

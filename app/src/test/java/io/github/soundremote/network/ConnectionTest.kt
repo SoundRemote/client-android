@@ -10,6 +10,7 @@ import io.github.soundremote.util.Net.putUShort
 import io.github.soundremote.util.Net.uShort
 import io.github.soundremote.util.PacketRequestIdType
 import io.github.soundremote.util.SystemMessage
+import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
@@ -30,7 +31,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -49,6 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger
 @ExtendWith(MockKExtension::class)
 @DisplayName("Connection")
 internal class ConnectionTest {
+
     @RelaxedMockK
     private lateinit var sendChannel: DatagramChannel
 
@@ -93,7 +94,7 @@ internal class ConnectionTest {
         val connection = createConnection(this)
         val actual = connection.connectionStatus.value
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @DisplayName("Changes status to \"connecting\" on connection attempt")
@@ -101,28 +102,28 @@ internal class ConnectionTest {
     fun connect_ChangesStatusToConnecting() = runTest {
         val connection = createConnection(this.backgroundScope)
 
-        assertEquals(ConnectionStatus.DISCONNECTED, connection.connectionStatus.value)
+        connection.connectionStatus.value shouldBe ConnectionStatus.DISCONNECTED
         val expected = ConnectionStatus.CONNECTING
 
         connection.connect(ADDRESS, SERVER_PORT, LOCAL_PORT, COMPRESSION)
         val actual = connection.connectionStatus.value
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @DisplayName("Changes status to \"disconnected\" on disconnect after connection attempt")
     @Test
     fun disconnect_ChangesStatusToDisconnected() = runTest {
         val connection = createConnection(this.backgroundScope)
-        assertEquals(ConnectionStatus.DISCONNECTED, connection.connectionStatus.value)
+        connection.connectionStatus.value shouldBe ConnectionStatus.DISCONNECTED
         connection.connect(ADDRESS, SERVER_PORT, LOCAL_PORT, COMPRESSION)
-        assertEquals(ConnectionStatus.CONNECTING, connection.connectionStatus.value)
+        connection.connectionStatus.value shouldBe ConnectionStatus.CONNECTING
         val expected = ConnectionStatus.DISCONNECTED
 
         connection.disconnect()
         val actual = connection.connectionStatus.value
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -177,7 +178,7 @@ internal class ConnectionTest {
         var currentExpectedStatus = 0
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             connection.connectionStatus.collect { actual ->
-                assertEquals(expectedStatuses[currentExpectedStatus], actual)
+                actual shouldBe expectedStatuses[currentExpectedStatus]
                 currentExpectedStatus++
                 // Disconnect after getting connected
                 if (actual == ConnectionStatus.CONNECTED) {

@@ -1,12 +1,13 @@
 package io.github.soundremote.network
 
 import io.github.soundremote.util.Net
-import org.junit.jupiter.api.Assertions.assertEquals
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("DisconnectData")
 internal class DisconnectDataTest {
+
     @DisplayName("SIZE has correct value")
     @Test
     fun size_ReturnsCorrectValue() {
@@ -14,7 +15,7 @@ internal class DisconnectDataTest {
 
         val actual = DisconnectData.SIZE
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @DisplayName("write() writes correctly")
@@ -28,6 +29,6 @@ internal class DisconnectDataTest {
         disconnectData.write(actual)
         actual.rewind()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 }

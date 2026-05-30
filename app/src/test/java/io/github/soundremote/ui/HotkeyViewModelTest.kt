@@ -11,14 +11,14 @@ import io.github.soundremote.util.ModKey
 import io.github.soundremote.util.Mods
 import io.github.soundremote.util.generateDescription
 import io.github.soundremote.util.isModActive
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -34,13 +34,14 @@ import java.util.stream.Stream
 @ExtendWith(MainDispatcherExtension::class)
 @DisplayName("HotkeyViewModel")
 class HotkeyViewModelTest {
-    private var hotkeyRepository = TestHotkeyRepository()
 
+    private var hotkeyRepository = TestHotkeyRepository()
     private lateinit var viewModel: HotkeyViewModel
 
     @Nested
     @DisplayName("Create Hotkey mode")
     inner class CreateHotkey {
+
         @BeforeEach
         fun setup() {
             viewModel = HotkeyViewModel(hotkeyRepository)
@@ -50,31 +51,30 @@ class HotkeyViewModelTest {
         @DisplayName("Sets screen mode correctly")
         fun screenMode_isCorrect() {
             val actual = viewModel.hotkeyScreenState.value.mode
-            assertEquals(HotkeyScreenMode.CREATE, actual)
+
+            actual shouldBe HotkeyScreenMode.CREATE
         }
 
         @Test
         @DisplayName("updateKeyCode() updates keyCode")
         fun updateKeyCode_updates() {
             val expected = KeyCode(0x60)
-            assertNotEquals(expected, viewModel.hotkeyScreenState.value.keyCode)
+            viewModel.hotkeyScreenState.value.keyCode shouldNotBe expected
 
             viewModel.updateKeyCode(expected)
 
-            val actual = viewModel.hotkeyScreenState.value.keyCode
-            assertEquals(expected, actual)
+            viewModel.hotkeyScreenState.value.keyCode shouldBe expected
         }
 
         @Test
         @DisplayName("updateName() updates hotkey name")
         fun updateName_updates() {
             val expected = "HotkeyName"
-            assertNotEquals(expected, viewModel.hotkeyScreenState.value.name)
+            viewModel.hotkeyScreenState.value.name shouldNotBe expected
 
             viewModel.updateName(expected)
 
-            val actual = viewModel.hotkeyScreenState.value.name
-            assertEquals(expected, actual)
+            viewModel.hotkeyScreenState.value.name shouldBe expected
         }
 
         @ParameterizedTest
@@ -87,7 +87,7 @@ class HotkeyViewModelTest {
                 ModKey.SHIFT -> viewModel.hotkeyScreenState.value.shift
                 ModKey.ALT -> viewModel.hotkeyScreenState.value.alt
             }
-            assertFalse(modState)
+            modState.shouldBeFalse()
 
             viewModel.updateMod(mod, true)
 
@@ -97,14 +97,14 @@ class HotkeyViewModelTest {
                 ModKey.SHIFT -> viewModel.hotkeyScreenState.value.shift
                 ModKey.ALT -> viewModel.hotkeyScreenState.value.alt
             }
-            assertTrue(actual)
+            actual.shouldBeTrue()
         }
 
         @Test
         @DisplayName("canSave() returns false if keyCode is null")
         fun canSave_keyCodeIsNull_returnsFalse() {
-            assertNull(viewModel.hotkeyScreenState.value.keyCode)
-            assertFalse(viewModel.canSave())
+            viewModel.hotkeyScreenState.value.keyCode.shouldBeNull()
+            viewModel.canSave().shouldBeFalse()
         }
 
         @Test
@@ -121,14 +121,13 @@ class HotkeyViewModelTest {
             viewModel.saveHotkey("B")
 
             val savedHotkey = hotkeyRepository.getAllOrdered().firstOrNull()?.firstOrNull()
-            assertNotNull(savedHotkey)
-            savedHotkey!!
-            assertEquals(expectedName, savedHotkey.name)
-            assertEquals(expectedKeyCode, savedHotkey.keyCode)
-            assertTrue(savedHotkey.isModActive(ModKey.CTRL))
-            assertTrue(savedHotkey.isModActive(ModKey.SHIFT))
-            assertFalse(savedHotkey.isModActive(ModKey.ALT))
-            assertFalse(savedHotkey.isModActive(ModKey.WIN))
+            savedHotkey.shouldNotBeNull()
+            savedHotkey.name shouldBe expectedName
+            savedHotkey.keyCode shouldBe expectedKeyCode
+            savedHotkey.isModActive(ModKey.CTRL).shouldBeTrue()
+            savedHotkey.isModActive(ModKey.SHIFT).shouldBeTrue()
+            savedHotkey.isModActive(ModKey.ALT).shouldBeFalse()
+            savedHotkey.isModActive(ModKey.WIN).shouldBeFalse()
         }
 
         @Test
@@ -149,14 +148,13 @@ class HotkeyViewModelTest {
             viewModel.saveHotkey(keyLabel)
 
             val savedHotkey = hotkeyRepository.getAllOrdered().firstOrNull()?.firstOrNull()
-            assertNotNull(savedHotkey)
-            savedHotkey!!
-            assertEquals(expectedName, savedHotkey.name)
-            assertEquals(expectedKeyCode, savedHotkey.keyCode)
+            savedHotkey.shouldNotBeNull()
+            savedHotkey.name shouldBe expectedName
+            savedHotkey.keyCode shouldBe expectedKeyCode
             for (mod in ModKey.entries) {
                 val expectedModValue = mods.isModActive(mod)
                 val actualModValue = savedHotkey.isModActive(mod)
-                assertEquals(expectedModValue, actualModValue)
+                actualModValue shouldBe expectedModValue
             }
         }
     }
@@ -174,9 +172,7 @@ class HotkeyViewModelTest {
             viewModel = HotkeyViewModel(hotkeyRepository)
             viewModel.loadHotkey(id)
 
-            val actual = viewModel.hotkeyScreenState.value.mode
-
-            assertEquals(HotkeyScreenMode.EDIT, actual)
+            viewModel.hotkeyScreenState.value.mode shouldBe HotkeyScreenMode.EDIT
         }
 
         @Test
@@ -191,12 +187,12 @@ class HotkeyViewModelTest {
 
             val state = viewModel.hotkeyScreenState.value
 
-            assertEquals(hotkey.name, state.name)
-            assertEquals(hotkey.keyCode, state.keyCode)
-            assertEquals(hotkey.isModActive(ModKey.ALT), state.alt)
-            assertEquals(hotkey.isModActive(ModKey.CTRL), state.ctrl)
-            assertEquals(hotkey.isModActive(ModKey.SHIFT), state.shift)
-            assertEquals(hotkey.isModActive(ModKey.WIN), state.win)
+            state.name shouldBe hotkey.name
+            state.keyCode shouldBe hotkey.keyCode
+            state.alt shouldBe hotkey.isModActive(ModKey.ALT)
+            state.ctrl shouldBe hotkey.isModActive(ModKey.CTRL)
+            state.shift shouldBe hotkey.isModActive(ModKey.SHIFT)
+            state.win shouldBe hotkey.isModActive(ModKey.WIN)
         }
 
         @ParameterizedTest
@@ -209,9 +205,7 @@ class HotkeyViewModelTest {
             viewModel = HotkeyViewModel(hotkeyRepository)
             viewModel.loadHotkey(id)
 
-            val actual = viewModel.hotkeyScreenState.value.keyGroupIndex
-
-            assertEquals(expectedKeyGroup.index, actual)
+            viewModel.hotkeyScreenState.value.keyGroupIndex shouldBe expectedKeyGroup.index
         }
 
         @Test
@@ -238,14 +232,13 @@ class HotkeyViewModelTest {
             viewModel.saveHotkey("B")
 
             val updatedHotkey = hotkeyRepository.getById(id)
-            assertNotNull(updatedHotkey)
-            updatedHotkey!!
-            assertEquals(expectedName, updatedHotkey.name)
-            assertEquals(expectedKeyCode, updatedHotkey.keyCode)
-            assertTrue(updatedHotkey.isModActive(ModKey.CTRL))
-            assertTrue(updatedHotkey.isModActive(ModKey.SHIFT))
-            assertFalse(updatedHotkey.isModActive(ModKey.ALT))
-            assertFalse(updatedHotkey.isModActive(ModKey.WIN))
+            updatedHotkey.shouldNotBeNull()
+            updatedHotkey.name shouldBe expectedName
+            updatedHotkey.keyCode shouldBe expectedKeyCode
+            updatedHotkey.isModActive(ModKey.CTRL).shouldBeTrue()
+            updatedHotkey.isModActive(ModKey.SHIFT).shouldBeTrue()
+            updatedHotkey.isModActive(ModKey.ALT).shouldBeFalse()
+            updatedHotkey.isModActive(ModKey.WIN).shouldBeFalse()
         }
     }
 

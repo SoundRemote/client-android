@@ -16,11 +16,12 @@ import io.github.soundremote.stringResource
 import io.github.soundremote.ui.theme.SoundRemoteTheme
 import io.github.soundremote.util.HotkeyDescription
 import io.github.soundremote.util.TestTag
-import org.junit.Assert.assertEquals
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 
 internal class HotkeyListScreenTest {
+
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
@@ -126,7 +127,7 @@ internal class HotkeyListScreenTest {
         composeTestRule.onNodeWithContentDescription(hotkeyActionsMenu).performClick()
         composeTestRule.onNodeWithText(actionEdit).performClick()
 
-        assertEquals(id, actualId)
+        actualId shouldBe id
     }
 
     // Hotkey delete action shows confirmation dialog
@@ -172,7 +173,7 @@ internal class HotkeyListScreenTest {
             onNodeWithText(actionDelete).performClick()
         }
 
-        assertEquals(id, actualId)
+        actualId shouldBe id
     }
 
     // Click on Hotkey calls "onEdit" function with correct id
@@ -192,7 +193,7 @@ internal class HotkeyListScreenTest {
 
         composeTestRule.onNodeWithText(name).performClick()
 
-        assertEquals(id, actualId)
+        actualId shouldBe id
     }
 
     @Suppress("TestFunctionName")

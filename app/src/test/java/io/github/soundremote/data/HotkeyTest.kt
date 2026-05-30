@@ -4,7 +4,9 @@ import io.github.soundremote.getHotkey
 import io.github.soundremote.util.ModKey
 import io.github.soundremote.util.Mods
 import io.github.soundremote.util.isModActive
-import org.junit.jupiter.api.Assertions.*
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -25,7 +27,7 @@ internal class HotkeyTest {
 
             val modActive = hotkey.isModActive(mod)
 
-            assertFalse(modActive)
+            modActive.shouldBeFalse()
         }
 
         @DisplayName("Are set when created with mods")
@@ -36,7 +38,7 @@ internal class HotkeyTest {
 
             val modActive = hotkey.isModActive(mod)
 
-            assertTrue(modActive)
+            modActive.shouldBeTrue()
         }
 
         @DisplayName("Bitfield is correct set when created without mods")
@@ -47,7 +49,7 @@ internal class HotkeyTest {
 
             val actual = hotkey.mods
 
-            assertEquals(expected, actual)
+            actual shouldBe expected
         }
 
         @DisplayName("Bitfield is correct set when created with Mods")
@@ -59,7 +61,7 @@ internal class HotkeyTest {
 
             val actual = hotkey.mods
 
-            assertEquals(expected, actual)
+            actual shouldBe expected
         }
     }
 }

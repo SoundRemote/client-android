@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
 internal class TestServiceManager : ServiceManager {
+
     private val _serviceState = MutableStateFlow(ServiceState())
     override val serviceState: StateFlow<ServiceState>
         get() = _serviceState

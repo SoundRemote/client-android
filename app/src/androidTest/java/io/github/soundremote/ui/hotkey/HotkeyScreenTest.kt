@@ -19,8 +19,8 @@ import io.github.soundremote.util.KeyCode
 import io.github.soundremote.util.KeyGroup
 import io.github.soundremote.util.ModKey
 import io.github.soundremote.util.toKeyCode
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 
@@ -61,7 +61,7 @@ internal class HotkeyScreenTest {
             performClick()
         }
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -81,7 +81,7 @@ internal class HotkeyScreenTest {
             performClick()
         }
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -101,7 +101,7 @@ internal class HotkeyScreenTest {
             performClick()
         }
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -121,7 +121,7 @@ internal class HotkeyScreenTest {
             performClick()
         }
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -137,7 +137,7 @@ internal class HotkeyScreenTest {
 
         composeTestRule.onNodeWithText(name).performTextInput(expected)
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     // Key Groups
@@ -171,7 +171,7 @@ internal class HotkeyScreenTest {
             performTextInput(c.toString())
         }
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     // Invalid character input should not call `onKeyCodeChange`
@@ -190,7 +190,7 @@ internal class HotkeyScreenTest {
             performTextInput("@")
         }
 
-        assertNull(actual)
+        actual.shouldBeNull()
     }
 
     // Key select menu item click should call `onKeyCodeChange`
@@ -211,7 +211,7 @@ internal class HotkeyScreenTest {
             performClick()
         }
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Suppress("TestFunctionName")
