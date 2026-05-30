@@ -3,12 +3,13 @@ package io.github.soundremote.network
 import io.github.soundremote.util.Net
 import io.github.soundremote.util.Net.putUByte
 import io.github.soundremote.util.PacketProtocolType
-import org.junit.jupiter.api.Assertions
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("AckConnectData")
 internal class AckConnectDataTest {
+
     @DisplayName("Reads correctly")
     @Test
     fun read_ReadsCorrectly() {
@@ -20,7 +21,6 @@ internal class AckConnectDataTest {
         val ackConnectData = AckConnectData.read(buffer)
         val actual = ackConnectData?.protocol
 
-        Assertions.assertNotNull(actual)
-        Assertions.assertEquals(expected, actual!!)
+        actual shouldBe expected
     }
 }

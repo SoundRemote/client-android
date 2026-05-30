@@ -17,7 +17,8 @@ import io.github.soundremote.data.AppAction
 import io.github.soundremote.stringResource
 import io.github.soundremote.ui.theme.SoundRemoteTheme
 import io.github.soundremote.util.HotkeyDescription
-import org.junit.Assert
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 
@@ -42,7 +43,7 @@ class ActionSelectDialogTest {
 
         composeTestRule.onNodeWithText(cancel).performClick()
 
-        Assert.assertTrue(dismissed)
+        dismissed.shouldBeTrue()
     }
 
     // When all action types are available, all action types are displayed
@@ -161,7 +162,7 @@ class ActionSelectDialogTest {
             onNodeWithText(ok).performClick()
         }
 
-        Assert.assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Suppress("TestFunctionName")

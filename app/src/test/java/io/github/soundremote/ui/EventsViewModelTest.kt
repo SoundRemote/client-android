@@ -10,13 +10,12 @@ import io.github.soundremote.data.TestEventActionRepository
 import io.github.soundremote.data.TestHotkeyRepository
 import io.github.soundremote.getHotkey
 import io.github.soundremote.ui.events.EventsViewModel
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MainDispatcherExtension::class)
 @DisplayName("EventsViewModel")
 internal class EventsViewModelTest {
+
     private var hotkeyRepository = TestHotkeyRepository()
     private var eventActionRepository = TestEventActionRepository()
     private lateinit var viewModel: EventsViewModel
@@ -50,12 +50,12 @@ internal class EventsViewModelTest {
             val hotkeys = listOf(getHotkey(id = expectedId))
             hotkeyRepository.setHotkeys(hotkeys)
             val eventId = Event.CALL_END.id
-            assertNull(viewModel.uiState.value.events.find { it.id == eventId }?.action)
+            viewModel.uiState.value.events.find { it.id == eventId }?.action.shouldBeNull()
 
             viewModel.setActionForEvent(eventId, Action(ActionType.HOTKEY, expectedId))
 
             val actual = viewModel.uiState.value.events.find { it.id == eventId }?.action?.id
-            assertEquals(expectedId, actual)
+            actual shouldBe expectedId
 
             collectJob.cancel()
         }
@@ -74,12 +74,12 @@ internal class EventsViewModelTest {
             val eventActions =
                 listOf(EventAction(eventId, ActionData(ActionType.HOTKEY, expectedId)))
             eventActionRepository.setEventActions(eventActions)
-            assertTrue(viewModel.uiState.value.events.find { it.id == eventId }?.action?.id == expectedId)
+            viewModel.uiState.value.events.find { it.id == eventId }?.action?.id shouldBe expectedId
 
             viewModel.setActionForEvent(eventId, null)
 
             val actual = viewModel.uiState.value.events.find { it.id == eventId }?.action
-            assertNull(actual)
+            actual.shouldBeNull()
 
             collectJob.cancel()
         }
@@ -102,15 +102,12 @@ internal class EventsViewModelTest {
             val eventActions =
                 listOf(EventAction(eventId, ActionData(ActionType.HOTKEY, oldHotkeyId)))
             eventActionRepository.setEventActions(eventActions)
-            assertEquals(
-                oldHotkeyId,
-                viewModel.uiState.value.events.find { it.id == eventId }?.action?.id
-            )
+            viewModel.uiState.value.events.find { it.id == eventId }?.action?.id shouldBe oldHotkeyId
 
             viewModel.setActionForEvent(eventId, Action(ActionType.HOTKEY, newHotkeyId))
 
             val actual = viewModel.uiState.value.events.find { it.id == eventId }?.action?.id
-            assertEquals(newHotkeyId, actual)
+            actual shouldBe newHotkeyId
 
             collectJob.cancel()
         }

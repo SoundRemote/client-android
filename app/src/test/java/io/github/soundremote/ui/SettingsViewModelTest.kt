@@ -7,11 +7,11 @@ import io.github.soundremote.util.DEFAULT_AUDIO_COMPRESSION
 import io.github.soundremote.util.DEFAULT_CLIENT_PORT
 import io.github.soundremote.util.DEFAULT_SERVER_PORT
 import io.github.soundremote.util.Net.COMPRESSION_320
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -21,8 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MainDispatcherExtension::class)
 @DisplayName("SettingsViewModel")
 class SettingsViewModelTest {
-    private val preferencesRepository = TestPreferencesRepository()
 
+    private val preferencesRepository = TestPreferencesRepository()
     private lateinit var viewModel: SettingsViewModel
 
     @BeforeEach
@@ -36,13 +36,12 @@ class SettingsViewModelTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.settings.collect {}
         }
-
-        assertEquals(DEFAULT_AUDIO_COMPRESSION, viewModel.settings.value.audioCompression)
+        viewModel.settings.value.audioCompression shouldBe DEFAULT_AUDIO_COMPRESSION
         val expected = COMPRESSION_320
 
         preferencesRepository.setAudioCompression(expected)
 
-        assertEquals(expected, viewModel.settings.value.audioCompression)
+        viewModel.settings.value.audioCompression shouldBe expected
 
         collectJob.cancel()
     }
@@ -53,13 +52,12 @@ class SettingsViewModelTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.settings.collect {}
         }
-
-        assertEquals(DEFAULT_CLIENT_PORT, viewModel.settings.value.clientPort)
+        viewModel.settings.value.clientPort shouldBe DEFAULT_CLIENT_PORT
         val expected = 33333
 
         preferencesRepository.setClientPort(expected)
 
-        assertEquals(expected, viewModel.settings.value.clientPort)
+        viewModel.settings.value.clientPort shouldBe expected
 
         collectJob.cancel()
     }
@@ -70,13 +68,12 @@ class SettingsViewModelTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.settings.collect {}
         }
-
-        assertEquals(DEFAULT_SERVER_PORT, viewModel.settings.value.serverPort)
+        viewModel.settings.value.serverPort shouldBe DEFAULT_SERVER_PORT
         val expected = 44444
 
         preferencesRepository.setServerPort(expected)
 
-        assertEquals(expected, viewModel.settings.value.serverPort)
+        viewModel.settings.value.serverPort shouldBe expected
 
         collectJob.cancel()
     }
