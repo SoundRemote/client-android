@@ -19,13 +19,18 @@ import io.github.soundremote.ui.theme.SoundRemoteTheme
 import io.github.soundremote.util.HotkeyDescription
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 
 class ActionSelectDialogTest {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>(
+        effectContext = UnconfinedTestDispatcher(),
+    )
 
     private val ok by composeTestRule.stringResource(android.R.string.ok)
     private val cancel by composeTestRule.stringResource(R.string.cancel)
@@ -165,7 +170,6 @@ class ActionSelectDialogTest {
         actual shouldBe expected
     }
 
-    @Suppress("TestFunctionName")
     @Composable
     private fun CreateActionSelectDialog(
         availableActionTypes: Set<ActionType> = ActionType.entries.toSet(),
@@ -181,6 +185,7 @@ class ActionSelectDialogTest {
                 hotkeys = hotkeys,
                 onConfirm = onConfirm,
                 onDismiss = onDismiss,
+                isTesting = true,
             )
         }
     }
