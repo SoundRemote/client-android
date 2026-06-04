@@ -270,7 +270,7 @@ internal class Connection(
         }
     }
 
-    private fun processAck(buffer: ByteBuffer) = synchronized(pendingRequestsLock) {
+    private fun processAck(buffer: ByteBuffer): Unit = synchronized(pendingRequestsLock) {
         if (pendingRequests.isEmpty()) return
         val ackData = AckData.read(buffer) ?: return
         val i = pendingRequests.iterator()
