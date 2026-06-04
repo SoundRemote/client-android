@@ -16,9 +16,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,7 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.soundremote.R
 import io.github.soundremote.data.Action
@@ -86,6 +87,13 @@ val appActions: List<ActionUIState> by lazy {
     }
 }
 
+/**
+ * @param isTesting is this composable used from a test. When `true`, `PrimaryTabRow` is set to use
+ * a default `TabRowDefaults.PrimaryIndicator`.
+ * The reason for this is v2 UI testing APIs not working well with `AlertDialog` with
+ * `usePlatformDefaultWidth = false` containing `PrimaryTabRow` with indicator having
+ * `matchContentSize = true`.
+ */
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 @Composable
 internal fun ActionSelectDialog(
@@ -94,6 +102,7 @@ internal fun ActionSelectDialog(
     hotkeys: List<HotkeyInfoUIState>,
     onConfirm: (Action?) -> Unit,
     onDismiss: () -> Unit,
+    isTesting: Boolean = false,
 ) {
     val actionTypes = rememberSaveable(availableActionTypes) {
         availableActionTypes.sortedBy { it.id }
@@ -144,13 +153,28 @@ internal fun ActionSelectDialog(
         },
         text = {
             Column {
-                TabRow(selectedTabIndex = selectedActionTypeIndex) {
-                    for ((index, actionType) in actionTypes.withIndex()) {
-                        Tab(
-                            selected = selectedActionTypeIndex == index,
-                            onClick = { selectedActionTypeIndex = index },
-                            text = { Text(stringResource(actionType.nameStringId)) }
-                        )
+                if (isTesting) {
+                    PrimaryTabRow(
+                        selectedTabIndex = selectedActionTypeIndex,
+                        indicator = { TabRowDefaults.PrimaryIndicator() },
+                    ) {
+                        for ((index, actionType) in actionTypes.withIndex()) {
+                            Tab(
+                                selected = selectedActionTypeIndex == index,
+                                onClick = { selectedActionTypeIndex = index },
+                                text = { Text(stringResource(actionType.nameStringId)) }
+                            )
+                        }
+                    }
+                } else {
+                    PrimaryTabRow(selectedTabIndex = selectedActionTypeIndex) {
+                        for ((index, actionType) in actionTypes.withIndex()) {
+                            Tab(
+                                selected = selectedActionTypeIndex == index,
+                                onClick = { selectedActionTypeIndex = index },
+                                text = { Text(stringResource(actionType.nameStringId)) }
+                            )
+                        }
                     }
                 }
                 ActionList(

@@ -4,15 +4,15 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import io.github.soundremote.R
 import io.github.soundremote.stringResource
 import io.github.soundremote.ui.theme.SoundRemoteTheme
 import io.github.soundremote.util.HotkeyDescription
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 
@@ -94,7 +94,7 @@ class HotkeySelectDialogTest {
 
         composeTestRule.onNodeWithText(cancel).performClick()
 
-        assertTrue(dismissed)
+        dismissed.shouldBeTrue()
     }
 
     @Test
@@ -121,7 +121,7 @@ class HotkeySelectDialogTest {
             onNodeWithText(ok).performClick()
         }
 
-        assertEquals(count, actual)
+        actual shouldBe count
     }
 
     @Suppress("TestFunctionName")

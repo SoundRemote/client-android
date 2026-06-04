@@ -15,6 +15,7 @@ jopus = "0.4.0"
 jupiter = "6.1.0"
 kotlinxCoroutines = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
+kotest = "6.1.11"
 lifecycle = "2.10.0"
 media = "1.8.0"
 mockk = "1.14.9"
@@ -58,6 +59,7 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
 mockk-agent = { group = "io.mockk", name = "mockk-agent", version.ref = "mockk" }
 seismic = { group = "com.squareup", name = "seismic", version.ref = "seismic" }
@@ -73,6 +75,7 @@ local-tests = [
     "mockk-android",
     "mockk-agent",
     "kotlinx-coroutines-test",
+    "kotest-assertions-core",
 ]
 
 [plugins]

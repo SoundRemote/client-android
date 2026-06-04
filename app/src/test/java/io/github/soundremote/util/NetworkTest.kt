@@ -2,8 +2,8 @@ package io.github.soundremote.util
 
 import io.github.soundremote.network.ConnectData
 import io.github.soundremote.network.DisconnectData
-import io.github.soundremote.network.KeepAliveData
 import io.github.soundremote.network.HotkeyData
+import io.github.soundremote.network.KeepAliveData
 import io.github.soundremote.network.PacketHeader
 import io.github.soundremote.network.SetFormatData
 import io.github.soundremote.util.Net.COMPRESSION_256
@@ -12,13 +12,13 @@ import io.github.soundremote.util.Net.PROTOCOL_VERSION
 import io.github.soundremote.util.Net.calculateGap
 import io.github.soundremote.util.Net.getConnectPacket
 import io.github.soundremote.util.Net.getDisconnectPacket
-import io.github.soundremote.util.Net.getKeepAlivePacket
 import io.github.soundremote.util.Net.getHotkeyPacket
+import io.github.soundremote.util.Net.getKeepAlivePacket
 import io.github.soundremote.util.Net.getSetFormatPacket
 import io.github.soundremote.util.Net.uByte
 import io.github.soundremote.util.Net.uInt
 import io.github.soundremote.util.Net.uShort
-import org.junit.jupiter.api.Assertions.assertEquals
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -32,6 +32,7 @@ internal class NetworkTest {
     @Nested
     @DisplayName("ByteBuffer.uByte")
     inner class GetUByte {
+
         @Test
         @DisplayName("reads correctly")
         fun readsCorrectly() {
@@ -40,9 +41,7 @@ internal class NetworkTest {
             buf.put(expected.toByte())
             buf.rewind()
 
-            val actual = buf.uByte
-
-            assertEquals(expected, actual)
+            buf.uByte shouldBe expected
         }
 
         @Test
@@ -52,7 +51,7 @@ internal class NetworkTest {
 
             buf.uByte
 
-            assertEquals(1, buf.position())
+            buf.position() shouldBe 1
         }
     }
 
@@ -68,9 +67,7 @@ internal class NetworkTest {
             buf.putShort(expected.toShort())
             buf.rewind()
 
-            val actual = buf.uShort
-
-            assertEquals(expected, actual)
+            buf.uShort shouldBe expected
         }
 
         @Test
@@ -80,7 +77,7 @@ internal class NetworkTest {
 
             buf.uShort
 
-            assertEquals(2, buf.position())
+            buf.position() shouldBe 2
         }
     }
 
@@ -96,9 +93,7 @@ internal class NetworkTest {
             buf.putInt(expected.toInt())
             buf.rewind()
 
-            val actual = buf.uInt
-
-            assertEquals(expected, actual)
+            buf.uInt shouldBe expected
         }
 
         @Test
@@ -108,7 +103,7 @@ internal class NetworkTest {
 
             buf.uInt
 
-            assertEquals(4, buf.position())
+            buf.position() shouldBe 4
         }
     }
 
@@ -121,13 +116,13 @@ internal class NetworkTest {
 
         val actual = getConnectPacket(compression, requestId)
 
-        assertEquals(actual.remaining(), expectedSize)
-        assertEquals(actual.uShort, Net.PROTOCOL_SIGNATURE)
-        assertEquals(actual.uByte, Net.PacketCategory.CONNECT.value)
-        assertEquals(actual.uShort, expectedSize.toUShort())
-        assertEquals(actual.uByte, PROTOCOL_VERSION)
-        assertEquals(actual.uShort, requestId)
-        assertEquals(actual.uByte, compression.toUByte())
+        actual.remaining() shouldBe expectedSize
+        actual.uShort shouldBe Net.PROTOCOL_SIGNATURE
+        actual.uByte shouldBe Net.PacketCategory.CONNECT.value
+        actual.uShort shouldBe expectedSize.toUShort()
+        actual.uByte shouldBe PROTOCOL_VERSION
+        actual.uShort shouldBe requestId
+        actual.uByte shouldBe compression.toUByte()
     }
 
     @Test
@@ -139,12 +134,12 @@ internal class NetworkTest {
 
         val actual = getSetFormatPacket(compression, requestId)
 
-        assertEquals(actual.remaining(), expectedSize)
-        assertEquals(actual.uShort, Net.PROTOCOL_SIGNATURE)
-        assertEquals(actual.uByte, Net.PacketCategory.SET_FORMAT.value)
-        assertEquals(actual.uShort, expectedSize.toUShort())
-        assertEquals(actual.uShort, requestId)
-        assertEquals(actual.uByte, compression.toUByte())
+        actual.remaining() shouldBe expectedSize
+        actual.uShort shouldBe Net.PROTOCOL_SIGNATURE
+        actual.uByte shouldBe Net.PacketCategory.SET_FORMAT.value
+        actual.uShort shouldBe expectedSize.toUShort()
+        actual.uShort shouldBe requestId
+        actual.uByte shouldBe compression.toUByte()
     }
 
     @Test
@@ -156,12 +151,12 @@ internal class NetworkTest {
 
         val actual = getHotkeyPacket(keyCode, mods)
 
-        assertEquals(actual.remaining(), expectedSize)
-        assertEquals(actual.uShort, Net.PROTOCOL_SIGNATURE)
-        assertEquals(actual.uByte, Net.PacketCategory.HOTKEY.value)
-        assertEquals(actual.uShort, expectedSize.toUShort())
-        assertEquals(actual.uByte, keyCode)
-        assertEquals(actual.uByte, mods)
+        actual.remaining() shouldBe expectedSize
+        actual.uShort shouldBe Net.PROTOCOL_SIGNATURE
+        actual.uByte shouldBe Net.PacketCategory.HOTKEY.value
+        actual.uShort shouldBe expectedSize.toUShort()
+        actual.uByte shouldBe keyCode
+        actual.uByte shouldBe mods
     }
 
     @Test
@@ -171,10 +166,10 @@ internal class NetworkTest {
 
         val actual = getKeepAlivePacket()
 
-        assertEquals(actual.remaining(), expectedSize)
-        assertEquals(actual.uShort, Net.PROTOCOL_SIGNATURE)
-        assertEquals(actual.uByte, Net.PacketCategory.CLIENT_KEEP_ALIVE.value)
-        assertEquals(actual.uShort, expectedSize.toUShort())
+        actual.remaining() shouldBe expectedSize
+        actual.uShort shouldBe Net.PROTOCOL_SIGNATURE
+        actual.uByte shouldBe Net.PacketCategory.CLIENT_KEEP_ALIVE.value
+        actual.uShort shouldBe expectedSize.toUShort()
     }
 
     @Test
@@ -184,10 +179,10 @@ internal class NetworkTest {
 
         val actual = getDisconnectPacket()
 
-        assertEquals(actual.remaining(), expectedSize)
-        assertEquals(actual.uShort, Net.PROTOCOL_SIGNATURE)
-        assertEquals(actual.uByte, Net.PacketCategory.DISCONNECT.value)
-        assertEquals(actual.uShort, expectedSize.toUShort())
+        actual.remaining() shouldBe expectedSize
+        actual.uShort shouldBe Net.PROTOCOL_SIGNATURE
+        actual.uByte shouldBe Net.PacketCategory.DISCONNECT.value
+        actual.uShort shouldBe expectedSize.toUShort()
     }
 
     @ParameterizedTest(name = "gap from {0} to {1} = {2}")
@@ -201,8 +196,6 @@ internal class NetworkTest {
         "1, 0x40_00_00_02, 0x40_00_00_00",
     )
     fun calculateGap_returnsCorrectResult(previous: Long, current: Long, expected: Int) {
-        val actual = calculateGap(previous.toUInt(), current.toUInt())
-
-        assertEquals(expected, actual)
+        calculateGap(previous.toUInt(), current.toUInt()) shouldBe expected
     }
 }

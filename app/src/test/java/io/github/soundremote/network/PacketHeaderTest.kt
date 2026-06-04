@@ -6,7 +6,8 @@ import io.github.soundremote.util.Net.putUShort
 import io.github.soundremote.util.PacketCategoryType
 import io.github.soundremote.util.PacketSignatureType
 import io.github.soundremote.util.PacketSizeType
-import org.junit.jupiter.api.Assertions.*
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -29,7 +30,7 @@ internal class PacketHeaderTest {
         fun readInvalidDatagram_ReturnsNull(buffer: ByteBuffer) {
             val actual = PacketHeader.read(buffer)
 
-            assertNull(actual)
+            actual.shouldBeNull()
         }
 
         @DisplayName("Returns correct packet header given valid datagram")
@@ -38,13 +39,14 @@ internal class PacketHeaderTest {
         fun readValidDatagram_ReturnsCorrectHeader(buffer: ByteBuffer, expected: PacketHeader) {
             val actual = PacketHeader.read(buffer)
 
-            assertEquals(expected, actual)
+            actual shouldBe expected
         }
     }
 
     @DisplayName("write")
     @Nested
     inner class WriteHeaderTests {
+
         @DisplayName("Writes correctly")
         @Test
         fun write_WritesCorrectly() {
@@ -60,11 +62,12 @@ internal class PacketHeaderTest {
             PacketHeader(Net.PacketCategory.ACK, size.toInt()).write(actual)
             actual.rewind()
 
-            assertTrue(expected == actual)
+            actual shouldBe expected
         }
     }
 
     companion object {
+
         @JvmStatic
         fun invalidDatagramProvider(): Stream<Arguments> {
             return Stream.of(

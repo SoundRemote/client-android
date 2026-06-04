@@ -29,7 +29,7 @@ class MigrationTest {
     @Test
     @Throws(IOException::class)
     fun migrateAll() {
-        // Create earliest version of the database.
+        // Create the earliest version of the database.
         helper.createDatabase(testDB, 1).apply {
             close()
         }

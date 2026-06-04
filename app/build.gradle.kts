@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId = "io.github.soundremote"
         minSdk = 23
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 12
         versionName = "0.5.0"
         testInstrumentationRunner = "io.github.soundremote.CustomTestRunner"
@@ -100,6 +100,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ktx)
     androidTestImplementation(libs.androidx.navigation.testing)
     androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.kotest.assertions.core)
 // Local tests
     testImplementation(libs.bundles.local.tests)
     testRuntimeOnly(libs.junit.platform.launcher)

@@ -3,8 +3,8 @@ package io.github.soundremote.util
 import androidx.annotation.IntDef
 import io.github.soundremote.network.ConnectData
 import io.github.soundremote.network.DisconnectData
-import io.github.soundremote.network.KeepAliveData
 import io.github.soundremote.network.HotkeyData
+import io.github.soundremote.network.KeepAliveData
 import io.github.soundremote.network.PacketData
 import io.github.soundremote.network.PacketHeader
 import io.github.soundremote.network.SetFormatData
@@ -28,7 +28,7 @@ object Net {
     const val PROTOCOL_SIGNATURE: PacketSignatureType = 0xA571u
 
     /**
-     *  Audio is send in 10 milliseconds intervals of 48khz, 2 byte per sample, 2 channels signal,
+     *  Audio is sent in 10 milliseconds intervals of 48khz, 2 byte per sample, 2 channels signal,
      *  which is 1920 bytes if uncompressed.
      */
     const val RECEIVE_BUFFER_CAPACITY = 2048

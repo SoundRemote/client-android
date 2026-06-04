@@ -7,13 +7,14 @@ import io.github.soundremote.util.DEFAULT_IGNORE_AUDIO_FOCUS
 import io.github.soundremote.util.DEFAULT_SERVER_ADDRESS
 import io.github.soundremote.util.DEFAULT_SERVER_PORT
 import io.github.soundremote.util.Net
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -48,7 +49,7 @@ class UserPreferencesRepositoryTest {
     fun getClientPort_defaultValue() = runTest {
         val actual = subject.getClientPort()
 
-        assertEquals(DEFAULT_CLIENT_PORT, actual)
+        actual shouldBe DEFAULT_CLIENT_PORT
     }
 
     @Test
@@ -56,7 +57,7 @@ class UserPreferencesRepositoryTest {
     fun getServerPort_defaultValue() = runTest {
         val actual = subject.getServerPort()
 
-        assertEquals(DEFAULT_SERVER_PORT, actual)
+        actual shouldBe DEFAULT_SERVER_PORT
     }
 
     @Test
@@ -64,7 +65,7 @@ class UserPreferencesRepositoryTest {
     fun getServerAddress_defaultValue() = runTest {
         val actual = subject.getServerAddress()
 
-        assertEquals(DEFAULT_SERVER_ADDRESS, actual)
+        actual shouldBe DEFAULT_SERVER_ADDRESS
     }
 
     @Test
@@ -72,7 +73,7 @@ class UserPreferencesRepositoryTest {
     fun getAudioCompression_defaultValue() = runTest {
         val actual = subject.getAudioCompression()
 
-        assertEquals(DEFAULT_AUDIO_COMPRESSION, actual)
+        actual shouldBe DEFAULT_AUDIO_COMPRESSION
     }
 
     @Test
@@ -83,7 +84,7 @@ class UserPreferencesRepositoryTest {
         subject.setClientPort(expected)
         val actual = subject.getClientPort()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -94,7 +95,7 @@ class UserPreferencesRepositoryTest {
         subject.setServerPort(expected)
         val actual = subject.getServerPort()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -105,19 +106,19 @@ class UserPreferencesRepositoryTest {
         subject.setServerAddress(expected)
         val actual = subject.getServerAddress()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
     @DisplayName("setAudioCompression sets audio compression correctly")
     fun setAudioCompression_setsCorrectly() = runTest {
         val expected = Net.COMPRESSION_320
-        assertNotEquals(DEFAULT_AUDIO_COMPRESSION, expected)
+        expected shouldNotBe DEFAULT_AUDIO_COMPRESSION
 
         subject.setAudioCompression(expected)
         val actual = subject.getAudioCompression()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -128,7 +129,7 @@ class UserPreferencesRepositoryTest {
         subject.setClientPort(expected)
         val actual = subject.settingsScreenPreferencesFlow.first().clientPort
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -139,19 +140,19 @@ class UserPreferencesRepositoryTest {
         subject.setServerPort(expected)
         val actual = subject.settingsScreenPreferencesFlow.first().serverPort
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
     @DisplayName("settingsScreenPreferencesFlow updates audio compression")
     fun settingsScreenPreferencesFlow_updatesAudioCompression() = runTest {
         val expected = Net.COMPRESSION_320
-        assertNotEquals(DEFAULT_AUDIO_COMPRESSION, expected)
+        expected shouldNotBe DEFAULT_AUDIO_COMPRESSION
 
         subject.setAudioCompression(expected)
         val actual = subject.settingsScreenPreferencesFlow.first().audioCompression
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -160,24 +161,24 @@ class UserPreferencesRepositoryTest {
         val expected = "123.45.67.89"
         val initialAddresses = subject.serverAddressesFlow.first()
         // Make sure that initial list contains only the default address
-        assertEquals(listOf(DEFAULT_SERVER_ADDRESS), initialAddresses)
+        initialAddresses shouldContainExactly listOf(DEFAULT_SERVER_ADDRESS)
 
         subject.setServerAddress(expected)
         val actual = subject.serverAddressesFlow.first().last()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
     @DisplayName("audioCompressionFlow updates")
     fun audioCompressionFlow_updates() = runTest {
         val expected = Net.COMPRESSION_320
-        assertNotEquals(DEFAULT_AUDIO_COMPRESSION, expected)
+        expected shouldNotBe DEFAULT_AUDIO_COMPRESSION
 
         subject.setAudioCompression(expected)
         val actual = subject.audioCompressionFlow.first()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -185,7 +186,7 @@ class UserPreferencesRepositoryTest {
     fun getIgnoreAudioFocus_defaultValue() = runTest {
         val actual = subject.getIgnoreAudioFocus()
 
-        assertEquals(DEFAULT_IGNORE_AUDIO_FOCUS, actual)
+        actual shouldBe DEFAULT_IGNORE_AUDIO_FOCUS
     }
 
     @ParameterizedTest
@@ -195,7 +196,7 @@ class UserPreferencesRepositoryTest {
         subject.setIgnoreAudioFocus(expected)
         val actual = subject.getIgnoreAudioFocus()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @ParameterizedTest
@@ -205,7 +206,7 @@ class UserPreferencesRepositoryTest {
         subject.setIgnoreAudioFocus(expected)
         val actual = subject.settingsScreenPreferencesFlow.first().ignoreAudioFocus
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @ParameterizedTest
@@ -215,6 +216,6 @@ class UserPreferencesRepositoryTest {
         subject.setIgnoreAudioFocus(expected)
         val actual = subject.ignoreAudioFocusFlow.first()
 
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 }

@@ -7,12 +7,12 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isSelected
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import io.github.soundremote.R
-import org.junit.Assert.assertEquals
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 
@@ -83,7 +83,7 @@ class SelectPreferenceTest {
             }
         }
 
-        assertEquals(expectedValue, actual)
+        actual shouldBe expectedValue
     }
 
     @Suppress("TestFunctionName")

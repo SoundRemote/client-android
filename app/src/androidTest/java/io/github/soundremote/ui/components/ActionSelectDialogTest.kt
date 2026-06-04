@@ -6,7 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
@@ -17,14 +17,20 @@ import io.github.soundremote.data.AppAction
 import io.github.soundremote.stringResource
 import io.github.soundremote.ui.theme.SoundRemoteTheme
 import io.github.soundremote.util.HotkeyDescription
-import org.junit.Assert
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 
 class ActionSelectDialogTest {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>(
+        effectContext = UnconfinedTestDispatcher(),
+    )
 
     private val ok by composeTestRule.stringResource(android.R.string.ok)
     private val cancel by composeTestRule.stringResource(R.string.cancel)
@@ -42,7 +48,7 @@ class ActionSelectDialogTest {
 
         composeTestRule.onNodeWithText(cancel).performClick()
 
-        Assert.assertTrue(dismissed)
+        dismissed.shouldBeTrue()
     }
 
     // When all action types are available, all action types are displayed
@@ -161,10 +167,9 @@ class ActionSelectDialogTest {
             onNodeWithText(ok).performClick()
         }
 
-        Assert.assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
-    @Suppress("TestFunctionName")
     @Composable
     private fun CreateActionSelectDialog(
         availableActionTypes: Set<ActionType> = ActionType.entries.toSet(),
@@ -180,6 +185,7 @@ class ActionSelectDialogTest {
                 hotkeys = hotkeys,
                 onConfirm = onConfirm,
                 onDismiss = onDismiss,
+                isTesting = true,
             )
         }
     }

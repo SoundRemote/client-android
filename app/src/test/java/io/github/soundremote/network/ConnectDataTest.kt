@@ -5,12 +5,13 @@ import io.github.soundremote.util.Net.COMPRESSION_320
 import io.github.soundremote.util.Net.putUByte
 import io.github.soundremote.util.Net.putUShort
 import io.github.soundremote.util.PacketRequestIdType
-import org.junit.jupiter.api.Assertions
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("ConnectData")
 internal class ConnectDataTest {
+
     @DisplayName("SIZE has correct value")
     @Test
     fun size_ReturnsCorrectValue() {
@@ -18,7 +19,7 @@ internal class ConnectDataTest {
 
         val actual = ConnectData.SIZE
 
-        Assertions.assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @DisplayName("Writes correctly")
@@ -36,6 +37,6 @@ internal class ConnectDataTest {
         ConnectData(compression, requestId).write(actual)
         actual.rewind()
 
-        Assertions.assertEquals(expected, actual)
+        actual shouldBe expected
     }
 }

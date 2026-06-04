@@ -9,14 +9,14 @@ import io.github.soundremote.service.TestServiceManager
 import io.github.soundremote.ui.home.HomeViewModel
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MainDispatcherExtension::class)
 @DisplayName("HomeViewModel")
 class HomeViewModelTest {
+
     private var preferencesRepository = TestPreferencesRepository()
     private var hotkeyRepository = TestHotkeyRepository()
     private var serviceManager = TestServiceManager()
@@ -49,8 +50,7 @@ class HomeViewModelTest {
 
             viewModel.connect("123.45.67.89")
 
-            val actualStatus = viewModel.homeUIState.value.connectionStatus
-            assertEquals(ConnectionStatus.CONNECTED, actualStatus)
+            viewModel.homeUIState.value.connectionStatus shouldBe ConnectionStatus.CONNECTED
 
             collectJob.cancel()
         }
@@ -61,14 +61,12 @@ class HomeViewModelTest {
                 viewModel.homeUIState.collect {}
             }
             hotkeyRepository.setHotkeys(emptyList())
-            assertNull(viewModel.messageState)
+            viewModel.messageState.shouldBeNull()
 
             viewModel.connect("Invalid address")
 
-            val actualStatus = viewModel.homeUIState.value.connectionStatus
-            assertEquals(ConnectionStatus.DISCONNECTED, actualStatus)
-            val actualMessage = viewModel.messageState
-            assertNotNull(actualMessage)
+            viewModel.homeUIState.value.connectionStatus shouldBe ConnectionStatus.DISCONNECTED
+            viewModel.messageState.shouldNotBeNull()
 
             collectJob.cancel()
         }
@@ -84,8 +82,7 @@ class HomeViewModelTest {
             viewModel.connect("192.168.0.2")
             viewModel.connect(expected)
 
-            val actual = viewModel.homeUIState.value.serverAddress
-            assertEquals(expected, actual)
+            viewModel.homeUIState.value.serverAddress shouldBe expected
 
             collectJob.cancel()
         }
@@ -100,7 +97,7 @@ class HomeViewModelTest {
             viewModel.connect(expected)
 
             val actual = viewModel.homeUIState.value.recentServersAddresses.last()
-            assertEquals(expected, actual)
+            actual shouldBe expected
 
             collectJob.cancel()
         }
@@ -115,11 +112,11 @@ class HomeViewModelTest {
         hotkeyRepository.setHotkeys(emptyList())
 
         viewModel.connect("Invalid address")
-        assertNotNull(viewModel.messageState)
+        viewModel.messageState.shouldNotBeNull()
 
         viewModel.messageShown()
 
-        assertNull(viewModel.messageState)
+        viewModel.messageState.shouldBeNull()
 
         collectJob.cancel()
     }
@@ -136,8 +133,7 @@ class HomeViewModelTest {
 
         viewModel.disconnect()
 
-        val actualStatus = viewModel.homeUIState.value.connectionStatus
-        assertEquals(ConnectionStatus.DISCONNECTED, actualStatus)
+        viewModel.homeUIState.value.connectionStatus shouldBe ConnectionStatus.DISCONNECTED
 
         collectJob.cancel()
     }
@@ -154,8 +150,7 @@ class HomeViewModelTest {
 
         viewModel.setMuted(true)
 
-        val actualStatus = viewModel.homeUIState.value.isMuted
-        assertTrue(actualStatus)
+        viewModel.homeUIState.value.isMuted.shouldBeTrue()
 
         collectJob.cancel()
     }
@@ -169,8 +164,7 @@ class HomeViewModelTest {
 
         viewModel.sendHotkey(id)
 
-        val actual = serviceManager.sentHotkey
-        assertEquals(expected, actual)
+        serviceManager.sentHotkey shouldBe expected
     }
 
     @Test
@@ -180,7 +174,6 @@ class HomeViewModelTest {
 
         viewModel.sendKey(expected)
 
-        val actual = serviceManager.sentKey
-        assertEquals(expected, actual)
+        serviceManager.sentKey shouldBe expected
     }
 }

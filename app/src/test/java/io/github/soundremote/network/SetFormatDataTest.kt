@@ -5,7 +5,7 @@ import io.github.soundremote.util.Net.COMPRESSION_320
 import io.github.soundremote.util.Net.putUByte
 import io.github.soundremote.util.Net.putUShort
 import io.github.soundremote.util.PacketRequestIdType
-import org.junit.jupiter.api.Assertions
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -19,7 +19,7 @@ class SetFormatDataTest {
 
         val actual = SetFormatData.SIZE
 
-        Assertions.assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @DisplayName("write() writes correctly")
@@ -36,6 +36,6 @@ class SetFormatDataTest {
         SetFormatData(compression, requestId).write(actual)
         actual.rewind()
 
-        Assertions.assertEquals(expected, actual)
+        actual shouldBe expected
     }
 }
