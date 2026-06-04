@@ -103,7 +103,7 @@ internal class Connection(
                 releaseChannels()
                 currentStatus = ConnectionStatus.DISCONNECTED
                 return@withContext false
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 sendMessage(SystemMessage.MESSAGE_BIND_ERROR)
                 releaseChannels()
                 currentStatus = ConnectionStatus.DISCONNECTED
