@@ -9,6 +9,7 @@ import io.github.soundremote.util.Net.calculateGap
 import io.github.soundremote.util.Net.uInt
 import io.github.soundremote.util.PacketProtocolType
 import io.github.soundremote.util.SystemMessage
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,8 @@ internal class Connection(
     private val opusAudio: SendChannel<ByteBuffer>,
     private val packetsLost: AtomicInteger,
     private val connectionMessages: SendChannel<SystemMessage>,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob()),
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     private var connectJob: Job? = null
     private var receiveJob: Job? = null
@@ -50,7 +52,15 @@ internal class Connection(
     private var serverAddress: InetSocketAddress? = null
     private var dataChannel: DatagramChannel? = null
     private var sendChannel: DatagramChannel? = null
+
+    /**
+     * Sync modifications to `currentStatus`, `receiveJob`, `keepAliveJob` with this.
+     */
     private val connectLock = Any()
+
+    /**
+     * Sync modifications to `serverAddress` and `sendChannel` with this.
+     */
     private val sendLock = Any()
     private val pendingRequestsLock = Any()
 
@@ -79,12 +89,12 @@ internal class Connection(
 
     private var audioSequenceNumber: UInt? = null
 
-    suspend fun connect(
+    fun connect(
         address: String,
         serverPort: Int,
         localPort: Int,
         @Net.Compression compression: Int
-    ) = withContext(scope.coroutineContext) {
+    ) {
         shutdown()
         synchronized(connectLock) {
             currentStatus = ConnectionStatus.CONNECTING
@@ -102,12 +112,12 @@ internal class Connection(
                 }
                 releaseChannels()
                 currentStatus = ConnectionStatus.DISCONNECTED
-                return@withContext false
+                return
             } catch (_: Exception) {
                 sendMessage(SystemMessage.MESSAGE_BIND_ERROR)
                 releaseChannels()
                 currentStatus = ConnectionStatus.DISCONNECTED
-                return@withContext false
+                return
             }
             receiveJob = receive()
         }
@@ -136,9 +146,9 @@ internal class Connection(
         scope.launch(CoroutineName("Send Hotkey")) { send(hotkeyPacket) }
     }
 
-    private suspend fun shutdown() = withContext(scope.coroutineContext) {
+    private fun shutdown() {
         synchronized(connectLock) {
-            if (currentStatus == ConnectionStatus.DISCONNECTED) return@withContext
+            if (currentStatus == ConnectionStatus.DISCONNECTED) return
             connectJob?.cancel()
             receiveJob?.cancel()
             keepAliveJob?.cancel()
@@ -160,10 +170,7 @@ internal class Connection(
         dataChannel = null
     }
 
-    /**
-     * Always runs on Dispatchers.IO
-     */
-    private fun receive() = scope.launch(CoroutineName("Receive") + Dispatchers.IO) {
+    private fun receive() = scope.launch(CoroutineName("Receive") + dispatcher) {
         try {
             while (isActive) {
                 val buf = Net.createPacketBuffer(Net.RECEIVE_BUFFER_CAPACITY)
@@ -176,7 +183,8 @@ internal class Connection(
                     Net.PacketCategory.AUDIO_DATA_UNCOMPRESSED.value -> processAudioData(buf, false)
                     Net.PacketCategory.SERVER_KEEP_ALIVE.value -> updateServerLastContact()
                     Net.PacketCategory.ACK.value -> processAck(buf)
-                    else -> {}
+                    // For tests - yield the test dispatcher and advance time
+                    else -> delay(10)
                 }
             }
         } catch (_: AsynchronousCloseException) {
@@ -212,7 +220,7 @@ internal class Connection(
         }
     }
 
-    private suspend fun send(data: ByteBuffer) = withContext(scope.coroutineContext) {
+    private suspend fun send(data: ByteBuffer) = withContext(dispatcher) {
         synchronized(sendLock) {
             serverAddress?.let { address ->
                 sendChannel?.send(data, address)
@@ -309,7 +317,7 @@ internal class Connection(
         }
     }
 
-    private suspend fun processDisconnect() {
+    private fun processDisconnect() {
         shutdown()
     }
 
