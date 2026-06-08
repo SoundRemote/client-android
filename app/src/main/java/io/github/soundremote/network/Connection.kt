@@ -142,9 +142,9 @@ internal class Connection(
         }
     }
 
-    fun sendHotkey(keyCode: KeyCode, mods: Mods = Mods()) {
+    suspend fun sendHotkey(keyCode: KeyCode, mods: Mods = Mods()) {
         val hotkeyPacket = Net.getHotkeyPacket(keyCode.value.toUByte(), mods.value.toUByte())
-        scope.launch(CoroutineName("Send Hotkey")) { send(hotkeyPacket) }
+        send(hotkeyPacket)
     }
 
     private suspend fun shutdown() {

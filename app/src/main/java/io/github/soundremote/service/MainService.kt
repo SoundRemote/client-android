@@ -49,7 +49,6 @@ import io.github.soundremote.network.Connection
 import io.github.soundremote.util.ACTION_CLOSE
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
-import io.github.soundremote.util.KeyCode
 import io.github.soundremote.util.Net
 import io.github.soundremote.util.SystemMessage
 import kotlinx.coroutines.CoroutineScope
@@ -306,11 +305,11 @@ internal class MainService : MediaBrowserServiceCompat() {
         }
     }
 
-    fun sendHotkey(hotkey: Hotkey) {
+    fun sendHotkey(hotkey: Hotkey) = scope.launch {
         connection.sendHotkey(hotkey.keyCode, hotkey.mods)
     }
 
-    fun sendKey(key: Key) {
+    fun sendKey(key: Key) = scope.launch {
         connection.sendHotkey(key.keyCode)
     }
 
@@ -465,7 +464,7 @@ internal class MainService : MediaBrowserServiceCompat() {
         override fun onPlay() {
             Timber.i("MediaSession Play")
             super.onPlay()
-            sendKey(Key.MEDIA_PLAY_PAUSE.keyCode)
+            sendKey(Key.MEDIA_PLAY_PAUSE)
             // Update playback state to change button in media notification
             updatePlaybackState(PlaybackStateCompat.STATE_PLAYING)
         }
@@ -473,13 +472,13 @@ internal class MainService : MediaBrowserServiceCompat() {
         override fun onStop() {
             Timber.i("MediaSession Stop")
             super.onStop()
-            sendKey(Key.MEDIA_STOP.keyCode)
+            sendKey(Key.MEDIA_STOP)
         }
 
         override fun onPause() {
             Timber.i("MediaSession Pause")
             super.onPause()
-            sendKey(Key.MEDIA_PLAY_PAUSE.keyCode)
+            sendKey(Key.MEDIA_PLAY_PAUSE)
             // Update playback state to change button in media notification
             updatePlaybackState(PlaybackStateCompat.STATE_PAUSED)
         }
@@ -487,13 +486,13 @@ internal class MainService : MediaBrowserServiceCompat() {
         override fun onSkipToNext() {
             Timber.i("MediaSession Next")
             super.onSkipToNext()
-            sendKey(Key.MEDIA_NEXT.keyCode)
+            sendKey(Key.MEDIA_NEXT)
         }
 
         override fun onSkipToPrevious() {
             Timber.i("MediaSession Previous")
             super.onSkipToPrevious()
-            sendKey(Key.MEDIA_PREV.keyCode)
+            sendKey(Key.MEDIA_PREV)
         }
 
         override fun onCustomAction(action: String?, extras: Bundle?) {
@@ -515,10 +514,6 @@ internal class MainService : MediaBrowserServiceCompat() {
 //            PlaybackStateCompat state = mMediaSession.getController().getPlaybackState();
 //            return super.onMediaButtonEvent(mediaButtonEvent);
 //        }
-    }
-
-    private fun sendKey(key: KeyCode) {
-        connection.sendHotkey(key)
     }
 
     private fun createNotification(sessionToken: MediaSessionCompat.Token): Notification {
