@@ -90,6 +90,7 @@ internal class Connection(
             }
         }
 
+    @Volatile
     private var audioSequenceNumber: UInt? = null
 
     suspend fun connect(
