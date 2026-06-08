@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.IOException
@@ -54,15 +56,19 @@ internal class Connection(
     private var sendChannel: DatagramChannel? = null
 
     /**
-     * Sync modifications to `currentStatus`, `receiveJob`, `keepAliveJob` with this.
+     * Sync modifications to `currentStatus`, `receiveJob`, `keepAliveJob`.
      */
-    private val connectLock = Any()
+    private val connectMutex = Mutex()
 
     /**
-     * Sync modifications to `serverAddress` and `sendChannel` with this.
+     * Sync modifications to `serverAddress` and `sendChannel`.
      */
-    private val sendLock = Any()
-    private val pendingRequestsLock = Any()
+    private val sendMutex = Mutex()
+
+    /**
+     * Sync modifications of `pendingRequests`.
+     */
+    private val pendingRequestsMutex = Mutex()
 
     private var serverProtocol: PacketProtocolType = 1u
     private var serverLastContact = AtomicLong(0)
@@ -89,17 +95,17 @@ internal class Connection(
 
     private var audioSequenceNumber: UInt? = null
 
-    fun connect(
+    suspend fun connect(
         address: String,
         serverPort: Int,
         localPort: Int,
         @Net.Compression compression: Int
     ) {
         shutdown()
-        synchronized(connectLock) {
+        connectMutex.withLock {
             currentStatus = ConnectionStatus.CONNECTING
             try {
-                synchronized(sendLock) {
+                sendMutex.withLock {
                     serverAddress = InetSocketAddress(address, serverPort)
                     sendChannel = createSendChannel()
                 }
@@ -132,11 +138,11 @@ internal class Connection(
         shutdown()
     }
 
-    fun sendSetFormat(@Net.Compression compression: Int) {
+    suspend fun sendSetFormat(@Net.Compression compression: Int) {
         val request = Request()
         val packet = Net.getSetFormatPacket(compression, request.id)
-        scope.launch(CoroutineName("Send SetFormat")) { send(packet) }
-        synchronized(pendingRequestsLock) {
+        send(packet)
+        pendingRequestsMutex.withLock {
             pendingRequests[Net.PacketCategory.SET_FORMAT] = request
         }
     }
@@ -146,8 +152,8 @@ internal class Connection(
         scope.launch(CoroutineName("Send Hotkey")) { send(hotkeyPacket) }
     }
 
-    private fun shutdown() {
-        synchronized(connectLock) {
+    private suspend fun shutdown() {
+        connectMutex.withLock {
             if (currentStatus == ConnectionStatus.DISCONNECTED) return
             connectJob?.cancel()
             receiveJob?.cancel()
@@ -160,8 +166,8 @@ internal class Connection(
         }
     }
 
-    private fun releaseChannels() {
-        synchronized(sendLock) {
+    private suspend fun releaseChannels() {
+        sendMutex.withLock {
             serverAddress = null
             sendChannel?.close()
             sendChannel = null
@@ -178,7 +184,7 @@ internal class Connection(
                 buf.flip()
                 val header: PacketHeader? = PacketHeader.read(buf)
                 when (header?.category) {
-                    Net.PacketCategory.DISCONNECT.value -> processDisconnect()
+                    Net.PacketCategory.DISCONNECT.value -> shutdown()
                     Net.PacketCategory.AUDIO_DATA_OPUS.value -> processAudioData(buf, true)
                     Net.PacketCategory.AUDIO_DATA_UNCOMPRESSED.value -> processAudioData(buf, false)
                     Net.PacketCategory.SERVER_KEEP_ALIVE.value -> updateServerLastContact()
@@ -221,14 +227,14 @@ internal class Connection(
     }
 
     private suspend fun send(data: ByteBuffer) = withContext(dispatcher) {
-        synchronized(sendLock) {
+        sendMutex.withLock {
             serverAddress?.let { address ->
                 sendChannel?.send(data, address)
             }
         }
     }
 
-    private fun sendMessage(message: SystemMessage) = scope.launch(CoroutineName("Send message")) {
+    private suspend fun sendMessage(message: SystemMessage) {
         connectionMessages.send(message)
     }
 
@@ -236,7 +242,7 @@ internal class Connection(
         val request = Request()
         val packet = Net.getConnectPacket(compression, request.id)
         send(packet)
-        synchronized(pendingRequestsLock) {
+        pendingRequestsMutex.withLock {
             pendingRequests[Net.PacketCategory.CONNECT] = request
         }
     }
@@ -278,7 +284,7 @@ internal class Connection(
         }
     }
 
-    private fun processAck(buffer: ByteBuffer): Unit = synchronized(pendingRequestsLock) {
+    private suspend fun processAck(buffer: ByteBuffer): Unit = pendingRequestsMutex.withLock {
         if (pendingRequests.isEmpty()) return
         val ackData = AckData.read(buffer) ?: return
         val i = pendingRequests.iterator()
@@ -303,8 +309,8 @@ internal class Connection(
      * Process ACK response on a Connect request.
      * @param buffer [ByteBuffer] must be positioned on ACK packet custom data.
      */
-    private fun processAckConnect(buffer: ByteBuffer) {
-        synchronized(connectLock) {
+    private suspend fun processAckConnect(buffer: ByteBuffer) {
+        connectMutex.withLock {
             if (currentStatus == ConnectionStatus.CONNECTING) {
                 currentStatus = ConnectionStatus.CONNECTED
                 connectJob?.cancel()
@@ -317,14 +323,10 @@ internal class Connection(
         }
     }
 
-    private fun processDisconnect() {
-        shutdown()
-    }
-
     /**
      * Removes pending requests older than 1 second
      */
-    private fun maintainPendingRequests(now: Long) = synchronized(pendingRequestsLock) {
+    private suspend fun maintainPendingRequests(now: Long) = pendingRequestsMutex.withLock {
         val i = pendingRequests.iterator()
         while (i.hasNext()) {
             val (_, request) = i.next()
