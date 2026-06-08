@@ -31,6 +31,8 @@ import java.net.StandardSocketOptions
 import java.nio.ByteBuffer
 import java.nio.channels.AlreadyBoundException
 import java.nio.channels.AsynchronousCloseException
+import java.nio.channels.ClosedByInterruptException
+import java.nio.channels.ClosedChannelException
 import java.nio.channels.DatagramChannel
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -59,11 +61,6 @@ internal class Connection(
      * Sync modifications to `currentStatus`, `receiveJob`, `keepAliveJob`.
      */
     private val connectMutex = Mutex()
-
-    /**
-     * Sync modifications to `serverAddress` and `sendChannel`.
-     */
-    private val sendMutex = Mutex()
 
     /**
      * Sync modifications of `pendingRequests`.
@@ -105,10 +102,8 @@ internal class Connection(
         connectMutex.withLock {
             currentStatus = ConnectionStatus.CONNECTING
             try {
-                sendMutex.withLock {
-                    serverAddress = InetSocketAddress(address, serverPort)
-                    sendChannel = createSendChannel()
-                }
+                serverAddress = InetSocketAddress(address, serverPort)
+                sendChannel = createSendChannel()
                 dataChannel = createReceiveChannel(InetSocketAddress(localPort))
             } catch (e: IllegalStateException) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && e is AlreadyBoundException) {
@@ -166,12 +161,10 @@ internal class Connection(
         }
     }
 
-    private suspend fun releaseChannels() {
-        sendMutex.withLock {
-            serverAddress = null
-            sendChannel?.close()
-            sendChannel = null
-        }
+    private fun releaseChannels() {
+        serverAddress = null
+        sendChannel?.close()
+        sendChannel = null
         dataChannel?.close()
         dataChannel = null
     }
@@ -227,10 +220,16 @@ internal class Connection(
     }
 
     private suspend fun send(data: ByteBuffer) = withContext(dispatcher) {
-        sendMutex.withLock {
+        try {
             serverAddress?.let { address ->
                 sendChannel?.send(data, address)
             }
+        } catch (_: AsynchronousCloseException) {
+            shutdown()
+        } catch (_: ClosedChannelException) {
+            shutdown()
+        } catch (_: ClosedByInterruptException) {
+            shutdown()
         }
     }
 
