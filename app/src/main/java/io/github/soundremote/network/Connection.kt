@@ -9,6 +9,7 @@ import io.github.soundremote.util.Net.calculateGap
 import io.github.soundremote.util.Net.uInt
 import io.github.soundremote.util.PacketProtocolType
 import io.github.soundremote.util.SystemMessage
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +21,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.IOException
@@ -28,6 +31,8 @@ import java.net.StandardSocketOptions
 import java.nio.ByteBuffer
 import java.nio.channels.AlreadyBoundException
 import java.nio.channels.AsynchronousCloseException
+import java.nio.channels.ClosedByInterruptException
+import java.nio.channels.ClosedChannelException
 import java.nio.channels.DatagramChannel
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -40,7 +45,8 @@ internal class Connection(
     private val opusAudio: SendChannel<ByteBuffer>,
     private val packetsLost: AtomicInteger,
     private val connectionMessages: SendChannel<SystemMessage>,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob()),
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     private var connectJob: Job? = null
     private var receiveJob: Job? = null
@@ -50,9 +56,16 @@ internal class Connection(
     private var serverAddress: InetSocketAddress? = null
     private var dataChannel: DatagramChannel? = null
     private var sendChannel: DatagramChannel? = null
-    private val connectLock = Any()
-    private val sendLock = Any()
-    private val pendingRequestsLock = Any()
+
+    /**
+     * Sync modifications to `currentStatus`, `receiveJob`, `keepAliveJob`.
+     */
+    private val connectMutex = Mutex()
+
+    /**
+     * Sync modifications of `pendingRequests`.
+     */
+    private val pendingRequestsMutex = Mutex()
 
     private var serverProtocol: PacketProtocolType = 1u
     private var serverLastContact = AtomicLong(0)
@@ -77,6 +90,7 @@ internal class Connection(
             }
         }
 
+    @Volatile
     private var audioSequenceNumber: UInt? = null
 
     suspend fun connect(
@@ -84,15 +98,13 @@ internal class Connection(
         serverPort: Int,
         localPort: Int,
         @Net.Compression compression: Int
-    ) = withContext(scope.coroutineContext) {
+    ) {
         shutdown()
-        synchronized(connectLock) {
+        connectMutex.withLock {
             currentStatus = ConnectionStatus.CONNECTING
             try {
-                synchronized(sendLock) {
-                    serverAddress = InetSocketAddress(address, serverPort)
-                    sendChannel = createSendChannel()
-                }
+                serverAddress = InetSocketAddress(address, serverPort)
+                sendChannel = createSendChannel()
                 dataChannel = createReceiveChannel(InetSocketAddress(localPort))
             } catch (e: IllegalStateException) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && e is AlreadyBoundException) {
@@ -102,12 +114,12 @@ internal class Connection(
                 }
                 releaseChannels()
                 currentStatus = ConnectionStatus.DISCONNECTED
-                return@withContext false
-            } catch (e: Exception) {
+                return
+            } catch (_: Exception) {
                 sendMessage(SystemMessage.MESSAGE_BIND_ERROR)
                 releaseChannels()
                 currentStatus = ConnectionStatus.DISCONNECTED
-                return@withContext false
+                return
             }
             receiveJob = receive()
         }
@@ -122,23 +134,23 @@ internal class Connection(
         shutdown()
     }
 
-    fun sendSetFormat(@Net.Compression compression: Int) {
+    suspend fun sendSetFormat(@Net.Compression compression: Int) {
         val request = Request()
         val packet = Net.getSetFormatPacket(compression, request.id)
-        scope.launch(CoroutineName("Send SetFormat")) { send(packet) }
-        synchronized(pendingRequestsLock) {
+        send(packet)
+        pendingRequestsMutex.withLock {
             pendingRequests[Net.PacketCategory.SET_FORMAT] = request
         }
     }
 
-    fun sendHotkey(keyCode: KeyCode, mods: Mods = Mods()) {
+    suspend fun sendHotkey(keyCode: KeyCode, mods: Mods = Mods()) {
         val hotkeyPacket = Net.getHotkeyPacket(keyCode.value.toUByte(), mods.value.toUByte())
-        scope.launch(CoroutineName("Send Hotkey")) { send(hotkeyPacket) }
+        send(hotkeyPacket)
     }
 
-    private suspend fun shutdown() = withContext(scope.coroutineContext) {
-        synchronized(connectLock) {
-            if (currentStatus == ConnectionStatus.DISCONNECTED) return@withContext
+    private suspend fun shutdown() {
+        connectMutex.withLock {
+            if (currentStatus == ConnectionStatus.DISCONNECTED) return
             connectJob?.cancel()
             receiveJob?.cancel()
             keepAliveJob?.cancel()
@@ -151,19 +163,14 @@ internal class Connection(
     }
 
     private fun releaseChannels() {
-        synchronized(sendLock) {
-            serverAddress = null
-            sendChannel?.close()
-            sendChannel = null
-        }
+        serverAddress = null
+        sendChannel?.close()
+        sendChannel = null
         dataChannel?.close()
         dataChannel = null
     }
 
-    /**
-     * Always runs on Dispatchers.IO
-     */
-    private fun receive() = scope.launch(CoroutineName("Receive") + Dispatchers.IO) {
+    private fun receive() = scope.launch(CoroutineName("Receive") + dispatcher) {
         try {
             while (isActive) {
                 val buf = Net.createPacketBuffer(Net.RECEIVE_BUFFER_CAPACITY)
@@ -171,12 +178,13 @@ internal class Connection(
                 buf.flip()
                 val header: PacketHeader? = PacketHeader.read(buf)
                 when (header?.category) {
-                    Net.PacketCategory.DISCONNECT.value -> processDisconnect()
+                    Net.PacketCategory.DISCONNECT.value -> shutdown()
                     Net.PacketCategory.AUDIO_DATA_OPUS.value -> processAudioData(buf, true)
                     Net.PacketCategory.AUDIO_DATA_UNCOMPRESSED.value -> processAudioData(buf, false)
                     Net.PacketCategory.SERVER_KEEP_ALIVE.value -> updateServerLastContact()
                     Net.PacketCategory.ACK.value -> processAck(buf)
-                    else -> {}
+                    // For tests - yield the test dispatcher and advance time
+                    else -> delay(10)
                 }
             }
         } catch (_: AsynchronousCloseException) {
@@ -212,15 +220,21 @@ internal class Connection(
         }
     }
 
-    private suspend fun send(data: ByteBuffer) = withContext(scope.coroutineContext) {
-        synchronized(sendLock) {
+    private suspend fun send(data: ByteBuffer) = withContext(dispatcher) {
+        try {
             serverAddress?.let { address ->
                 sendChannel?.send(data, address)
             }
+        } catch (_: AsynchronousCloseException) {
+            shutdown()
+        } catch (_: ClosedChannelException) {
+            shutdown()
+        } catch (_: ClosedByInterruptException) {
+            shutdown()
         }
     }
 
-    private fun sendMessage(message: SystemMessage) = scope.launch(CoroutineName("Send message")) {
+    private suspend fun sendMessage(message: SystemMessage) {
         connectionMessages.send(message)
     }
 
@@ -228,7 +242,7 @@ internal class Connection(
         val request = Request()
         val packet = Net.getConnectPacket(compression, request.id)
         send(packet)
-        synchronized(pendingRequestsLock) {
+        pendingRequestsMutex.withLock {
             pendingRequests[Net.PacketCategory.CONNECT] = request
         }
     }
@@ -270,7 +284,7 @@ internal class Connection(
         }
     }
 
-    private fun processAck(buffer: ByteBuffer) = synchronized(pendingRequestsLock) {
+    private suspend fun processAck(buffer: ByteBuffer): Unit = pendingRequestsMutex.withLock {
         if (pendingRequests.isEmpty()) return
         val ackData = AckData.read(buffer) ?: return
         val i = pendingRequests.iterator()
@@ -295,8 +309,8 @@ internal class Connection(
      * Process ACK response on a Connect request.
      * @param buffer [ByteBuffer] must be positioned on ACK packet custom data.
      */
-    private fun processAckConnect(buffer: ByteBuffer) {
-        synchronized(connectLock) {
+    private suspend fun processAckConnect(buffer: ByteBuffer) {
+        connectMutex.withLock {
             if (currentStatus == ConnectionStatus.CONNECTING) {
                 currentStatus = ConnectionStatus.CONNECTED
                 connectJob?.cancel()
@@ -309,14 +323,10 @@ internal class Connection(
         }
     }
 
-    private suspend fun processDisconnect() {
-        shutdown()
-    }
-
     /**
      * Removes pending requests older than 1 second
      */
-    private fun maintainPendingRequests(now: Long) = synchronized(pendingRequestsLock) {
+    private suspend fun maintainPendingRequests(now: Long) = pendingRequestsMutex.withLock {
         val i = pendingRequests.iterator()
         while (i.hasNext()) {
             val (_, request) = i.next()

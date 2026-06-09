@@ -22,6 +22,7 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
@@ -30,9 +31,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -44,7 +43,7 @@ import java.nio.channels.DatagramChannel
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-// TODO: Check unnecessary stubbing
+@OptIn(ExperimentalCoroutinesApi::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
 @DisplayName("Connection")
@@ -78,60 +77,48 @@ internal class ConnectionTest {
         unmockkObject(Connection)
     }
 
-    @BeforeEach
-    fun setUp() {
-    }
-
-    @AfterEach
-    fun tearDown() {
-    }
-
     @DisplayName("Has \"disconnected\" status on creation")
     @Test
     fun constructor_CreatesWithDisconnectedStatus() = runTest {
-        val expected = ConnectionStatus.DISCONNECTED
+        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
 
-        val connection = createConnection(this)
+        val connection = createConnection(this, testDispatcher)
+
         val actual = connection.connectionStatus.value
-
-        actual shouldBe expected
+        actual shouldBe ConnectionStatus.DISCONNECTED
     }
 
     @DisplayName("Changes status to \"connecting\" on connection attempt")
     @Test
     fun connect_ChangesStatusToConnecting() = runTest {
-        val connection = createConnection(this.backgroundScope)
+        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
 
-        connection.connectionStatus.value shouldBe ConnectionStatus.DISCONNECTED
-        val expected = ConnectionStatus.CONNECTING
-
+        val connection = createConnection(this, testDispatcher)
         connection.connect(ADDRESS, SERVER_PORT, LOCAL_PORT, COMPRESSION)
-        val actual = connection.connectionStatus.value
 
-        actual shouldBe expected
+        val actual = connection.connectionStatus.value
+        actual shouldBe ConnectionStatus.CONNECTING
     }
 
     @DisplayName("Changes status to \"disconnected\" on disconnect after connection attempt")
     @Test
     fun disconnect_ChangesStatusToDisconnected() = runTest {
-        val connection = createConnection(this.backgroundScope)
-        connection.connectionStatus.value shouldBe ConnectionStatus.DISCONNECTED
+        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
+
+        val connection = createConnection(this, testDispatcher)
         connection.connect(ADDRESS, SERVER_PORT, LOCAL_PORT, COMPRESSION)
-        connection.connectionStatus.value shouldBe ConnectionStatus.CONNECTING
-        val expected = ConnectionStatus.DISCONNECTED
-
         connection.disconnect()
-        val actual = connection.connectionStatus.value
 
-        actual shouldBe expected
+        val actual = connection.connectionStatus.value
+        actual shouldBe ConnectionStatus.DISCONNECTED
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @DisplayName("connect() sends datagrams to the server")
     @Test
     fun connect_SendsDatagram() = runTest {
-        val connection = createConnection(this)
+        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
 
+        val connection = createConnection(this, testDispatcher)
         connection.connect(ADDRESS, SERVER_PORT, LOCAL_PORT, COMPRESSION)
         advanceUntilIdle()
 
@@ -139,7 +126,6 @@ internal class ConnectionTest {
     }
 
     @Disabled
-    @OptIn(ExperimentalCoroutinesApi::class)
     @DisplayName("Changes status after receiving ACK connect datagram and disconnect datagram")
     @Test
     fun receives_AckConnectAndDisconnect() = runTest {
@@ -168,7 +154,8 @@ internal class ConnectionTest {
             serverAddress
         }
 
-        val connection = createConnection(this)
+        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
+        val connection = createConnection(this, testDispatcher)
         val expectedStatuses = listOf(
             ConnectionStatus.DISCONNECTED,
             ConnectionStatus.CONNECTING,
@@ -190,9 +177,13 @@ internal class ConnectionTest {
         advanceUntilIdle()
     }
 
-    // Utility
-    private fun createConnection(scope: CoroutineScope): Connection {
-        return Connection(audioChannel, audioChannel, losses, messageChannel, scope)
+    // --- Utility ---
+
+    private fun createConnection(
+        scope: CoroutineScope,
+        dispatcher: CoroutineDispatcher,
+    ): Connection {
+        return Connection(audioChannel, audioChannel, losses, messageChannel, scope, dispatcher)
     }
 
     private fun getConnectRequestId(source: ByteBuffer): PacketRequestIdType? {
