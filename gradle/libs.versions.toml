@@ -17,7 +17,7 @@ kotlinxCoroutines = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
 kotest = "6.1.11"
 lifecycle = "2.10.0"
-media = "1.8.0"
+media3 = "1.10.1"
 mockk = "1.14.9"
 navigation = "2.9.8"
 room = "2.8.4"
@@ -41,7 +41,7 @@ androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navig
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-androidx-media = { module = "androidx.media:media", version.ref = "media" }
+androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }

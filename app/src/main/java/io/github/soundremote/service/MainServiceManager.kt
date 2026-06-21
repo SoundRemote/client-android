@@ -48,12 +48,17 @@ internal class MainServiceManager(
 
     override fun bind(context: Context) {
         Intent(context, MainService::class.java).also { intent ->
-            context.bindService(intent, serviceConnection, 0)
+            context.bindService(
+                intent,
+                serviceConnection,
+                Context.BIND_AUTO_CREATE,
+            )
         }
     }
 
     override fun unbind(context: Context) {
         stopCollect()
+        bound = false
         context.unbindService(serviceConnection)
     }
 
@@ -83,6 +88,7 @@ internal class MainServiceManager(
     }
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
+
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
             val localBinder = binder as MainService.LocalBinder
             service = WeakReference(localBinder.getService())
