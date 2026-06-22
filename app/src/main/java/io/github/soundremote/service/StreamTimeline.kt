@@ -1,4 +1,4 @@
-package io.github.soundremote.audio
+package io.github.soundremote.service
 
 import androidx.annotation.OptIn
 import androidx.media3.common.C

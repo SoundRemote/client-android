@@ -1,4 +1,4 @@
-package io.github.soundremote.audio
+package io.github.soundremote.service
 
 import android.os.Looper
 import android.view.Surface
@@ -24,7 +24,7 @@ import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
 
 @OptIn(UnstableApi::class)
-class AudioTrackPlayer(
+class StreamPlayer(
     private val onPlay: () -> Unit,
     private val onPause: () -> Unit,
     private val onStop: () -> Unit,

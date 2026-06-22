@@ -19,7 +19,6 @@ import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.soundremote.MainActivity
 import io.github.soundremote.R
-import io.github.soundremote.audio.AudioTrackPlayer
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
 import kotlinx.coroutines.CoroutineDispatcher
@@ -38,7 +37,7 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
     private var stateCollect: Job? = null
 
     private var mediaSession: MediaSession? = null
-    private lateinit var player: AudioTrackPlayer
+    private lateinit var player: StreamPlayer
     private val actionClose = "action_close"
     private val sessionCommandClose = SessionCommand(actionClose, Bundle.EMPTY)
 
@@ -48,7 +47,7 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
     override fun onCreate() {
         super.onCreate()
         bindMainService()
-        player = AudioTrackPlayer(
+        player = StreamPlayer(
             onPlay = {
                 Timber.i("MediaSession Play")
                 if (mainServiceBound) {
