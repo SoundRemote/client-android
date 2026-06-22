@@ -45,11 +45,10 @@ class StreamPlayer(
         .setTitle(notificationTitle)
         .setArtist(makeAppStateText(appConnected, appMuted))
         .build()
-    private val mediaItem = MediaItem.Builder()
+    private var mediaItem = MediaItem.Builder()
         .setMediaMetadata(mediaData)
         .build()
-    private val streamTimeline = StreamTimeline(mediaItem)
-    private var currentTimeline: Timeline = streamTimeline
+    private var timeline = StreamTimeline(mediaItem)
 
     fun setShowNotification(show: Boolean) {
         verifyThread()
@@ -64,7 +63,6 @@ class StreamPlayer(
         listeners.flushEvents()
     }
 
-    // TODO: also update mediaItem and timeline?
     fun updateAppState(connected: Boolean, muted: Boolean) {
         verifyThread()
         if (connected == appConnected && muted == appMuted) {
@@ -77,9 +75,18 @@ class StreamPlayer(
             metadataBuilder.setArtist(makeAppStateText(connected, muted))
         }
         mediaData = metadataBuilder.build()
-        listeners.sendEvent(Player.EVENT_MEDIA_METADATA_CHANGED) { listener ->
+        listeners.queueEvent(Player.EVENT_MEDIA_METADATA_CHANGED) { listener ->
             listener.onMediaMetadataChanged(mediaData)
         }
+        mediaItem = MediaItem.Builder().setMediaMetadata(mediaData).build()
+        timeline = StreamTimeline(mediaItem)
+        listeners.queueEvent(Player.EVENT_TIMELINE_CHANGED) { listener ->
+            listener.onTimelineChanged(
+                timeline,
+                Player.TIMELINE_CHANGE_REASON_SOURCE_UPDATE,
+            )
+        }
+        listeners.flushEvents()
     }
 
     private fun makeAppStateText(connected: Boolean, muted: Boolean) = buildList {
@@ -160,7 +167,7 @@ class StreamPlayer(
 
     override fun getCurrentTimeline(): Timeline {
         verifyThread()
-        return currentTimeline
+        return timeline
     }
 
     override fun getCurrentPeriodIndex() = 0
