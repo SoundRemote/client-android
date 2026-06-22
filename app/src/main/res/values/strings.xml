@@ -1,5 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">SoundRemote</string>
+    <string name="empty_string" translatable="false" />
+    <string name="empty_string_attribution_label" translatable="false">Default access</string>
 
     <string name="delete">Delete</string>
     <string name="save">Save</string>
