@@ -6,6 +6,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.TextureView
 import androidx.annotation.OptIn
+import androidx.compose.ui.util.fastJoinToString
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.DeviceInfo
@@ -30,12 +31,18 @@ class AudioTrackPlayer(
     private val onPrevious: () -> Unit,
     private val onNext: () -> Unit,
     private val applicationLooper: Looper,
-    notificationTitle: String,
+    private val notificationTitle: String,
+    private val disconnectedText: String,
+    private val mutedText: String,
 ) : Player {
 
+    private var appConnected = false
+    private var appMuted = false
+
     private val listeners = ListenerSet<Player.Listener>(applicationLooper)
-    private val mediaData = MediaMetadata.Builder()
+    private var mediaData = MediaMetadata.Builder()
         .setTitle(notificationTitle)
+        .setArtist(makeAppStateText(appConnected, appMuted))
         .build()
     private val mediaItem = MediaItem.Builder()
         .setMediaMetadata(mediaData)
@@ -54,6 +61,29 @@ class AudioTrackPlayer(
             )
         }
     }
+
+    // TODO: also update mediaItem and timeline?
+    fun updateAppState(connected: Boolean, muted: Boolean) {
+        verifyThread()
+        if (connected == appConnected && muted == appMuted) {
+            return
+        }
+        appConnected = connected
+        appMuted = muted
+        val metadataBuilder = MediaMetadata.Builder().setTitle(notificationTitle)
+        if (!connected || muted) {
+            metadataBuilder.setArtist(makeAppStateText(connected, muted))
+        }
+        mediaData = metadataBuilder.build()
+        listeners.sendEvent(Player.EVENT_MEDIA_METADATA_CHANGED) { listener ->
+            listener.onMediaMetadataChanged(mediaData)
+        }
+    }
+
+    private fun makeAppStateText(connected: Boolean, muted: Boolean) = buildList {
+        if (!connected) add(disconnectedText)
+        if (muted) add(mutedText)
+    }.fastJoinToString()
 
     override fun play() = onPlay()
     override fun pause() = onPause()

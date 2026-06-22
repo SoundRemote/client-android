@@ -20,11 +20,22 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.github.soundremote.MainActivity
 import io.github.soundremote.R
 import io.github.soundremote.audio.AudioTrackPlayer
+import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @AndroidEntryPoint
-internal class MediaService : MediaSessionService() {
+internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) :
+    MediaSessionService() {
+
+    private val scope = CoroutineScope(dispatcher)
+    private var stateCollect: Job? = null
 
     private var mediaSession: MediaSession? = null
     private lateinit var player: AudioTrackPlayer
@@ -69,8 +80,9 @@ internal class MediaService : MediaSessionService() {
                 }
             },
             applicationLooper = mainLooper,
-            notificationTitle = getString(R.string.notification_title_template)
-                .format(getString(R.string.app_name)),
+            notificationTitle = getString(R.string.app_name),
+            disconnectedText = getString(R.string.notification_disconnected_text),
+            mutedText = getString(R.string.notification_muted_text),
         )
         mediaSession = createMediaSession(player)
     }
@@ -171,10 +183,32 @@ internal class MediaService : MediaSessionService() {
             val localBinder = binder as MainService.LocalBinder
             mainService = localBinder.getService()
             mainServiceBound = true
+            startCollect()
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
+            stopCollect()
             mainServiceBound = false
         }
+    }
+
+    private fun startCollect() {
+        mainService?.let { service ->
+            stateCollect = scope.launch {
+                combine(service.connectionStatus, service.isMuted) { connectionStatus, isMuted ->
+                    ServiceState(connectionStatus, isMuted)
+                }.collect {
+                    player.updateAppState(
+                        it.connectionStatus == ConnectionStatus.CONNECTED,
+                        it.isMuted,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun stopCollect() {
+        stateCollect?.cancel()
+        stateCollect = null
     }
 }

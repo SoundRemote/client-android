@@ -47,7 +47,8 @@
     <string name="action_unmute_app">Unmute application</string>
 
     <!--Notification-->
-    <string name="notification_title_template">Return to %1$s</string>
+    <string name="notification_disconnected_text">Disconnected 🔴</string>
+    <string name="notification_muted_text">Muted 🔇</string>
 
     <!--Hotkeys-->
     <string name="hotkey_list_title">Hotkeys</string>
