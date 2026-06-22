@@ -40,6 +40,7 @@ class StreamPlayer(
     private var appMuted = false
 
     private val listeners = ListenerSet<Player.Listener>(applicationLooper)
+    private var playerPlaybackState = Player.STATE_READY
     private var mediaData = MediaMetadata.Builder()
         .setTitle(notificationTitle)
         .setArtist(makeAppStateText(appConnected, appMuted))
@@ -52,14 +53,15 @@ class StreamPlayer(
 
     fun setShowNotification(show: Boolean) {
         verifyThread()
-        if (show xor (currentTimeline == Timeline.EMPTY)) return
-        currentTimeline = if (show) streamTimeline else Timeline.EMPTY
-        listeners.sendEvent(Player.EVENT_TIMELINE_CHANGED) { listener ->
-            listener.onTimelineChanged(
-                currentTimeline,
-                Player.TIMELINE_CHANGE_REASON_SOURCE_UPDATE,
-            )
+        if (show xor (playerPlaybackState == Player.STATE_IDLE)) return
+        playerPlaybackState = if (show) Player.STATE_READY else Player.STATE_IDLE
+        listeners.queueEvent(Player.EVENT_PLAYBACK_STATE_CHANGED) { listener ->
+            listener.onPlaybackStateChanged(playerPlaybackState)
         }
+        listeners.queueEvent(Player.EVENT_IS_PLAYING_CHANGED) { listener ->
+            listener.onIsPlayingChanged(isPlaying)
+        }
+        listeners.flushEvents()
     }
 
     // TODO: also update mediaItem and timeline?
@@ -91,9 +93,13 @@ class StreamPlayer(
     override fun seekToPrevious() = onPrevious()
     override fun seekToNext() = onNext()
 
-    override fun getPlaybackState() = Player.STATE_READY
+    override fun getPlaybackState(): Int {
+        verifyThread()
+        return playerPlaybackState
+    }
+
     override fun getPlayWhenReady() = true
-    override fun isPlaying() = true // playWhenReady && playbackState == Player.STATE_READY
+    override fun isPlaying() = playWhenReady && playbackState == Player.STATE_READY
     override fun setPlayWhenReady(playWhenReady: Boolean) {}
 
     private val playerAvailableCommands = Player.Commands.Builder().addAll(

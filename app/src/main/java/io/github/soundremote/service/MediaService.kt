@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@OptIn(UnstableApi::class)
 @AndroidEntryPoint
 internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) :
     MediaSessionService() {
@@ -47,6 +48,7 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
     override fun onCreate() {
         super.onCreate()
         bindMainService()
+        setShowNotificationForIdlePlayer(SHOW_NOTIFICATION_FOR_IDLE_PLAYER_NEVER)
         player = StreamPlayer(
             onPlay = {
                 Timber.i("MediaSession Play")
@@ -86,7 +88,6 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
         mediaSession = createMediaSession(player)
     }
 
-    @OptIn(UnstableApi::class)
     override fun onDestroy() {
         mainServiceBound = false
         unbindService(serviceConnection)
@@ -98,7 +99,6 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
         super.onDestroy()
     }
 
-    @OptIn(UnstableApi::class)
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         player.setShowNotification(false)
@@ -108,7 +108,6 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
     // https://developer.android.com/media/implement/surfaces/mobile#config-action-buttons
     private inner class MyCallback : MediaSession.Callback {
 
-        @OptIn(UnstableApi::class)
         override fun onConnect(
             session: MediaSession,
             controller: MediaSession.ControllerInfo
@@ -139,7 +138,6 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
         }
     }
 
-    @OptIn(UnstableApi::class)
     private fun createMediaSession(player: Player): MediaSession {
         val buttons = listOf(
             CommandButton.Builder(CommandButton.ICON_UNDEFINED)
