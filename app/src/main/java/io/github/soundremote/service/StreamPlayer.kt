@@ -63,11 +63,9 @@ class StreamPlayer(
         listeners.flushEvents()
     }
 
-    fun updateAppState(connected: Boolean, muted: Boolean) {
+    fun updateAppState(connected: Boolean = appConnected, muted: Boolean = appMuted) {
         verifyThread()
-        if (connected == appConnected && muted == appMuted) {
-            return
-        }
+        if (connected == appConnected && muted == appMuted) return
         appConnected = connected
         appMuted = muted
         val metadataBuilder = MediaMetadata.Builder().setTitle(notificationTitle)

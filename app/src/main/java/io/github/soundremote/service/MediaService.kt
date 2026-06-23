@@ -25,7 +25,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -35,7 +34,8 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
     MediaSessionService() {
 
     private val scope = CoroutineScope(dispatcher)
-    private var stateCollect: Job? = null
+    private var connectionStateCollect: Job? = null
+    private var mutedStateCollect: Job? = null
 
     private var mediaSession: MediaSession? = null
     private lateinit var player: StreamPlayer
@@ -191,21 +191,23 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
 
     private fun startCollect() {
         mainService?.let { service ->
-            stateCollect = scope.launch {
-                combine(service.connectionStatus, service.isMuted) { connectionStatus, isMuted ->
-                    ServiceState(connectionStatus, isMuted)
-                }.collect {
-                    player.updateAppState(
-                        it.connectionStatus == ConnectionStatus.CONNECTED,
-                        it.isMuted,
-                    )
+            connectionStateCollect = scope.launch {
+                service.connectionStatus.collect {
+                    player.updateAppState(connected = it == ConnectionStatus.CONNECTED)
+                }
+            }
+            mutedStateCollect = scope.launch {
+                service.isMuted.collect {
+                    player.updateAppState(muted = it)
                 }
             }
         }
     }
 
     private fun stopCollect() {
-        stateCollect?.cancel()
-        stateCollect = null
+        connectionStateCollect?.cancel()
+        connectionStateCollect = null
+        mutedStateCollect?.cancel()
+        mutedStateCollect = null
     }
 }
