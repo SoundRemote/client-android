@@ -41,12 +41,21 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
     private lateinit var player: StreamPlayer
     private val actionClose = "action_close"
     private val sessionCommandClose = SessionCommand(actionClose, Bundle.EMPTY)
+    private val actionMute = "action_mute"
+    private val sessionCommandMute = SessionCommand(actionMute, Bundle.EMPTY)
+    private val actionUnmute = "action_unmute"
+    private val sessionCommandUnmute = SessionCommand(actionUnmute, Bundle.EMPTY)
 
     private var mainService: MainService? = null
     private var mainServiceBound: Boolean = false
 
+    private lateinit var muteButton: CommandButton
+    private lateinit var unmuteButton: CommandButton
+    private lateinit var closeButton: CommandButton
+
     override fun onCreate() {
         super.onCreate()
+        initCommandButtons()
         bindMainService()
         setShowNotificationForIdlePlayer(SHOW_NOTIFICATION_FOR_IDLE_PLAYER_NEVER)
         player = StreamPlayer(
@@ -88,6 +97,27 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
         mediaSession = createMediaSession(player)
     }
 
+    private fun initCommandButtons() {
+        unmuteButton = CommandButton.Builder(CommandButton.ICON_UNDEFINED)
+            .setCustomIconResId(R.drawable.ic_volume_mute)
+            .setDisplayName(getString(R.string.action_unmute_app))
+            .setSessionCommand(sessionCommandUnmute)
+            .setSlots(CommandButton.SLOT_OVERFLOW)
+            .build()
+        muteButton = CommandButton.Builder(CommandButton.ICON_UNDEFINED)
+            .setCustomIconResId(R.drawable.ic_volume_up)
+            .setDisplayName(getString(R.string.action_mute_app))
+            .setSessionCommand(sessionCommandMute)
+            .setSlots(CommandButton.SLOT_OVERFLOW)
+            .build()
+        closeButton = CommandButton.Builder(CommandButton.ICON_UNDEFINED)
+            .setCustomIconResId(R.drawable.ic_close)
+            .setDisplayName(getString(R.string.close))
+            .setSessionCommand(sessionCommandClose)
+            .setSlots(CommandButton.SLOT_OVERFLOW)
+            .build()
+    }
+
     override fun onDestroy() {
         mainServiceBound = false
         unbindService(serviceConnection)
@@ -115,6 +145,8 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
             return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
                 .setAvailableSessionCommands(
                     MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
+                        .add(sessionCommandMute)
+                        .add(sessionCommandUnmute)
                         .add(sessionCommandClose)
                         .build()
                 )
@@ -127,26 +159,35 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
             customCommand: SessionCommand,
             args: Bundle
         ): ListenableFuture<SessionResult> {
-            if (customCommand.customAction == actionClose) {
-                Timber.i("MediaSession Close")
-                if (mainServiceBound) {
-                    mainService?.closeApp()
+            when (customCommand.customAction) {
+                actionMute -> {
+                    Timber.i("MediaSession Mute")
+                    if (mainServiceBound) {
+                        mainService?.setMuted(true)
+                    }
                 }
-                return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+
+                actionUnmute -> {
+                    Timber.i("MediaSession Unmute")
+                    if (mainServiceBound) {
+                        mainService?.setMuted(false)
+                    }
+                }
+
+                actionClose -> {
+                    Timber.i("MediaSession Close")
+                    if (mainServiceBound) {
+                        mainService?.closeApp()
+                    }
+                }
+
+                else -> return super.onCustomCommand(session, controller, customCommand, args)
             }
-            return super.onCustomCommand(session, controller, customCommand, args)
+            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
         }
     }
 
     private fun createMediaSession(player: Player): MediaSession {
-        val buttons = listOf(
-            CommandButton.Builder(CommandButton.ICON_UNDEFINED)
-                .setCustomIconResId(R.drawable.ic_close)
-                .setDisplayName(getString(R.string.close))
-                .setSessionCommand(sessionCommandClose)
-                .setSlots(CommandButton.SLOT_OVERFLOW)
-                .build(),
-        )
         val mainActivityIntent =
             PendingIntent.getActivity(
                 this,
@@ -155,7 +196,6 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         return MediaSession.Builder(this, player)
-            .setMediaButtonPreferences(buttons)
             .setCallback(MyCallback())
             .setSessionActivity(mainActivityIntent)
             .build()
@@ -198,11 +238,17 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
             }
             mutedStateCollect = scope.launch {
                 service.isMuted.collect {
+                    mediaSession?.setMediaButtonPreferences(makeCommandButtons(it))
                     player.updateAppState(muted = it)
                 }
             }
         }
     }
+
+    private fun makeCommandButtons(muted: Boolean) = listOf(
+        if (muted) unmuteButton else muteButton,
+        closeButton,
+    )
 
     private fun stopCollect() {
         connectionStateCollect?.cancel()
