@@ -39,7 +39,7 @@ class StreamPlayer(
     private var appConnected = false
     private var appMuted = false
 
-    private val listeners = ListenerSet<Player.Listener>(applicationLooper)
+    @Player.State
     private var playerPlaybackState = Player.STATE_READY
     private var mediaData = MediaMetadata.Builder()
         .setTitle(notificationTitle)
@@ -49,11 +49,12 @@ class StreamPlayer(
         .setMediaMetadata(mediaData)
         .build()
     private var timeline = StreamTimeline(mediaItem)
+    private val listeners = ListenerSet<Player.Listener>(applicationLooper)
 
-    fun setShowNotification(show: Boolean) {
+    fun setPlaybackState(@Player.State playbackState: Int) {
         verifyThread()
-        if (show xor (playerPlaybackState == Player.STATE_IDLE)) return
-        playerPlaybackState = if (show) Player.STATE_READY else Player.STATE_IDLE
+        if (playerPlaybackState == playbackState) return
+        playerPlaybackState = playbackState
         listeners.queueEvent(Player.EVENT_PLAYBACK_STATE_CHANGED) { listener ->
             listener.onPlaybackStateChanged(playerPlaybackState)
         }
@@ -98,6 +99,7 @@ class StreamPlayer(
     override fun seekToPrevious() = onPrevious()
     override fun seekToNext() = onNext()
 
+    @Player.State
     override fun getPlaybackState(): Int {
         verifyThread()
         return playerPlaybackState

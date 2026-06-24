@@ -131,7 +131,8 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        player.setShowNotification(false)
+        // Hide notification by setting playbackState to idle
+        player.playbackState = Player.STATE_IDLE
         stopSelf()
     }
 
