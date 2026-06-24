@@ -42,7 +42,8 @@
     <string name="action_mute_app">Отключить звук приложения</string>
     <string name="action_unmute_app">Включить звук приложения</string>
     <!--Notification-->
-    <string name="notification_title_template">Открыть %1$s</string>
+    <string name="notification_disconnected_text">Отключено 🔴</string>
+    <string name="notification_muted_text">Без звука 🔇</string>
     <!--Hotkeys-->
     <string name="hotkey_list_title">Сочетания клавиш</string>
     <string name="hotkey_delete_confirmation">Удалить сочетание клавиш?</string>

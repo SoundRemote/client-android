@@ -78,10 +78,10 @@ room {
 }
 
 dependencies {
-    implementation(libs.androidx.media)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.ktx)  // For the predictive back gesture
     implementation(libs.bundles.androidx.lifeycle)
+    implementation(libs.androidx.media3.session)
 // Compose
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)

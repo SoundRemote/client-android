@@ -1,40 +1,25 @@
 package io.github.soundremote.service
 
 import android.Manifest
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.content.pm.ServiceInfo
 import android.hardware.SensorManager
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
-import android.media.MediaMetadata
 import android.os.Binder
 import android.os.Build
-import android.os.Bundle
-import android.os.IBinder
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.media.MediaBrowserServiceCompat
-import androidx.media.session.MediaButtonReceiver
 import com.squareup.seismic.ShakeDetector
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.soundremote.R
 import io.github.soundremote.audio.AudioPipe
 import io.github.soundremote.audio.AudioPipe.Companion.PIPE_PLAYING
 import io.github.soundremote.data.ActionData
@@ -68,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class MainService : MediaBrowserServiceCompat() {
+internal class MainService : Service() {
 
     @Inject
     lateinit var userPreferencesRepo: PreferencesRepository
@@ -81,10 +66,6 @@ internal class MainService : MediaBrowserServiceCompat() {
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val binder = LocalBinder()
-
-    private lateinit var mediaSession: MediaSessionCompat
-    private lateinit var notification: Notification
-    private var isForeground = false
 
     private val _systemMessages: Channel<SystemMessage> = Channel(5, BufferOverflow.DROP_OLDEST)
     val systemMessages: ReceiveChannel<SystemMessage>
@@ -154,10 +135,6 @@ internal class MainService : MediaBrowserServiceCompat() {
             }
         }
 
-        mediaSession = createMediaSession()
-        sessionToken = mediaSession.sessionToken
-        notification = createNotification(mediaSession.sessionToken)
-
         // Shake listener
         scope.launch {
             eventActionRepository.getShakeEventFlow().collect {
@@ -182,75 +159,34 @@ internal class MainService : MediaBrowserServiceCompat() {
                 }
             }
         }
+        registerCallStateListener()
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-
         stopProcessing()
-        mediaSession.release()
         audioPipe.release()
         scope.cancel()
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        MediaButtonReceiver.handleIntent(mediaSession, intent)
-        if (!isForeground) {
-            showForeground()
-            startProcessing()
-        }
-        return super.onStartCommand(intent, flags, startId)
+        super.onDestroy()
     }
 
     override fun onTaskRemoved(rootIntent: Intent) {
         super.onTaskRemoved(rootIntent)
-
         stopProcessing()
-        removeForeground()
         stopSelf()
-    }
-
-    private fun startProcessing() {
-        mediaSession.isActive = true
-        registerCallStateListener()
     }
 
     private fun stopProcessing() {
         disconnect()
         unregisterCallStateListener()
-        mediaSession.isActive = false
     }
 
-    private fun showForeground() {
-        isForeground = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-            )
-        } else {
-            startForeground(NOTIFICATION_ID, notification)
-        }
-    }
-
-    private fun removeForeground() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-        } else {
-            @Suppress("DEPRECATION")
-            stopForeground(true)
-        }
-        isForeground = false
-    }
+    // Binding
 
     inner class LocalBinder : Binder() {
         fun getService(): MainService = this@MainService
     }
 
-    override fun onBind(intent: Intent): IBinder {
-        return binder
-    }
+    override fun onBind(intent: Intent) = binder
 
     private fun updatePlaybackState() {
         if (connectionStatus.value == ConnectionStatus.CONNECTED &&
@@ -322,6 +258,10 @@ internal class MainService : MediaBrowserServiceCompat() {
     fun setMuted(value: Boolean) {
         _isMuted.value = value
         updatePlaybackState()
+    }
+
+    fun closeApp() {
+        sendBroadcast(Intent(ACTION_CLOSE).setPackage(packageName))
     }
 
     // Audio focus
@@ -416,198 +356,6 @@ internal class MainService : MediaBrowserServiceCompat() {
                 setMuted(true)
             }
         }
-    }
-
-    // Media
-
-    //https://developer.android.com/about/versions/13/behavior-changes-13#playback-controls
-    private fun createMediaSession(): MediaSessionCompat {
-        val playbackState = playbackStateBuilder.build()
-        val metadata = MediaMetadataCompat.Builder()
-            .putString(MediaMetadata.METADATA_KEY_TITLE, notificationTitle)
-            .build()
-        return MediaSessionCompat(this, MEDIA_SESSION_TAG).apply {
-            setCallback(MediaCallback())
-            setPlaybackState(playbackState)
-            setMetadata(metadata)
-        }
-    }
-
-    private val playbackStateBuilder by lazy {
-        PlaybackStateCompat.Builder()
-            .setActions(
-                PlaybackStateCompat.ACTION_PLAY_PAUSE
-                        or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                        or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-            )
-            .addCustomAction(
-                NOTIFICATION_ACTION_CLOSE,
-                closeActionTitle,
-                NOTIFICATION_ICON_CLOSE
-            )
-            .setState(
-                PlaybackStateCompat.STATE_PAUSED,
-                PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
-                1f
-            )
-    }
-
-    private fun updatePlaybackState(state: Int) {
-        mediaSession.setPlaybackState(
-            playbackStateBuilder
-                .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1f)
-                .build()
-        )
-    }
-
-    private inner class MediaCallback : MediaSessionCompat.Callback() {
-        override fun onPlay() {
-            Timber.i("MediaSession Play")
-            super.onPlay()
-            sendKey(Key.MEDIA_PLAY_PAUSE)
-            // Update playback state to change button in media notification
-            updatePlaybackState(PlaybackStateCompat.STATE_PLAYING)
-        }
-
-        override fun onStop() {
-            Timber.i("MediaSession Stop")
-            super.onStop()
-            sendKey(Key.MEDIA_STOP)
-        }
-
-        override fun onPause() {
-            Timber.i("MediaSession Pause")
-            super.onPause()
-            sendKey(Key.MEDIA_PLAY_PAUSE)
-            // Update playback state to change button in media notification
-            updatePlaybackState(PlaybackStateCompat.STATE_PAUSED)
-        }
-
-        override fun onSkipToNext() {
-            Timber.i("MediaSession Next")
-            super.onSkipToNext()
-            sendKey(Key.MEDIA_NEXT)
-        }
-
-        override fun onSkipToPrevious() {
-            Timber.i("MediaSession Previous")
-            super.onSkipToPrevious()
-            sendKey(Key.MEDIA_PREV)
-        }
-
-        override fun onCustomAction(action: String?, extras: Bundle?) {
-            Timber.i("MediaSession $action")
-            when (action) {
-                NOTIFICATION_ACTION_CLOSE -> {
-                    Intent(ACTION_CLOSE).also { intent ->
-                        intent.setPackage(packageName)
-                        sendBroadcast(intent)
-                    }
-                }
-            }
-            super.onCustomAction(action, extras)
-        }
-
-//        @Override
-//        public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
-//            KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-//            PlaybackStateCompat state = mMediaSession.getController().getPlaybackState();
-//            return super.onMediaButtonEvent(mediaButtonEvent);
-//        }
-    }
-
-    private fun createNotification(sessionToken: MediaSessionCompat.Token): Notification {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel()
-        }
-        val mediaStyle: NotificationCompat.Style =
-            androidx.media.app.NotificationCompat.MediaStyle()
-                .setMediaSession(sessionToken)
-                .setShowActionsInCompactView(0, 1, 2)
-
-        val previousAction = NotificationCompat.Action(
-            R.drawable.ic_skip_previous,
-            getString(R.string.key_media_prev),
-            MediaButtonReceiver.buildMediaButtonPendingIntent(
-                this,
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-            )
-        )
-        val pauseAction = NotificationCompat.Action(
-            R.drawable.ic_play_pause,
-            getString(R.string.key_media_play_pause),
-            MediaButtonReceiver.buildMediaButtonPendingIntent(
-                this,
-                PlaybackStateCompat.ACTION_PLAY_PAUSE
-            )
-        )
-        val nextAction = NotificationCompat.Action(
-            R.drawable.ic_skip_next,
-            getString(R.string.key_media_next),
-            MediaButtonReceiver.buildMediaButtonPendingIntent(
-                this,
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-            )
-        )
-        val closeAction = NotificationCompat.Action(
-            NOTIFICATION_ICON_CLOSE,
-            closeActionTitle,
-            PendingIntent.getBroadcast(
-                this, 0, Intent(ACTION_CLOSE), PendingIntent.FLAG_IMMUTABLE
-            )
-        )
-        val sessionActivityPendingIntent =
-            packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
-                val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                PendingIntent.getActivity(this, 0, sessionIntent, flags)
-            }
-        return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(notificationTitle)
-            .setContentIntent(sessionActivityPendingIntent)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setShowWhen(false)
-            .setStyle(mediaStyle)
-            .addAction(previousAction)
-            .addAction(pauseAction)
-            .addAction(nextAction)
-            .addAction(closeAction)
-            .build()
-    }
-
-    private val notificationTitle: String
-        get() = getString(R.string.notification_title_template).format(getString(R.string.app_name))
-
-    private val closeActionTitle: String
-        get() = getString(R.string.close)
-
-    override fun onGetRoot(
-        clientPackageName: String,
-        clientUid: Int,
-        rootHints: Bundle?
-    ): BrowserRoot {
-        // Clients can connect, but this BrowserRoot is an empty hierarchy
-        // so onLoadChildren returns nothing. This disables the ability to browse for content.
-        return BrowserRoot(EMPTY_MEDIA_ROOT_ID, null)
-    }
-
-    override fun onLoadChildren(
-        parentId: String,
-        result: Result<List<MediaBrowserCompat.MediaItem>>
-    ) {
-        // Browsing is not allowed
-        result.sendResult(null)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel() {
-        val notificationChannel = NotificationChannel(
-            NOTIFICATION_CHANNEL_ID,
-            NOTIFICATION_CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_LOW
-        )
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(notificationChannel)
     }
 
     // Call state
@@ -738,15 +486,5 @@ internal class MainService : MediaBrowserServiceCompat() {
                 executeAction(it.action)
             }
         }
-    }
-
-    companion object {
-        private const val NOTIFICATION_ID = 389
-        private const val NOTIFICATION_CHANNEL_ID = "sound_remote_channel_id"
-        private const val NOTIFICATION_CHANNEL_NAME = "SoundRemote audio service"
-        private const val MEDIA_SESSION_TAG = "SoundRemote Media Session"
-        private const val EMPTY_MEDIA_ROOT_ID = "empty_root_id"
-        private const val NOTIFICATION_ACTION_CLOSE = "ACTION_CLOSE"
-        private val NOTIFICATION_ICON_CLOSE = R.drawable.ic_close
     }
 }

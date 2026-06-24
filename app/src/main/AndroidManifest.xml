@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
+    <attribution
+        android:tag="@string/empty_string"
+        android:label="@string/empty_string_attribution_label" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
@@ -32,28 +36,19 @@
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".service.MainService" />
         <service
-            android:name=".service.MainService"
-            android:enabled="true"
+            android:name=".service.MediaService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
-            android:stopWithTask="false"
             tools:ignore="ExportedService">
             <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
-        <receiver
-            android:name="androidx.media.session.MediaButtonReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
     </application>
 </manifest>
