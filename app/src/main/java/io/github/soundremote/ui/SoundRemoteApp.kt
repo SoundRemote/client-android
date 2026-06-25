@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -36,13 +35,12 @@ internal fun SoundRemoteApp(
 
     // Binding and unbinding the connection
     val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) {
-                viewModel.bindConnection(context)
+                viewModel.bindService()
             } else if (event == Lifecycle.Event.ON_STOP) {
-                viewModel.unbindConnection(context)
+                viewModel.unbindService()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

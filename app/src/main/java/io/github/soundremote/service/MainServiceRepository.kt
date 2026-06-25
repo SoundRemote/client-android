@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.soundremote.data.Hotkey
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
@@ -13,7 +14,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -22,19 +22,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class MainServiceManager(
-    private val dispatcher: CoroutineDispatcher,
-) : ServiceManager {
-    @Inject
-    constructor() : this(Dispatchers.Default)
+internal class MainServiceRepository(
+    private val context: Context,
+    dispatcher: CoroutineDispatcher,
+) : ServiceRepository {
 
-    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
-    private lateinit var service: WeakReference<MainService>
+    @Inject
+    constructor(@ApplicationContext appContext: Context) : this(appContext, Dispatchers.Default)
+
+    private val scope = CoroutineScope(dispatcher)
+    private var service: MainService? = null
     private var bound: Boolean = false
     private var stateCollect: Job? = null
     private var messageCollect: Job? = null
@@ -46,7 +47,7 @@ internal class MainServiceManager(
     override val systemMessages: ReceiveChannel<SystemMessage>
         get() = _systemMessages
 
-    override fun bind(context: Context) {
+    override fun bind() {
         Intent(context, MainService::class.java).also { intent ->
             context.bindService(
                 intent,
@@ -56,7 +57,7 @@ internal class MainServiceManager(
         }
     }
 
-    override fun unbind(context: Context) {
+    override fun unbind() {
         stopCollect()
         bound = false
         context.unbindService(serviceConnection)
@@ -64,34 +65,34 @@ internal class MainServiceManager(
 
     override fun connect(address: String) {
         if (!bound) return
-        service.get()?.connect(address)
+        service?.connect(address)
     }
 
     override fun disconnect() {
         if (!bound) return
-        service.get()?.disconnect()
+        service?.disconnect()
     }
 
     override fun sendHotkey(hotkey: Hotkey) {
         if (!bound) return
-        service.get()?.sendHotkey(hotkey)
+        service?.sendHotkey(hotkey)
     }
 
     override fun sendKey(key: Key) {
         if (!bound) return
-        service.get()?.sendKey(key)
+        service?.sendKey(key)
     }
 
     override fun setMuted(value: Boolean) {
         if (!bound) return
-        service.get()?.setMuted(value)
+        service?.setMuted(value)
     }
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
 
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
             val localBinder = binder as MainService.LocalBinder
-            service = WeakReference(localBinder.getService())
+            service = localBinder.getService()
             startCollect()
             bound = true
         }
@@ -103,13 +104,13 @@ internal class MainServiceManager(
     }
 
     private fun startCollect() {
-        service.get()?.let { service ->
-            stateCollect = scope.launch(dispatcher) {
+        service?.let { service ->
+            stateCollect = scope.launch {
                 combine(service.connectionStatus, service.isMuted) { connectionStatus, isMuted ->
                     ServiceState(connectionStatus, isMuted)
                 }.collect { _serviceState.value = it }
             }
-            messageCollect = scope.launch(dispatcher) {
+            messageCollect = scope.launch {
                 while (isActive) {
                     val message = service.systemMessages.receive()
                     _systemMessages.send(message)

@@ -6,16 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.common.net.InetAddresses
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.soundremote.R
 import io.github.soundremote.data.HotkeyRepository
 import io.github.soundremote.data.preferences.PreferencesRepository
-import io.github.soundremote.service.ServiceManager
+import io.github.soundremote.service.ServiceRepository
 import io.github.soundremote.util.ConnectionStatus
-import io.github.soundremote.util.Key
 import io.github.soundremote.util.HotkeyDescription
+import io.github.soundremote.util.Key
 import io.github.soundremote.util.generateDescription
-import com.google.common.net.InetAddresses
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -41,13 +41,13 @@ data class HomeHotkeyUIState(
 internal class HomeViewModel @Inject constructor(
     private val userPreferencesRepo: PreferencesRepository,
     private val hotkeyRepository: HotkeyRepository,
-    private val serviceManager: ServiceManager,
+    private val serviceRepository: ServiceRepository,
 ) : ViewModel() {
 
     val homeUIState: StateFlow<HomeUIState> = combine(
         hotkeyRepository.getFavouredOrdered(true),
         userPreferencesRepo.serverAddressesFlow,
-        serviceManager.serviceState,
+        serviceRepository.serviceState,
     ) { hotkeys, addresses, serviceState ->
         val hotkeyStates = hotkeys.map { hotkey ->
             HomeHotkeyUIState(
@@ -92,29 +92,29 @@ internal class HomeViewModel @Inject constructor(
         val newAddress = address.trim()
         if (InetAddresses.isInetAddress(newAddress)) {
             setServerAddress(newAddress)
-            serviceManager.connect(newAddress)
+            serviceRepository.connect(newAddress)
         } else {
             setMessage(R.string.message_invalid_address)
         }
     }
 
     fun disconnect() {
-        serviceManager.disconnect()
+        serviceRepository.disconnect()
     }
 
     fun sendHotkey(hotkeyId: Int) {
         viewModelScope.launch {
             hotkeyRepository.getById(hotkeyId)?.let {
-                serviceManager.sendHotkey(it)
+                serviceRepository.sendHotkey(it)
             }
         }
     }
 
     fun sendKey(key: Key) {
-        serviceManager.sendKey(key)
+        serviceRepository.sendKey(key)
     }
 
     fun setMuted(value: Boolean) {
-        serviceManager.setMuted(value)
+        serviceRepository.setMuted(value)
     }
 }
