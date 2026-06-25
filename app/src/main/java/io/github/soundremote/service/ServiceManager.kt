@@ -1,6 +1,5 @@
 package io.github.soundremote.service
 
-import android.content.Context
 import io.github.soundremote.data.Hotkey
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
@@ -11,8 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 internal interface ServiceManager {
     val serviceState: StateFlow<ServiceState>
     val systemMessages: ReceiveChannel<SystemMessage>
-    fun bind(context: Context)
-    fun unbind(context: Context)
+    fun bind()
+    fun unbind()
     fun connect(address: String)
     fun disconnect()
     fun sendHotkey(hotkey: Hotkey)

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.soundremote.data.Hotkey
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
@@ -26,11 +27,12 @@ import javax.inject.Singleton
 
 @Singleton
 internal class MainServiceManager(
+    private val context: Context,
     dispatcher: CoroutineDispatcher,
 ) : ServiceManager {
 
     @Inject
-    constructor() : this(Dispatchers.Default)
+    constructor(@ApplicationContext appContext: Context) : this(appContext, Dispatchers.Default)
 
     private val scope = CoroutineScope(dispatcher)
     private var service: MainService? = null
@@ -45,7 +47,7 @@ internal class MainServiceManager(
     override val systemMessages: ReceiveChannel<SystemMessage>
         get() = _systemMessages
 
-    override fun bind(context: Context) {
+    override fun bind() {
         Intent(context, MainService::class.java).also { intent ->
             context.bindService(
                 intent,
@@ -55,7 +57,7 @@ internal class MainServiceManager(
         }
     }
 
-    override fun unbind(context: Context) {
+    override fun unbind() {
         stopCollect()
         bound = false
         context.unbindService(serviceConnection)

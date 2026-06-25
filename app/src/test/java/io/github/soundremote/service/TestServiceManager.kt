@@ -1,6 +1,5 @@
 package io.github.soundremote.service
 
-import android.content.Context
 import io.github.soundremote.data.Hotkey
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
@@ -18,11 +17,11 @@ internal class TestServiceManager : ServiceManager {
     override val systemMessages: ReceiveChannel<SystemMessage>
         get() = TODO("Not yet implemented")
 
-    override fun bind(context: Context) {
+    override fun bind() {
         TODO("Not yet implemented")
     }
 
-    override fun unbind(context: Context) {
+    override fun unbind() {
         TODO("Not yet implemented")
     }
 
