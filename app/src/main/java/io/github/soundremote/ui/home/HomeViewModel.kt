@@ -12,7 +12,7 @@ import io.github.soundremote.R
 import io.github.soundremote.data.HotkeyRepository
 import io.github.soundremote.data.preferences.PreferencesRepository
 import io.github.soundremote.service.ServiceRepository
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.HotkeyDescription
 import io.github.soundremote.util.Key
 import io.github.soundremote.util.generateDescription
@@ -27,8 +27,8 @@ data class HomeUIState(
     val hotkeys: List<HomeHotkeyUIState> = emptyList(),
     val serverAddress: String = "",
     val recentServersAddresses: List<String> = emptyList(),
-    val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
-    val isMuted: Boolean = false,
+    val connectionState: ConnectionState = ConnectionState.DISCONNECTED,
+    val muted: Boolean = false,
 )
 
 data class HomeHotkeyUIState(
@@ -63,8 +63,8 @@ internal class HomeViewModel @Inject constructor(
             hotkeys = hotkeyStates,
             serverAddress = addresses.last(),
             recentServersAddresses = addresses,
-            connectionStatus = serviceState.connectionStatus,
-            isMuted = serviceState.isMuted,
+            connectionState = serviceState.connectionState,
+            muted = serviceState.muted,
         )
     }.stateIn(
         scope = viewModelScope,

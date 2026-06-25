@@ -66,7 +66,7 @@ import io.github.soundremote.R
 import io.github.soundremote.ui.components.ListItemHeadline
 import io.github.soundremote.ui.components.ListItemSupport
 import io.github.soundremote.ui.theme.SoundRemoteTheme
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.HotkeyDescription
 import io.github.soundremote.util.Key
 import io.github.soundremote.util.TestTag
@@ -127,15 +127,15 @@ fun HomeScreen(
                 },
                 actions = {
                     ConnectButton(
-                        connectionStatus = uiState.connectionStatus,
+                        connectionState = uiState.connectionState,
                         onConnect = { onConnect(address.text) },
                         onDisconnect = onDisconnect,
                     )
                     IconToggleButton(
-                        checked = uiState.isMuted,
+                        checked = uiState.muted,
                         onCheckedChange = { onSetMuted(it) }
                     ) {
-                        if (uiState.isMuted) {
+                        if (uiState.muted) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_volume_mute),
                                 contentDescription = stringResource(R.string.action_unmute_app)
@@ -319,7 +319,7 @@ private fun AddressEdit(
 
 @Composable
 private fun ConnectButton(
-    connectionStatus: ConnectionStatus,
+    connectionState: ConnectionState,
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
     modifier: Modifier = Modifier
@@ -329,11 +329,11 @@ private fun ConnectButton(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
-        if (connectionStatus == ConnectionStatus.CONNECTING) {
+        if (connectionState == ConnectionState.CONNECTING) {
             CircularProgressIndicator()
         }
-        when (connectionStatus) {
-            ConnectionStatus.DISCONNECTED -> {
+        when (connectionState) {
+            ConnectionState.DISCONNECTED -> {
                 IconButton(
                     onClick = onConnect,
                 ) {
@@ -344,9 +344,9 @@ private fun ConnectButton(
                 }
             }
 
-            ConnectionStatus.CONNECTING,
-            ConnectionStatus.CONNECTED -> {
-                val tint = if (connectionStatus == ConnectionStatus.CONNECTED) {
+            ConnectionState.CONNECTING,
+            ConnectionState.CONNECTED -> {
+                val tint = if (connectionState == ConnectionState.CONNECTED) {
                     connectedColor
                 } else {
                     LocalContentColor.current
@@ -413,7 +413,7 @@ private fun Landscape() {
 
 @Composable
 private fun HomePreview() {
-    var status by remember { mutableStateOf(ConnectionStatus.DISCONNECTED) }
+    var connectionState by remember { mutableStateOf(ConnectionState.DISCONNECTED) }
     var id = 0
     SoundRemoteTheme {
         HomeScreen(
@@ -431,17 +431,17 @@ private fun HomePreview() {
                         HotkeyDescription.WithLabelId("Ctrl + Alt + ", R.string.key_delete)
                     ),
                 ),
-                connectionStatus = status,
-                isMuted = true,
+                connectionState = connectionState,
+                muted = true,
             ),
             messageId = null,
             onNavigateToEditHotkey = {},
-            onConnect = { status = ConnectionStatus.CONNECTING },
+            onConnect = { connectionState = ConnectionState.CONNECTING },
             onDisconnect = {
-                status = if (status == ConnectionStatus.CONNECTING) {
-                    ConnectionStatus.CONNECTED
+                connectionState = if (connectionState == ConnectionState.CONNECTING) {
+                    ConnectionState.CONNECTED
                 } else {
-                    ConnectionStatus.DISCONNECTED
+                    ConnectionState.DISCONNECTED
                 }
             },
             onSetMuted = {},

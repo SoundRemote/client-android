@@ -7,7 +7,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.soundremote.data.Hotkey
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.Key
 import io.github.soundremote.util.SystemMessage
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,7 +39,7 @@ internal class MainServiceRepository(
     private var bound: Boolean = false
     private var stateCollect: Job? = null
     private var messageCollect: Job? = null
-    private var _serviceState = MutableStateFlow(ServiceState(ConnectionStatus.DISCONNECTED, false))
+    private var _serviceState = MutableStateFlow(ServiceState(ConnectionState.DISCONNECTED, false))
     override val serviceState: StateFlow<ServiceState>
         get() = _serviceState
 
@@ -106,8 +106,8 @@ internal class MainServiceRepository(
     private fun startCollect() {
         service?.let { service ->
             stateCollect = scope.launch {
-                combine(service.connectionStatus, service.isMuted) { connectionStatus, isMuted ->
-                    ServiceState(connectionStatus, isMuted)
+                combine(service.connectionState, service.mutedState) { connectionState, muted ->
+                    ServiceState(connectionState, muted)
                 }.collect { _serviceState.value = it }
             }
             messageCollect = scope.launch {

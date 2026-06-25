@@ -7,7 +7,7 @@ import io.github.soundremote.getHotkey
 import io.github.soundremote.service.ServiceState
 import io.github.soundremote.service.TestServiceRepository
 import io.github.soundremote.ui.home.HomeViewModel
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.Key
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
@@ -42,7 +42,7 @@ class HomeViewModelTest {
     @DisplayName("connect")
     inner class Connect {
         @Test
-        fun `with valid address changes status to CONNECTED`() = runTest {
+        fun `with valid address changes state to CONNECTED`() = runTest {
             val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                 viewModel.homeUIState.collect {}
             }
@@ -50,7 +50,7 @@ class HomeViewModelTest {
 
             viewModel.connect("123.45.67.89")
 
-            viewModel.homeUIState.value.connectionStatus shouldBe ConnectionStatus.CONNECTED
+            viewModel.homeUIState.value.connectionState shouldBe ConnectionState.CONNECTED
 
             collectJob.cancel()
         }
@@ -65,7 +65,7 @@ class HomeViewModelTest {
 
             viewModel.connect("Invalid address")
 
-            viewModel.homeUIState.value.connectionStatus shouldBe ConnectionStatus.DISCONNECTED
+            viewModel.homeUIState.value.connectionState shouldBe ConnectionState.DISCONNECTED
             viewModel.messageState.shouldNotBeNull()
 
             collectJob.cancel()
@@ -122,35 +122,35 @@ class HomeViewModelTest {
     }
 
     @Test
-    @DisplayName("disconnect() changes status to DISCONNECTED")
-    fun disconnect_changesStatus() = runTest {
+    @DisplayName("disconnect() changes state to DISCONNECTED")
+    fun disconnect_changesState() = runTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.homeUIState.collect {}
         }
         hotkeyRepository.setHotkeys(emptyList())
 
-        serviceRepository.setServiceState(ServiceState(ConnectionStatus.CONNECTED))
+        serviceRepository.setServiceState(ServiceState(ConnectionState.CONNECTED))
 
         viewModel.disconnect()
 
-        viewModel.homeUIState.value.connectionStatus shouldBe ConnectionStatus.DISCONNECTED
+        viewModel.homeUIState.value.connectionState shouldBe ConnectionState.DISCONNECTED
 
         collectJob.cancel()
     }
 
     @Test
-    @DisplayName("setMuted() changes muted status")
-    fun setMuted_changesMutedStatus() = runTest {
+    @DisplayName("setMuted() changes muted state")
+    fun setMuted_changesMutedState() = runTest {
         val collectJob = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.homeUIState.collect {}
         }
         hotkeyRepository.setHotkeys(emptyList())
 
-        serviceRepository.setServiceState(ServiceState(isMuted = false))
+        serviceRepository.setServiceState(ServiceState(muted = false))
 
         viewModel.setMuted(true)
 
-        viewModel.homeUIState.value.isMuted.shouldBeTrue()
+        viewModel.homeUIState.value.muted.shouldBeTrue()
 
         collectJob.cancel()
     }

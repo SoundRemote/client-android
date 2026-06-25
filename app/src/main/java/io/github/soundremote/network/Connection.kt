@@ -1,7 +1,7 @@
 package io.github.soundremote.network
 
 import android.os.Build
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.KeyCode
 import io.github.soundremote.util.Mods
 import io.github.soundremote.util.Net
@@ -58,7 +58,7 @@ internal class Connection(
     private var sendChannel: DatagramChannel? = null
 
     /**
-     * Sync modifications to `currentStatus`, `receiveJob`, `keepAliveJob`.
+     * Sync modifications to `currentState`, `receiveJob`, `keepAliveJob`.
      */
     private val connectMutex = Mutex()
 
@@ -68,14 +68,14 @@ internal class Connection(
     private val pendingRequestsMutex = Mutex()
 
     private var serverProtocol: PacketProtocolType = 1u
-    private var serverLastContact = AtomicLong(0)
-    private var _connectionStatus = MutableStateFlow(ConnectionStatus.DISCONNECTED)
-    val connectionStatus: StateFlow<ConnectionStatus>
-        get() = _connectionStatus
-    private var currentStatus
-        get() = _connectionStatus.value
+    private val serverLastContact = AtomicLong(0)
+    private val _state = MutableStateFlow(ConnectionState.DISCONNECTED)
+    val state: StateFlow<ConnectionState>
+        get() = _state
+    private var currentState
+        get() = _state.value
         set(value) {
-            _connectionStatus.value = value
+            _state.value = value
         }
 
     private val _processAudio = AtomicBoolean(true)
@@ -101,7 +101,7 @@ internal class Connection(
     ) {
         shutdown()
         connectMutex.withLock {
-            currentStatus = ConnectionStatus.CONNECTING
+            currentState = ConnectionState.CONNECTING
             try {
                 serverAddress = InetSocketAddress(address, serverPort)
                 sendChannel = createSendChannel()
@@ -113,12 +113,12 @@ internal class Connection(
                     sendMessage(SystemMessage.MESSAGE_BIND_ERROR)
                 }
                 releaseChannels()
-                currentStatus = ConnectionStatus.DISCONNECTED
+                currentState = ConnectionState.DISCONNECTED
                 return
             } catch (_: Exception) {
                 sendMessage(SystemMessage.MESSAGE_BIND_ERROR)
                 releaseChannels()
-                currentStatus = ConnectionStatus.DISCONNECTED
+                currentState = ConnectionState.DISCONNECTED
                 return
             }
             receiveJob = receive()
@@ -150,14 +150,14 @@ internal class Connection(
 
     private suspend fun shutdown() {
         connectMutex.withLock {
-            if (currentStatus == ConnectionStatus.DISCONNECTED) return
+            if (currentState == ConnectionState.DISCONNECTED) return
             connectJob?.cancel()
             receiveJob?.cancel()
             keepAliveJob?.cancel()
             // Close channel after cancelling receiving job to avoid trying to invoke receive
             // from closed or null channel
             releaseChannels()
-            currentStatus = ConnectionStatus.DISCONNECTED
+            currentState = ConnectionState.DISCONNECTED
             audioSequenceNumber = null
         }
     }
@@ -198,7 +198,7 @@ internal class Connection(
             attempts++
             delay(1000L)
         }
-        if (currentStatus != ConnectionStatus.CONNECTED) {
+        if (currentState != ConnectionState.CONNECTED) {
             sendMessage(SystemMessage.MESSAGE_CONNECT_FAILED)
             shutdown()
         }
@@ -248,12 +248,12 @@ internal class Connection(
     }
 
     private fun updateServerLastContact() {
-        if (currentStatus != ConnectionStatus.CONNECTED) return
+        if (currentState != ConnectionState.CONNECTED) return
         serverLastContact.set(System.nanoTime())
     }
 
     private suspend fun processAudioData(buffer: ByteBuffer, compressed: Boolean) {
-        if (currentStatus != ConnectionStatus.CONNECTED || !processAudio) return
+        if (currentState != ConnectionState.CONNECTED || !processAudio) return
 
         val sequenceNumber = buffer.uInt
         processAudioSequenceNumber(sequenceNumber)
@@ -311,8 +311,8 @@ internal class Connection(
      */
     private suspend fun processAckConnect(buffer: ByteBuffer) {
         connectMutex.withLock {
-            if (currentStatus == ConnectionStatus.CONNECTING) {
-                currentStatus = ConnectionStatus.CONNECTED
+            if (currentState == ConnectionState.CONNECTING) {
+                currentState = ConnectionState.CONNECTED
                 connectJob?.cancel()
                 keepAliveJob = keepAlive()
             }
