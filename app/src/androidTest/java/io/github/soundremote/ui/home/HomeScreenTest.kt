@@ -18,7 +18,7 @@ import androidx.compose.ui.test.performTouchInput
 import io.github.soundremote.R
 import io.github.soundremote.stringResource
 import io.github.soundremote.ui.theme.SoundRemoteTheme
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.HotkeyDescription
 import io.github.soundremote.util.Key
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -53,7 +53,7 @@ internal class HomeScreenTest {
     // Mute button is not toggled when muted state is off
     @Test
     fun muteButton_stateNotMuted_notToggled() {
-        val uiState = HomeUIState(isMuted = false)
+        val uiState = HomeUIState(muted = false)
         composeTestRule.setContent {
             CreateHomeScreen(uiState = uiState)
         }
@@ -65,7 +65,7 @@ internal class HomeScreenTest {
     // Mute button is toggled when muted state is on
     @Test
     fun muteButton_stateMuted_toggled() {
-        val uiState = HomeUIState(isMuted = true)
+        val uiState = HomeUIState(muted = true)
         composeTestRule.setContent {
             CreateHomeScreen(uiState = uiState)
         }
@@ -79,7 +79,7 @@ internal class HomeScreenTest {
     fun muteButton_click_mutes() {
         var actual = false
         composeTestRule.setContent {
-            val uiState = HomeUIState(isMuted = false)
+            val uiState = HomeUIState(muted = false)
             CreateHomeScreen(uiState = uiState, onSetMuted = { actual = it })
         }
 
@@ -93,7 +93,7 @@ internal class HomeScreenTest {
     fun unmuteButton_click_unmutes() {
         var actual = true
         composeTestRule.setContent {
-            val uiState = HomeUIState(isMuted = true)
+            val uiState = HomeUIState(muted = true)
             CreateHomeScreen(uiState = uiState, onSetMuted = { actual = it })
         }
 
@@ -120,7 +120,7 @@ internal class HomeScreenTest {
     fun connectButton_whenDisconnected_isDisplayed() {
         composeTestRule.setContent {
             val uiState = HomeUIState(
-                connectionStatus = ConnectionStatus.DISCONNECTED,
+                connectionState = ConnectionState.DISCONNECTED,
             )
             CreateHomeScreen(uiState = uiState)
         }
@@ -134,7 +134,7 @@ internal class HomeScreenTest {
     fun disconnectButton_whenConnected_isDisplayed() {
         composeTestRule.setContent {
             val uiState = HomeUIState(
-                connectionStatus = ConnectionStatus.CONNECTED,
+                connectionState = ConnectionState.CONNECTED,
             )
             CreateHomeScreen(uiState = uiState)
         }
@@ -148,7 +148,7 @@ internal class HomeScreenTest {
     fun disconnectButton_whenConnecting_isDisplayed() {
         composeTestRule.setContent {
             val uiState = HomeUIState(
-                connectionStatus = ConnectionStatus.CONNECTING,
+                connectionState = ConnectionState.CONNECTING,
             )
             CreateHomeScreen(uiState = uiState)
         }
@@ -164,7 +164,7 @@ internal class HomeScreenTest {
         var actual = ""
         composeTestRule.setContent {
             val uiState = HomeUIState(
-                connectionStatus = ConnectionStatus.DISCONNECTED,
+                connectionState = ConnectionState.DISCONNECTED,
                 serverAddress = expected,
             )
             CreateHomeScreen(uiState = uiState, onConnect = { actual = it })
@@ -181,7 +181,7 @@ internal class HomeScreenTest {
         var actualPerformed = false
         composeTestRule.setContent {
             val uiState = HomeUIState(
-                connectionStatus = ConnectionStatus.CONNECTED,
+                connectionState = ConnectionState.CONNECTED,
             )
             CreateHomeScreen(uiState = uiState, onDisconnect = { actualPerformed = true })
         }

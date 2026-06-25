@@ -2,7 +2,7 @@ package io.github.soundremote.network
 
 import io.github.soundremote.network.Connection.Companion.createReceiveChannel
 import io.github.soundremote.network.Connection.Companion.createSendChannel
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.Net
 import io.github.soundremote.util.Net.PROTOCOL_VERSION
 import io.github.soundremote.util.Net.putUByte
@@ -77,40 +77,40 @@ internal class ConnectionTest {
         unmockkObject(Connection)
     }
 
-    @DisplayName("Has \"disconnected\" status on creation")
+    @DisplayName("Has \"disconnected\" state on creation")
     @Test
-    fun constructor_CreatesWithDisconnectedStatus() = runTest {
+    fun constructor_CreatesWithDisconnectedState() = runTest {
         val testDispatcher = UnconfinedTestDispatcher(testScheduler)
 
         val connection = createConnection(this, testDispatcher)
 
-        val actual = connection.connectionStatus.value
-        actual shouldBe ConnectionStatus.DISCONNECTED
+        val actual = connection.state.value
+        actual shouldBe ConnectionState.DISCONNECTED
     }
 
-    @DisplayName("Changes status to \"connecting\" on connection attempt")
+    @DisplayName("Changes state to \"connecting\" on connection attempt")
     @Test
-    fun connect_ChangesStatusToConnecting() = runTest {
+    fun connect_ChangesStateToConnecting() = runTest {
         val testDispatcher = UnconfinedTestDispatcher(testScheduler)
 
         val connection = createConnection(this, testDispatcher)
         connection.connect(ADDRESS, SERVER_PORT, LOCAL_PORT, COMPRESSION)
 
-        val actual = connection.connectionStatus.value
-        actual shouldBe ConnectionStatus.CONNECTING
+        val actual = connection.state.value
+        actual shouldBe ConnectionState.CONNECTING
     }
 
-    @DisplayName("Changes status to \"disconnected\" on disconnect after connection attempt")
+    @DisplayName("Changes state to \"disconnected\" on disconnect after connection attempt")
     @Test
-    fun disconnect_ChangesStatusToDisconnected() = runTest {
+    fun disconnect_ChangesStateToDisconnected() = runTest {
         val testDispatcher = UnconfinedTestDispatcher(testScheduler)
 
         val connection = createConnection(this, testDispatcher)
         connection.connect(ADDRESS, SERVER_PORT, LOCAL_PORT, COMPRESSION)
         connection.disconnect()
 
-        val actual = connection.connectionStatus.value
-        actual shouldBe ConnectionStatus.DISCONNECTED
+        val actual = connection.state.value
+        actual shouldBe ConnectionState.DISCONNECTED
     }
 
     @DisplayName("connect() sends datagrams to the server")
@@ -126,7 +126,7 @@ internal class ConnectionTest {
     }
 
     @Disabled
-    @DisplayName("Changes status after receiving ACK connect datagram and disconnect datagram")
+    @DisplayName("Changes state after receiving ACK connect datagram and disconnect datagram")
     @Test
     fun receives_AckConnectAndDisconnect() = runTest {
         var requestId: PacketRequestIdType? = null
@@ -156,19 +156,19 @@ internal class ConnectionTest {
 
         val testDispatcher = UnconfinedTestDispatcher(testScheduler)
         val connection = createConnection(this, testDispatcher)
-        val expectedStatuses = listOf(
-            ConnectionStatus.DISCONNECTED,
-            ConnectionStatus.CONNECTING,
-            ConnectionStatus.CONNECTED,
-            ConnectionStatus.DISCONNECTED
+        val expectedStates = listOf(
+            ConnectionState.DISCONNECTED,
+            ConnectionState.CONNECTING,
+            ConnectionState.CONNECTED,
+            ConnectionState.DISCONNECTED
         )
-        var currentExpectedStatus = 0
+        var currentExpectedState = 0
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            connection.connectionStatus.collect { actual ->
-                actual shouldBe expectedStatuses[currentExpectedStatus]
-                currentExpectedStatus++
+            connection.state.collect { actual ->
+                actual shouldBe expectedStates[currentExpectedState]
+                currentExpectedState++
                 // Disconnect after getting connected
-                if (actual == ConnectionStatus.CONNECTED) {
+                if (actual == ConnectionState.CONNECTED) {
                     disconnect.set(true)
                 }
             }

@@ -1,7 +1,7 @@
 package io.github.soundremote.service
 
 import io.github.soundremote.data.Hotkey
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.Key
 import io.github.soundremote.util.SystemMessage
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -27,13 +27,13 @@ internal class TestServiceRepository : ServiceRepository {
 
     override fun connect(address: String) {
         _serviceState.update {
-            it.copy(connectionStatus = ConnectionStatus.CONNECTED)
+            it.copy(connectionState = ConnectionState.CONNECTED)
         }
     }
 
     override fun disconnect() {
         _serviceState.update {
-            it.copy(connectionStatus = ConnectionStatus.DISCONNECTED)
+            it.copy(connectionState = ConnectionState.DISCONNECTED)
         }
     }
 
@@ -47,7 +47,7 @@ internal class TestServiceRepository : ServiceRepository {
 
     override fun setMuted(value: Boolean) {
         _serviceState.update {
-            it.copy(isMuted = value)
+            it.copy(muted = value)
         }
     }
 

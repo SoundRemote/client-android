@@ -1,7 +1,7 @@
 package io.github.soundremote.service
 
 import io.github.soundremote.data.Hotkey
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.Key
 import io.github.soundremote.util.SystemMessage
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -20,6 +20,6 @@ internal interface ServiceRepository {
 }
 
 data class ServiceState(
-    val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
-    val isMuted: Boolean = false,
+    val connectionState: ConnectionState = ConnectionState.DISCONNECTED,
+    val muted: Boolean = false,
 )

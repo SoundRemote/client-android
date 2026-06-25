@@ -32,7 +32,7 @@ import io.github.soundremote.data.HotkeyRepository
 import io.github.soundremote.data.preferences.PreferencesRepository
 import io.github.soundremote.network.Connection
 import io.github.soundremote.util.ACTION_CLOSE
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.Key
 import io.github.soundremote.util.Net
 import io.github.soundremote.util.SystemMessage
@@ -77,10 +77,10 @@ internal class MainService : Service() {
 
     private val connection = Connection(uncompressedAudio, opusAudio, packetsLost, _systemMessages)
     private val audioPipe = AudioPipe(uncompressedAudio, opusAudio, packetsLost)
-    val connectionStatus = connection.connectionStatus
-    private var _isMuted = MutableStateFlow(false)
-    val isMuted: StateFlow<Boolean>
-        get() = _isMuted
+    val connectionState = connection.state
+    private var _mutedState = MutableStateFlow(false)
+    val mutedState: StateFlow<Boolean>
+        get() = _mutedState
 
     // Flag to detect the initial collected compression value
     private var initialCompressionValue = true
@@ -108,9 +108,9 @@ internal class MainService : Service() {
 
     init {
         scope.launch {
-            connection.connectionStatus.collect {
+            connection.state.collect {
                 when (it) {
-                    ConnectionStatus.CONNECTED, ConnectionStatus.DISCONNECTED -> {
+                    ConnectionState.CONNECTED, ConnectionState.DISCONNECTED -> {
                         updatePlaybackState()
                     }
 
@@ -189,8 +189,8 @@ internal class MainService : Service() {
     override fun onBind(intent: Intent) = binder
 
     private fun updatePlaybackState() {
-        if (connectionStatus.value == ConnectionStatus.CONNECTED &&
-            !isMuted.value &&
+        if (connectionState.value == ConnectionState.CONNECTED &&
+            !mutedState.value &&
             audioPipe.state != PIPE_PLAYING
         ) {
             if (ignoreAudioFocus || getFocusOrMute()) {
@@ -256,7 +256,7 @@ internal class MainService : Service() {
     }
 
     fun setMuted(value: Boolean) {
-        _isMuted.value = value
+        _mutedState.value = value
         updatePlaybackState()
     }
 

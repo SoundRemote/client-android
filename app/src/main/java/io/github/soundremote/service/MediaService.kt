@@ -19,7 +19,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.soundremote.MainActivity
 import io.github.soundremote.R
-import io.github.soundremote.util.ConnectionStatus
+import io.github.soundremote.util.ConnectionState
 import io.github.soundremote.util.Key
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -233,12 +233,12 @@ internal class MediaService(dispatcher: CoroutineDispatcher = Dispatchers.Main) 
     private fun startCollect() {
         mainService?.let { service ->
             connectionStateCollect = scope.launch {
-                service.connectionStatus.collect {
-                    player.updateAppState(connected = it == ConnectionStatus.CONNECTED)
+                service.connectionState.collect {
+                    player.updateAppState(connected = it == ConnectionState.CONNECTED)
                 }
             }
             mutedStateCollect = scope.launch {
-                service.isMuted.collect {
+                service.mutedState.collect {
                     mediaSession?.setMediaButtonPreferences(makeCommandButtons(it))
                     player.updateAppState(muted = it)
                 }

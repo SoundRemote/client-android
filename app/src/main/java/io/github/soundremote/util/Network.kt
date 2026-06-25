@@ -11,7 +11,7 @@ import io.github.soundremote.network.SetFormatData
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-enum class ConnectionStatus {
+enum class ConnectionState {
     DISCONNECTED, CONNECTING, CONNECTED
 }
 
