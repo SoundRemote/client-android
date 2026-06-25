@@ -12,7 +12,7 @@ internal interface ServiceModule {
 
     @Binds
     @Singleton
-    fun bindsServiceManager(
-        serviceManager: MainServiceManager,
-    ): ServiceManager
+    fun bindsServiceRepository(
+        serviceRepository: MainServiceRepository,
+    ): ServiceRepository
 }

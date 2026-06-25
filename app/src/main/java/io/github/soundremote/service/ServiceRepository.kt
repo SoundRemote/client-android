@@ -7,7 +7,7 @@ import io.github.soundremote.util.SystemMessage
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.StateFlow
 
-internal interface ServiceManager {
+internal interface ServiceRepository {
     val serviceState: StateFlow<ServiceState>
     val systemMessages: ReceiveChannel<SystemMessage>
     fun bind()

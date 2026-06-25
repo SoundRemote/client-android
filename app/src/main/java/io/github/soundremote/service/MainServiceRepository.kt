@@ -26,10 +26,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class MainServiceManager(
+internal class MainServiceRepository(
     private val context: Context,
     dispatcher: CoroutineDispatcher,
-) : ServiceManager {
+) : ServiceRepository {
 
     @Inject
     constructor(@ApplicationContext appContext: Context) : this(appContext, Dispatchers.Default)

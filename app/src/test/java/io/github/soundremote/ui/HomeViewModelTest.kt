@@ -5,7 +5,7 @@ import io.github.soundremote.data.TestHotkeyRepository
 import io.github.soundremote.data.preferences.TestPreferencesRepository
 import io.github.soundremote.getHotkey
 import io.github.soundremote.service.ServiceState
-import io.github.soundremote.service.TestServiceManager
+import io.github.soundremote.service.TestServiceRepository
 import io.github.soundremote.ui.home.HomeViewModel
 import io.github.soundremote.util.ConnectionStatus
 import io.github.soundremote.util.Key
@@ -30,12 +30,12 @@ class HomeViewModelTest {
 
     private var preferencesRepository = TestPreferencesRepository()
     private var hotkeyRepository = TestHotkeyRepository()
-    private var serviceManager = TestServiceManager()
+    private var serviceRepository = TestServiceRepository()
     private lateinit var viewModel: HomeViewModel
 
     @BeforeEach
     fun setup() {
-        viewModel = HomeViewModel(preferencesRepository, hotkeyRepository, serviceManager)
+        viewModel = HomeViewModel(preferencesRepository, hotkeyRepository, serviceRepository)
     }
 
     @Nested
@@ -129,7 +129,7 @@ class HomeViewModelTest {
         }
         hotkeyRepository.setHotkeys(emptyList())
 
-        serviceManager.setServiceState(ServiceState(ConnectionStatus.CONNECTED))
+        serviceRepository.setServiceState(ServiceState(ConnectionStatus.CONNECTED))
 
         viewModel.disconnect()
 
@@ -146,7 +146,7 @@ class HomeViewModelTest {
         }
         hotkeyRepository.setHotkeys(emptyList())
 
-        serviceManager.setServiceState(ServiceState(isMuted = false))
+        serviceRepository.setServiceState(ServiceState(isMuted = false))
 
         viewModel.setMuted(true)
 
@@ -164,7 +164,7 @@ class HomeViewModelTest {
 
         viewModel.sendHotkey(id)
 
-        serviceManager.sentHotkey shouldBe expected
+        serviceRepository.sentHotkey shouldBe expected
     }
 
     @Test
@@ -174,6 +174,6 @@ class HomeViewModelTest {
 
         viewModel.sendKey(expected)
 
-        serviceManager.sentKey shouldBe expected
+        serviceRepository.sentKey shouldBe expected
     }
 }

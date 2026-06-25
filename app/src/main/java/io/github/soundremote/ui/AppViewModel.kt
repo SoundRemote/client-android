@@ -3,7 +3,7 @@ package io.github.soundremote.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.soundremote.service.ServiceManager
+import io.github.soundremote.service.ServiceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class AppViewModel @Inject constructor(private val serviceManager: ServiceManager) :
+internal class AppViewModel @Inject constructor(private val serviceRepository: ServiceRepository) :
     ViewModel() {
 
     private val _systemMessage = MutableStateFlow<Int?>(null)
@@ -21,18 +21,18 @@ internal class AppViewModel @Inject constructor(private val serviceManager: Serv
     init {
         viewModelScope.launch {
             while (isActive) {
-                val message = serviceManager.systemMessages.receive()
+                val message = serviceRepository.systemMessages.receive()
                 _systemMessage.value = message.stringId
             }
         }
     }
 
     fun bindService() {
-        serviceManager.bind()
+        serviceRepository.bind()
     }
 
     fun unbindService() {
-        serviceManager.unbind()
+        serviceRepository.unbind()
     }
 
     fun messageShown() {
