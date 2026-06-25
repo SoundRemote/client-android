@@ -4,8 +4,9 @@ import android.os.Build
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.soundremote.data.ActionData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.soundremote.data.Action
+import io.github.soundremote.data.ActionData
 import io.github.soundremote.data.ActionType
 import io.github.soundremote.data.AppAction
 import io.github.soundremote.data.Event
@@ -14,11 +15,9 @@ import io.github.soundremote.data.EventActionRepository
 import io.github.soundremote.data.HotkeyRepository
 import io.github.soundremote.util.AppPermission
 import io.github.soundremote.util.TextValue
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -47,12 +46,10 @@ internal class EventsViewModel @Inject constructor(
     private val eventActionRepository: EventActionRepository,
     private val hotkeyRepository: HotkeyRepository,
 ) : ViewModel() {
-    val uiState: StateFlow<EventsUIState> = combine(
-        flowOf(Event.entries.toTypedArray()),
-        eventActionRepository.getAll(),
-    ) { events, eventActions ->
+
+    val uiState: StateFlow<EventsUIState> = eventActionRepository.getAll().map { eventActions ->
         val eventUIStates = mutableListOf<EventUIState>()
-        for (event in events) {
+        for (event in Event.entries) {
             val eventAction = eventActions.find { it.eventId == event.id }
             val actionUIState = eventAction?.action?.let { action ->
                 val type = ActionType.getById(action.actionType)
