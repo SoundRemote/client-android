@@ -102,10 +102,8 @@ class PlaybackSink {
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createAudioTrackV26(audioAttributes, audioFormat, bufferSize)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            createAudioTrackV23(audioAttributes, audioFormat, bufferSize)
         } else {
-            createAudioTrackV21(audioAttributes, audioFormat, bufferSize)
+            createAudioTrackV23(audioAttributes, audioFormat, bufferSize)
         }
     }
 
@@ -134,7 +132,6 @@ class PlaybackSink {
     // Suppress range check on setSessionId because its documentation states that
     // AudioManager.AUDIO_SESSION_ID_GENERATE is an acceptable value
     @SuppressLint("Range")
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun createAudioTrackV23(
         audioAttributes: AudioAttributes,
         audioFormat: AudioFormat,
@@ -146,18 +143,4 @@ class PlaybackSink {
         .setTransferMode(AudioTrack.MODE_STREAM)
         .setSessionId(sessionId)
         .build()
-
-    private fun createAudioTrackV21(
-        audioAttributes: AudioAttributes,
-        audioFormat: AudioFormat,
-        bufferSize: Int,
-    ): AudioTrack {
-        return AudioTrack(
-            audioAttributes,
-            audioFormat,
-            bufferSize,
-            AudioTrack.MODE_STREAM,
-            sessionId,
-        )
-    }
 }
