@@ -59,6 +59,7 @@ import io.github.soundremote.util.Key
 import io.github.soundremote.util.KeyCode
 import io.github.soundremote.util.KeyGroup
 import io.github.soundremote.util.KeyLabel
+import io.github.soundremote.util.ModKey
 import io.github.soundremote.util.toKeyCode
 
 private val sharedMod = Modifier
@@ -70,10 +71,7 @@ private val sharedMod = Modifier
 internal fun HotkeyScreen(
     state: HotkeyScreenUIState,
     onKeyCodeChange: (KeyCode?) -> Unit,
-    onWinChange: (Boolean) -> Unit,
-    onCtrlChange: (Boolean) -> Unit,
-    onShiftChange: (Boolean) -> Unit,
-    onAltChange: (Boolean) -> Unit,
+    onModChange: (ModKey, Boolean) -> Unit,
     onNameChange: (String) -> Unit,
     checkCanSave: () -> Boolean,
     onSave: (keyLabel: String) -> Unit,
@@ -138,44 +136,44 @@ internal fun HotkeyScreen(
                     ModSelectItem(
                         text = stringResource(R.string.win_checkbox_label),
                         checkedProvider = { state.win },
-                        onCheckedChange = { onWinChange(it) },
+                        onCheckedChange = { onModChange(ModKey.WIN, it) },
                     )
                     ModSelectItem(
                         text = stringResource(R.string.ctrl_checkbox_label),
                         checkedProvider = { state.ctrl },
-                        onCheckedChange = { onCtrlChange(it) },
+                        onCheckedChange = { onModChange(ModKey.CTRL, it) },
                     )
                     ModSelectItem(
                         text = stringResource(R.string.shift_checkbox_label),
                         checkedProvider = { state.shift },
-                        onCheckedChange = { onShiftChange(it) },
+                        onCheckedChange = { onModChange(ModKey.SHIFT, it) },
                     )
                     ModSelectItem(
                         text = stringResource(R.string.alt_checkbox_label),
                         checkedProvider = { state.alt },
-                        onCheckedChange = { onAltChange(it) },
+                        onCheckedChange = { onModChange(ModKey.ALT, it) },
                     )
                 }
             } else {
                 ModSelectItem(
                     text = stringResource(R.string.win_checkbox_label),
                     checkedProvider = { state.win },
-                    onCheckedChange = { onWinChange(it) },
+                    onCheckedChange = { onModChange(ModKey.WIN, it) },
                 )
                 ModSelectItem(
                     text = stringResource(R.string.ctrl_checkbox_label),
                     checkedProvider = { state.ctrl },
-                    onCheckedChange = { onCtrlChange(it) },
+                    onCheckedChange = { onModChange(ModKey.CTRL, it) },
                 )
                 ModSelectItem(
                     text = stringResource(R.string.shift_checkbox_label),
                     checkedProvider = { state.shift },
-                    onCheckedChange = { onShiftChange(it) },
+                    onCheckedChange = { onModChange(ModKey.SHIFT, it) },
                 )
                 ModSelectItem(
                     text = stringResource(R.string.alt_checkbox_label),
                     checkedProvider = { state.alt },
-                    onCheckedChange = { onAltChange(it) },
+                    onCheckedChange = { onModChange(ModKey.ALT, it) },
                 )
             }
             NameEdit(
@@ -451,10 +449,14 @@ private fun ScreenPreview(compactHeight: Boolean) {
             keyGroupIndex = Key.MEDIA_NEXT.group.index
         ),
         onKeyCodeChange = {},
-        onWinChange = { win = it },
-        onCtrlChange = { ctrl = it },
-        onAltChange = { alt = it },
-        onShiftChange = { shift = it },
+        onModChange = { mod, value ->
+            when (mod) {
+                ModKey.WIN -> win = value
+                ModKey.CTRL -> ctrl = value
+                ModKey.SHIFT -> shift = value
+                ModKey.ALT -> alt = value
+            }
+        },
         onClose = {},
         checkCanSave = { false },
         onNameChange = {},

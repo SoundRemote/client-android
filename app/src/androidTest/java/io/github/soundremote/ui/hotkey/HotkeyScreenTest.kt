@@ -44,6 +44,7 @@ internal class HotkeyScreenTest {
     }
 
     // Mods
+
     @Test
     fun winMod_click_changesWinMod() {
         val initial = true
@@ -52,7 +53,7 @@ internal class HotkeyScreenTest {
         composeTestRule.setContent {
             CreateHotkeyScreen(
                 state = HotkeyScreenUIState(win = initial),
-                onWinChange = { actual = it },
+                onModChange = { mod, value -> if (mod == ModKey.WIN) actual = value },
             )
         }
 
@@ -72,7 +73,7 @@ internal class HotkeyScreenTest {
         composeTestRule.setContent {
             CreateHotkeyScreen(
                 state = HotkeyScreenUIState(ctrl = initial),
-                onCtrlChange = { actual = it },
+                onModChange = { mod, value -> if (mod == ModKey.CTRL) actual = value },
             )
         }
 
@@ -92,7 +93,7 @@ internal class HotkeyScreenTest {
         composeTestRule.setContent {
             CreateHotkeyScreen(
                 state = HotkeyScreenUIState(shift = initial),
-                onShiftChange = { actual = it },
+                onModChange = { mod, value -> if (mod == ModKey.SHIFT) actual = value },
             )
         }
 
@@ -112,7 +113,7 @@ internal class HotkeyScreenTest {
         composeTestRule.setContent {
             CreateHotkeyScreen(
                 state = HotkeyScreenUIState(alt = initial),
-                onAltChange = { actual = it },
+                onModChange = { mod, value -> if (mod == ModKey.ALT) actual = value },
             )
         }
 
@@ -220,10 +221,7 @@ internal class HotkeyScreenTest {
         modifier: Modifier = Modifier,
         state: HotkeyScreenUIState = HotkeyScreenUIState(),
         onKeyCodeChange: (KeyCode?) -> Unit = {},
-        onWinChange: (Boolean) -> Unit = {},
-        onCtrlChange: (Boolean) -> Unit = {},
-        onShiftChange: (Boolean) -> Unit = {},
-        onAltChange: (Boolean) -> Unit = {},
+        onModChange: (ModKey, Boolean) -> Unit = { _, _ -> },
         onNameChange: (String) -> Unit = {},
         checkCanSave: () -> Boolean = { false },
         onSave: (String) -> Unit = {},
@@ -235,10 +233,7 @@ internal class HotkeyScreenTest {
             HotkeyScreen(
                 state,
                 onKeyCodeChange,
-                onWinChange,
-                onCtrlChange,
-                onShiftChange,
-                onAltChange,
+                onModChange,
                 onNameChange,
                 checkCanSave,
                 onSave,

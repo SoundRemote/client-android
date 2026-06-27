@@ -13,7 +13,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import io.github.soundremote.util.ModKey
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -81,10 +80,7 @@ private fun HotkeyScreenRoute(
     HotkeyScreen(
         state = state,
         onKeyCodeChange = { viewModel.updateKeyCode(it) },
-        onWinChange = { viewModel.updateMod(ModKey.WIN, it) },
-        onCtrlChange = { viewModel.updateMod(ModKey.CTRL, it) },
-        onShiftChange = { viewModel.updateMod(ModKey.SHIFT, it) },
-        onAltChange = { viewModel.updateMod(ModKey.ALT, it) },
+        onModChange = viewModel::updateMod,
         onNameChange = { viewModel.updateName(it) },
         checkCanSave = viewModel::canSave,
         onSave = viewModel::saveHotkey,
