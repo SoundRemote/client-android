@@ -226,18 +226,16 @@ value class KeyCode(val value: Int) {
 
     /**
      * If this [KeyCode] is a virtual-key code for a digit or an english alphabet letter key,
-     * returns the `Char` representing the corresponding character. Otherwise, returns null.
+     * returns the corresponding character. Otherwise, returns null.
      *
-     * @return `Char` or null
+     * @return `Char` or `null` if this is not a letter or a digit
      */
-    fun toLetterOrDigitChar(): Char? {
-        if (value in 0x30..0x39) {
-            return ('0'.code + value - 0x30).toChar()
-        }
-        return if (value in 0x41..0x5A) {
-            ('a'.code + value - 0x41).toChar()
-        } else null
+    fun toLetterOrDigitChar(): Char? = when (value) {
+        in 0x30..0x39 -> '0' + value - 0x30
+        in 0x41..0x5A -> 'a' + value - 0x41
+        else -> null
     }
+
 
     /**
      * Same as [toLetterOrDigitChar] but converts `Char` into an uppercase `String`.
