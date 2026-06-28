@@ -2,15 +2,20 @@ package io.github.soundremote
 
 import androidx.compose.ui.test.MainTestClock
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import io.github.soundremote.util.Mods
 import io.github.soundremote.util.TestTag
 import org.junit.Rule
 import org.junit.Test
@@ -44,6 +49,11 @@ class NavigationTest {
     private val menuAbout by composeTestRule.stringResource(R.string.action_about)
     private val editHotkeys by composeTestRule.stringResource(R.string.action_edit_hotkeys)
     private val createHotkey by composeTestRule.stringResource(R.string.action_hotkey_create)
+    private val keyEdit by composeTestRule.stringResource(R.string.hotkey_key_edit_label)
+    private val save by composeTestRule.stringResource(R.string.save)
+    private val win by composeTestRule.stringResource(R.string.win_checkbox_label)
+    private val ctrl by composeTestRule.stringResource(R.string.ctrl_checkbox_label)
+    private val alt by composeTestRule.stringResource(R.string.alt_checkbox_label)
 
     // First screen is HomeScreen
     @Test
@@ -298,6 +308,36 @@ class NavigationTest {
         }
         // Assert that app is back on `Hotkeys` screen
         composeTestRule.onNodeWithText(hotkeysTitle).assertIsDisplayed()
+    }
+
+    // Given: HotkeyScreen in create mode.
+    // When: multiple simultaneous clicks on `Save` button.
+    // Then: Hotkey created once and app is back on `Hotkeys` screen.
+    @Test
+    fun saveHotkeyButton_multipleClicks_savesOnce() {
+        composeTestRule.apply {
+            // Go to `Hotkeys` screen
+            onNodeWithContentDescription(editHotkeys).performClick()
+
+            // Go to `Create hotkey` screen
+            onNodeWithContentDescription(createHotkey).performClick()
+
+            // Create hotkey
+            onNodeWithText(win).apply { performScrollTo(); performClick() }
+            onNodeWithText(ctrl).apply { performScrollTo(); performClick() }
+            onNodeWithText(alt).apply { performScrollTo(); performClick() }
+            onNodeWithText(keyEdit).apply { performClick(); performTextInput("G") }
+
+            // Double click save button
+            onNodeWithContentDescription(save)
+                .performSimultaneousDoubleClick(composeTestRule.mainClock)
+        }
+
+        // Assert that app is back on `Hotkeys` screen
+        composeTestRule.onNodeWithText(hotkeysTitle).assertIsDisplayed()
+        // Assert hotkey was created only once
+        val hotkeyText = Mods(win = true, ctrl = true, shift = false, alt = true).toPrefixString()
+        composeTestRule.onAllNodesWithText(hotkeyText, true).assertCountEquals(1)
     }
 }
 

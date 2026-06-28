@@ -13,7 +13,6 @@ import io.github.soundremote.util.generateDescription
 import io.github.soundremote.util.isModActive
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -98,13 +97,6 @@ class HotkeyViewModelTest {
                 ModKey.ALT -> viewModel.hotkeyScreenState.value.alt
             }
             actual.shouldBeTrue()
-        }
-
-        @Test
-        @DisplayName("canSave() returns false if keyCode is null")
-        fun canSave_keyCodeIsNull_returnsFalse() {
-            viewModel.hotkeyScreenState.value.keyCode.shouldBeNull()
-            viewModel.canSave().shouldBeFalse()
         }
 
         @Test

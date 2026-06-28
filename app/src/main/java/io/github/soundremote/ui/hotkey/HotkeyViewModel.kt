@@ -81,10 +81,6 @@ internal class HotkeyViewModel @Inject constructor(
         }
     }
 
-    fun canSave(): Boolean {
-        return hotkeyScreenState.value.keyCode != null
-    }
-
     fun saveHotkey(keyLabel: String) {
         hotkeyScreenState.value.let { currentState ->
             val currentKeyCode = currentState.keyCode ?: return@let
