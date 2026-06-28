@@ -82,7 +82,6 @@ private fun HotkeyScreenRoute(
         onKeyCodeChange = { viewModel.updateKeyCode(it) },
         onModChange = viewModel::updateMod,
         onNameChange = { viewModel.updateName(it) },
-        checkCanSave = viewModel::canSave,
         onSave = viewModel::saveHotkey,
         onClose = onNavigateUp,
         showSnackbar = showSnackbar,

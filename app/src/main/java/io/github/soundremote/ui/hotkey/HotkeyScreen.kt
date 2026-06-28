@@ -73,19 +73,12 @@ internal fun HotkeyScreen(
     onKeyCodeChange: (KeyCode?) -> Unit,
     onModChange: (ModKey, Boolean) -> Unit,
     onNameChange: (String) -> Unit,
-    checkCanSave: () -> Boolean,
     onSave: (keyLabel: String) -> Unit,
     onClose: () -> Unit,
     showSnackbar: (String, SnackbarDuration) -> Unit,
     compactHeight: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val invalidKeyError = stringResource(R.string.error_invalid_key)
-    val resources = LocalResources.current
-    fun getKeyLabel(keyCode: KeyCode): String =
-        keyCode.toLetterOrDigitString()
-            ?: resources.getString(keyCode.keyLabelId()!!)
-
     Column(modifier) {
         TopAppBar(
             title = {
@@ -101,15 +94,18 @@ internal fun HotkeyScreen(
             },
             navigationIcon = { NavigateUpButton(onClose) },
             actions = {
+                val invalidKeyError = stringResource(R.string.error_invalid_key)
+                val resources = LocalResources.current
+                fun getKeyLabel(keyCode: KeyCode): String =
+                    keyCode.toLetterOrDigitString()
+                        ?: resources.getString(keyCode.keyLabelId()!!)
                 IconButton(
                     onClick = dropUnlessResumed {
-                        if (checkCanSave()) {
-                            val keyLabel = getKeyLabel(state.keyCode!!)
+                        state.keyCode?.let { keyCode ->
+                            val keyLabel = getKeyLabel(keyCode)
                             onSave(keyLabel)
                             onClose()
-                        } else {
-                            showSnackbar(invalidKeyError, SnackbarDuration.Short)
-                        }
+                        } ?: showSnackbar(invalidKeyError, SnackbarDuration.Short)
                     }
                 ) {
                     Icon(painterResource(R.drawable.ic_save_filled), stringResource(R.string.save))
@@ -458,7 +454,6 @@ private fun ScreenPreview(compactHeight: Boolean) {
             }
         },
         onClose = {},
-        checkCanSave = { false },
         onNameChange = {},
         onSave = {},
         showSnackbar = { _, _ -> },
