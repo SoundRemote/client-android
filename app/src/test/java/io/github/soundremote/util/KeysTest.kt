@@ -73,6 +73,21 @@ internal class KeysTest {
         }
     }
 
+    @DisplayName("KeyCode.keyLabelId")
+    @Nested
+    inner class KeyCodeKeyLabelIdTests {
+
+        @ParameterizedTest
+        @EnumSource(names = ["MEDIA_VOLUME_UP", "F12", "NUM_ADD"])
+        @DisplayName("returns a correct string resource id for a KeyCode associated with a Key entry")
+        fun keyInstanceCode_ReturnsCorrectLabelId(key: Key) {
+            val expected = key.labelId
+            val keyCode = key.keyCode
+
+            keyCode.keyLabelId() shouldBe expected
+        }
+    }
+
     @DisplayName("generateDescription")
     @Nested
     inner class GenerateDescriptionTests {

@@ -202,6 +202,10 @@ enum class Key(
     override fun toString(): String {
         return name
     }
+
+    companion object {
+        val byKeyCode: Map<KeyCode, Key> = entries.associateBy { it.keyCode }
+    }
 }
 
 enum class ModKey(val bitField: Int, val label: String) {
@@ -236,7 +240,6 @@ value class KeyCode(val value: Int) {
         else -> null
     }
 
-
     /**
      * Same as [toLetterOrDigitChar] but converts `Char` into an uppercase `String`.
      *
@@ -246,7 +249,7 @@ value class KeyCode(val value: Int) {
         toLetterOrDigitChar()?.uppercase()
 
     /**
-     * If this [KeyCode] is __not__ a virtual-key code for a digit or an english alphabet letter
+     * If this [KeyCode] is __not__ a virtual-key code for a digit or an English alphabet letter
      * key, returns resource id of the string containing its label. Returns null if there is no
      * [Key] with such [KeyCode].
      *
@@ -254,7 +257,7 @@ value class KeyCode(val value: Int) {
      */
     @StringRes
     fun keyLabelId(): Int? =
-        Key.entries.find { it.keyCode == this }?.labelId
+        Key.byKeyCode[this]?.labelId
 }
 
 @JvmInline
