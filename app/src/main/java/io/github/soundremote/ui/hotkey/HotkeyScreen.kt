@@ -62,10 +62,6 @@ import io.github.soundremote.util.KeyLabel
 import io.github.soundremote.util.ModKey
 import io.github.soundremote.util.toKeyCode
 
-private val sharedMod = Modifier
-    .fillMaxWidth()
-    .padding(horizontal = 16.dp, vertical = 8.dp)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HotkeyScreen(
@@ -198,6 +194,10 @@ private fun keyGroupToTabIndex(keyGroupIndex: Int): Int {
     return keyGroupIndex
 }
 
+private val sharedMod = Modifier
+    .fillMaxWidth()
+    .padding(horizontal = 16.dp, vertical = 8.dp)
+
 @Composable
 private fun KeySelect(
     keyCode: KeyCode?,
@@ -312,7 +312,7 @@ private fun KeySelectCombobox(
     val keyCaption: String = when {
         keys.isEmpty() -> ""
         selectedKeyCode == null -> stringResource(keys[0].labelId)
-        else -> keys.find { it.keyCode == selectedKeyCode }
+        else -> Key.byKeyCode[selectedKeyCode]
             ?.let { stringResource(it.labelId) }
             ?: ""
     }
