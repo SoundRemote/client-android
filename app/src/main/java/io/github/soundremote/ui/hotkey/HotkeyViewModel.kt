@@ -58,9 +58,8 @@ internal class HotkeyViewModel @Inject constructor(
     }
 
     private fun getKeyGroupIndex(keyCode: KeyCode?): Int {
-        if (keyCode == null) return KeyGroup.LETTER_DIGIT.index
-        val key = Key.entries.find { it.keyCode == keyCode }
-        return key?.group?.index ?: KeyGroup.LETTER_DIGIT.index
+        return keyCode?.let { Key.byKeyCode[keyCode]?.group?.index }
+            ?: KeyGroup.LETTER_DIGIT.index
     }
 
     fun updateKeyCode(keyCode: KeyCode?) {
