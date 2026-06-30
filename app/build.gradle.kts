@@ -117,7 +117,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     androidTestImplementation(libs.hilt.android.testing)
-    kspAndroidTest(libs.hilt.compiler)
 // Navigation
     implementation(libs.androidx.navigation.compose)
 // Serialization
