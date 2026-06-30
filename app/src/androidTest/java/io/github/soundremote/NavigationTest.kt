@@ -15,8 +15,11 @@ import androidx.compose.ui.test.performTextInput
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import io.github.soundremote.data.room.AppDatabase
 import io.github.soundremote.util.Mods
 import io.github.soundremote.util.TestTag
+import jakarta.inject.Inject
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -33,6 +36,9 @@ class NavigationTest {
 
     @get:Rule(order = 2)
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @Inject
+    lateinit var db: AppDatabase
 
     private val appName by composeTestRule.stringResource(R.string.app_name)
 
@@ -54,6 +60,12 @@ class NavigationTest {
     private val win by composeTestRule.stringResource(R.string.win_checkbox_label)
     private val ctrl by composeTestRule.stringResource(R.string.ctrl_checkbox_label)
     private val alt by composeTestRule.stringResource(R.string.alt_checkbox_label)
+
+    @Before
+    fun setup() {
+        hiltRule.inject()
+        db.clearAllTables()
+    }
 
     // First screen is HomeScreen
     @Test

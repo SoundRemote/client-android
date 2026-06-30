@@ -11,7 +11,10 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.soundremote.MainActivity
 import io.github.soundremote.R
+import io.github.soundremote.data.room.AppDatabase
 import io.github.soundremote.stringResource
+import jakarta.inject.Inject
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -29,6 +32,9 @@ class HotkeyFlowTest {
     @get:Rule(order = 2)
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+    @Inject
+    lateinit var db: AppDatabase
+
     private val editHotkeys by composeTestRule.stringResource(R.string.action_edit_hotkeys)
     private val createHotkey by composeTestRule.stringResource(R.string.action_hotkey_create)
     private val altMod by composeTestRule.stringResource(R.string.alt_checkbox_label)
@@ -37,6 +43,12 @@ class HotkeyFlowTest {
     private val save by composeTestRule.stringResource(R.string.save)
     private val name by composeTestRule.stringResource(R.string.hotkey_name_edit_label)
     private val clear by composeTestRule.stringResource(R.string.clear)
+
+    @Before
+    fun setup() {
+        hiltRule.inject()
+        db.clearAllTables()
+    }
 
     @Test
     fun createAndEditHotkeyFlow() {
