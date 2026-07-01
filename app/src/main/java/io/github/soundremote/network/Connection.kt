@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class Connection(
     private val uncompressedAudio: SendChannel<ByteBuffer>,
@@ -184,7 +185,7 @@ internal class Connection(
                     Net.PacketCategory.SERVER_KEEP_ALIVE.value -> updateServerLastContact()
                     Net.PacketCategory.ACK.value -> processAck(buf)
                     // For tests - yield the test dispatcher and advance time
-                    else -> delay(10)
+                    else -> delay(10.milliseconds)
                 }
             }
         } catch (_: AsynchronousCloseException) {
@@ -196,7 +197,7 @@ internal class Connection(
         while (isActive && attempts < 3) {
             sendConnect(compression)
             attempts++
-            delay(1000L)
+            delay(1000L.milliseconds)
         }
         if (currentState != ConnectionState.CONNECTED) {
             sendMessage(SystemMessage.MESSAGE_CONNECT_FAILED)
@@ -207,7 +208,7 @@ internal class Connection(
     private fun keepAlive() = scope.launch(CoroutineName("KeepAlive")) {
         serverLastContact.set(System.nanoTime())
         while (isActive) {
-            delay(1000L)
+            delay(1000L.milliseconds)
             val now = System.nanoTime()
             val elapsedNanos = now - serverLastContact.get()
             val elapsedSeconds = TimeUnit.SECONDS.convert(elapsedNanos, TimeUnit.NANOSECONDS)
