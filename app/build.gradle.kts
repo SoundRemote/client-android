@@ -64,6 +64,7 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+    kotlin.compilerOptions.freeCompilerArgs.add("-Xannotation-default-target=param-property")
 }
 
 tasks.withType<Test> {
